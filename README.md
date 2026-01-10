@@ -41,6 +41,8 @@ npm install
 
 ### 環境変数の設定
 
+#### ローカル開発環境
+
 `.env.local` ファイルを作成し、以下の環境変数を設定してください：
 
 ```env
@@ -50,6 +52,18 @@ NEXT_PUBLIC_GAS_URL=your_gas_url_here
 # 編集モードパスワード
 NEXT_PUBLIC_EDIT_PASSWORD=your_password_here
 ```
+
+#### GitHub Pages デプロイ用
+
+GitHub Secretsに以下の環境変数を設定してください：
+
+**設定場所**: https://github.com/cecilharveyff4jp/SNW_Home/settings/secrets/actions
+
+1. **Settings** → **Secrets and variables** → **Actions**
+2. **New repository secret** をクリック
+3. 以下の2つを追加:
+   - Name: `NEXT_PUBLIC_GAS_URL` / Secret: （Google Apps ScriptのURL）
+   - Name: `NEXT_PUBLIC_EDIT_PASSWORD` / Secret: （編集モードのパスワード）
 
 ### 開発サーバーの起動
 
