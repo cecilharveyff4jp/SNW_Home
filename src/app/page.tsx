@@ -2162,11 +2162,12 @@ export default function Home() {
           const attackDuration = 0.3; // 攻撃期間 (0.45-0.75)
           
           // 攻撃回数分だけダメージを表示
-          anim.damages.forEach((damageInfo, damageIndex) => {
+          const damages = anim.damages; // ローカル変数に保存してTypeScriptの型絞り込みを維持
+          damages.forEach((damageInfo, damageIndex) => {
             const { damage, isCritical } = damageInfo;
             
             // 各攻撃のタイミングを計算（攻撃期間内で均等に分散）
-            const attackProgress = 0.45 + (damageIndex / anim.damages.length) * attackDuration;
+            const attackProgress = 0.45 + (damageIndex / damages.length) * attackDuration;
             const damageEndProgress = attackProgress + displayDuration;
             
             // このダメージ表示期間内かチェック
