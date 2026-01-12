@@ -50,7 +50,9 @@ function doGet(e) {
           h: objectsData[i][6],
           birthday: objectsData[i][7] || '',  // 8列目（birthday）
           note: objectsData[i][8] || '',  // 9列目（note）を追加
-          isFavorite: objectsData[i][11] || false  // 12列目（isFavorite）
+          isFavorite: objectsData[i][11] || false,  // 12列目（isFavorite）
+          Animation: objectsData[i][12] || '',  // 13列目（Animation）
+          Fire: objectsData[i][13] || ''  // 14列目（Fire）
         });
       }
     }
@@ -164,7 +166,7 @@ function doPost(e) {
     // 既存データをクリア（2行目以降、ヘッダーは残す）
     const lastRow = objectsSheet.getLastRow();
     if (lastRow >= 2) {
-      objectsSheet.getRange(2, 1, lastRow - 1, 12).clearContent();  // 12列まで拡張
+      objectsSheet.getRange(2, 1, lastRow - 1, 14).clearContent();  // 14列まで拡張
     }
     
     // 新しいデータを書き込み
@@ -184,9 +186,11 @@ function doPost(e) {
         obj.note || '',  // note列
         timestamp,  // updatedAt
         actor,  // updatedBy
-        obj.isFavorite || false  // isFavorite
+        obj.isFavorite || false,  // isFavorite
+        obj.Animation || '',  // Animation列
+        obj.Fire || ''  // Fire列
       ]);
-      objectsSheet.getRange(2, 1, rows.length, 12).setValues(rows);  // 12列まで書き込み
+      objectsSheet.getRange(2, 1, rows.length, 14).setValues(rows);  // 14列まで書き込み
     }
     
     return ContentService.createTextOutput(JSON.stringify({ 

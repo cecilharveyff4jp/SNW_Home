@@ -1,143 +1,18 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
-
-// GitHub Pages用のbasePath設定
-const basePath = process.env.NODE_ENV === 'production' ? '/SNW_Home' : '';
-
-type Meta = { 
-  cols?: number; 
-  rows?: number; 
-  cellSize?: number; 
-  mapName?: string;
-  bgImage?: string;
-  bgCenterX?: number;
-  bgCenterY?: number;
-  bgScale?: number;
-  bgOpacity?: number;
-};
-type BgConfig = {
-  image: string;  // 画像ファイル名
-  centerX: number;  // 中心点X (%)
-  centerY: number;  // 中心点Y (%)
-  scale: number;  // 拡大率
-  opacity: number;  // 透明度 (0-1)
-};
-type Obj = {
-  id?: string;
-  type?: string;
-  label?: string;
-  x?: number;
-  y?: number;
-  w?: number;
-  h?: number;
-  birthday?: string;
-  isFavorite?: boolean;
-  note?: string;
-};
-
-const FALLBACK = { cols: 60, rows: 40, cellSize: 24 };
-
-function num(v: unknown, fb: number) {
-  const n = Number(v);
-  return Number.isFinite(n) ? n : fb;
-}
-
-function clamp(n: number, a: number, b: number) {
-  return Math.max(a, Math.min(b, n));
-}
-
-function theme(type: string) {
-  switch ((type || "").toUpperCase()) {
-    case "HQ":
-      return { top: "rgba(46,107,255,0.18)", side: "rgba(46,107,255,0.10)", stroke: "#2e6bff" };
-    case "BEAR_TRAP":
-      return { top: "rgba(255,138,42,0.20)", side: "rgba(255,138,42,0.12)", stroke: "#ff8a2a" };
-    case "STATUE":
-      return { top: "rgba(33,195,138,0.20)", side: "rgba(33,195,138,0.12)", stroke: "#21c38a" };
-    case "CITY":
-      return { top: "rgba(181,107,255,0.18)", side: "rgba(181,107,255,0.10)", stroke: "#b56bff" };
-    case "DEPOT":
-      return { top: "rgba(139,69,19,0.18)", side: "rgba(139,69,19,0.10)", stroke: "#8B4513" };
-    case "MOUNTAIN":
-      return { top: "rgba(120,113,108,0.18)", side: "rgba(120,113,108,0.10)", stroke: "#78716c" };
-    case "LAKE":
-      return { top: "rgba(30,64,175,0.18)", side: "rgba(30,64,175,0.10)", stroke: "#1e40af" };
-    default:
-      return { top: "rgba(17,24,39,0.14)", side: "rgba(17,24,39,0.08)", stroke: "#111827" };
-  }
-}
-
-// タイプ別のデフォルトサイズ
-function getDefaultSize(type: string): { w: number; h: number } {
-  switch ((type || "").toUpperCase()) {
-    case "HQ":
-      return { w: 4, h: 4 };
-    case "CITY":
-      return { w: 2, h: 2 };
-    case "FLAG":
-      return { w: 1, h: 1 };
-    case "STATUE":
-      return { w: 2, h: 2 };
-    case "DEPOT":
-      return { w: 2, h: 2 };
-    case "MOUNTAIN":
-      return { w: 1, h: 1 };
-    case "LAKE":
-      return { w: 1, h: 1 };
-    default:
-      return { w: 2, h: 2 };
-  }
-}
-
-// 回転（2D）
-function rot(x: number, y: number, angle: number) {
-  const c = Math.cos(angle);
-  const s = Math.sin(angle);
-  return { x: x * c - y * s, y: x * s + y * c };
-}
-
-// オブジェクト間の重なり判定
-function checkOverlap(obj1: Obj, obj2: Obj): boolean {
-  const x1 = num(obj1.x, 0);
-  const y1 = num(obj1.y, 0);
-  const w1 = Math.max(1, num(obj1.w, 1));
-  const h1 = Math.max(1, num(obj1.h, 1));
-
-  const x2 = num(obj2.x, 0);
-  const y2 = num(obj2.y, 0);
-  const w2 = Math.max(1, num(obj2.w, 1));
-  const h2 = Math.max(1, num(obj2.h, 1));
-
-  return !(
-    x1 + w1 <= x2 || // obj1 is to the left of obj2
-    x2 + w2 <= x1 || // obj2 is to the left of obj1
-    y1 + h1 <= y2 || // obj1 is above obj2
-    y2 + h2 <= y1    // obj2 is above obj1
-  );
-}
-
-// 重なっている領域を取得
-function getOverlapRect(obj1: Obj, obj2: Obj): { x: number; y: number; w: number; h: number } | null {
-  const x1 = num(obj1.x, 0);
-  const y1 = num(obj1.y, 0);
-  const w1 = Math.max(1, num(obj1.w, 1));
-  const h1 = Math.max(1, num(obj1.h, 1));
-
-  const x2 = num(obj2.x, 0);
-  const y2 = num(obj2.y, 0);
-  const w2 = Math.max(1, num(obj2.w, 1));
-  const h2 = Math.max(1, num(obj2.h, 1));
-
-  if (!checkOverlap(obj1, obj2)) return null;
-
-  const overlapX = Math.max(x1, x2);
-  const overlapY = Math.max(y1, y2);
-  const overlapW = Math.min(x1 + w1, x2 + w2) - overlapX;
-  const overlapH = Math.min(y1 + h1, y2 + h2) - overlapY;
-
-  return { x: overlapX, y: overlapY, w: overlapW, h: overlapH };
-}
+import type { Meta, BgConfig, Obj } from './types';
+import { 
+  basePath, 
+  num, 
+  clamp, 
+  theme, 
+  getDefaultSize, 
+  rot, 
+  checkOverlap, 
+  getOverlapRect,
+  FALLBACK 
+} from './utils';
 
 export default function Home() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -174,6 +49,8 @@ export default function Home() {
   const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
   const pointerStartRef = useRef<{ x: number; y: number; time: number } | null>(null);
   const lastTapRef = useRef<{ time: number; x: number; y: number } | null>(null);
+  const clickTimerRef = useRef<NodeJS.Timeout | null>(null); // ダブルクリック検出用
+  const lastClickRef = useRef<{ time: number; gridX: number; gridY: number } | null>(null); // onClick用ダブルクリック検出
   const [showMoveArrows, setShowMoveArrows] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
@@ -191,6 +68,9 @@ export default function Home() {
   
   // 熊罠最高ダメージ記録管理
   const [bearTrapMaxDamage, setBearTrapMaxDamage] = useState<number>(0);
+  
+  // 溶鉱炉レベル画像のプリロード
+  const fireLevelImagesRef = useRef<{ [key: string]: HTMLImageElement }>({});
 
   // 背景設定
   const [bgConfig, setBgConfig] = useState<BgConfig>({
@@ -244,6 +124,93 @@ export default function Home() {
   const soldierAnimationRef = useRef<number | null>(null);
   const isAnimationStartingRef = useRef<boolean>(false); // アニメーション開始中フラグ
 
+  // 花火アニメーション用
+  type Firework = {
+    x: number;
+    y: number;
+    mapX: number; // マップ座標X
+    mapY: number; // マップ座標Y
+    particles: Array<{
+      vx: number;
+      vy: number;
+      life: number;
+      maxLife: number;
+      color: string;
+      x: number;
+      y: number;
+    }>;
+    startTime: number;
+  };
+  const [fireworks, setFireworks] = useState<Firework[]>([]);
+  const fireworksAnimationRef = useRef<number | null>(null);
+
+  // キラキラエフェクト用
+  type Sparkle = {
+    x: number;
+    y: number;
+    mapX: number; // マップ座標X
+    mapY: number; // マップ座標Y
+    particles: Array<{
+      offsetX: number;
+      offsetY: number;
+      vx: number; // 速度ベクトルX
+      vy: number; // 速度ベクトルY
+      size: number;
+      rotation: number;
+      life: number;
+      maxLife: number;
+      color: string;
+    }>;
+    startTime: number;
+    targetObj: Obj;
+  };
+  const [sparkles, setSparkles] = useState<Sparkle[]>([]);
+  const sparklesAnimationRef = useRef<number | null>(null);
+
+  // 花吹雪アニメーション用
+  type CherryBlossom = {
+    x: number; // スクリーン座標X
+    y: number; // スクリーン座標Y
+    mapX: number; // マップ座標X
+    mapY: number; // マップ座標Y
+    particles: Array<{
+      offsetX: number; // 中心からのオフセットX
+      offsetY: number; // 中心からのオフセットY
+      vx: number; // 速度ベクトルX
+      vy: number; // 速度ベクトルY
+      size: number;
+      rotation: number;
+      life: number;
+      maxLife: number;
+      color: string;
+    }>;
+    startTime: number;
+    targetObj: Obj;
+  };
+  const [cherryBlossoms, setCherryBlossoms] = useState<CherryBlossom[]>([]);
+  const cherryBlossomsAnimationRef = useRef<number | null>(null);
+
+  // 隕石アニメーション用
+  type Meteor = {
+    x: number; // スクリーン座標X（開始位置）
+    y: number; // スクリーン座標Y（開始位置）
+    meteors: Array<{
+      offsetX: number;
+      offsetY: number;
+      vx: number; // 横方向速度
+      vy: number; // 縦方向速度
+      size: number; // 大きさ（1=大、0.5=小）
+      rotation: number;
+      swayOffset: number; // 揺れのオフセット
+      swaySpeed: number; // 揺れの速度
+      life: number;
+    }>;
+    startTime: number;
+  };
+  const [meteors, setMeteors] = useState<Meteor[]>([]);
+  const meteorsAnimationRef = useRef<number | null>(null);
+  const meteorImageRef = useRef<HTMLImageElement | null>(null);
+
   // カメラ：パン(tx,ty)は「画面座標系」での移動量（ピクセル）、scaleは倍率
   // 初期ズーム: 統一して1.0でスタート（SSRハイドレーションエラー回避）
   const [cam, setCam] = useState({ 
@@ -262,6 +229,25 @@ export default function Home() {
     } catch (e) {
       console.error('Failed to load bearTrapMaxDamage:', e);
     }
+  }, []);
+
+  // 溶鉱炉レベル画像のプリロード
+  useEffect(() => {
+    const imagesToLoad = ['FC1', 'FC2', 'FC3', 'FC4', 'FC5', 'FC6', 'FC7', 'FC8', 'FC9', 'FC10'];
+    imagesToLoad.forEach(name => {
+      const img = new Image();
+      img.src = `/fire-levels/${name}.webp`;
+      fireLevelImagesRef.current[name] = img;
+    });
+  }, []);
+
+  // 隕石画像のプリロード
+  useEffect(() => {
+    const img = new Image();
+    img.src = '/meteor.webp';
+    img.onload = () => {
+      meteorImageRef.current = img;
+    };
   }, []);
 
   useEffect(() => {
@@ -472,12 +458,13 @@ export default function Home() {
   useEffect(() => {
     if (!showBirthdayCelebration) return;
     
-    if (birthdayAnimationStage === 0) {
-      // Happy Birthday表示後、2.5秒でステージ2（紙吹雪）へ
-      const timer = setTimeout(() => setBirthdayAnimationStage(2), 2500);
-      return () => clearTimeout(timer);
-    }
-  }, [showBirthdayCelebration, birthdayAnimationStage]);
+    // showBirthdayCelebrationがtrueになったら、必ずステージ0から開始
+    setBirthdayAnimationStage(0);
+    
+    // Happy Birthday表示後、2.5秒でステージ2（紙吹雪）へ
+    const timer = setTimeout(() => setBirthdayAnimationStage(2), 2500);
+    return () => clearTimeout(timer);
+  }, [showBirthdayCelebration]);
 
   // 編集モーダルが開いたときに名前入力欄にフォーカス（一度だけ）
   // selectedIdが変わったときのみフォーカス（同じオブジェクトの編集中は再フォーカスしない）
@@ -749,6 +736,44 @@ export default function Home() {
 
     // マップ中心を戻す
     return { mx: p.x + cx, my: p.y + cy };
+  };
+
+  // 変換(マップ→スクリーン座標): アニメーション描画で使う
+  // mxとmyはマップ左上を原点とするピクセル座標
+  const mapToScreen = (mx: number, my: number, viewW: number, viewH: number) => {
+    const mapW = cfg.cols * cfg.cell;
+    const mapH = cfg.rows * cfg.cell;
+    const cx = mapW / 2;
+    const cy = mapH / 2;
+
+    // 描画時の変換順序と同じ:
+    // ctx.translate(viewW / 2, viewH / 2);
+    // ctx.translate(cam.tx, cam.ty);
+    // ctx.scale(cam.scale, cam.scale);
+    // ctx.rotate(LOOK.angle);
+    // ctx.translate(-cx, -cy);
+    // この後、座標(mx, my)を描画
+    
+    // 1. translate(-cx, -cy) の効果: マップ中心を引く
+    let x = mx - cx;
+    let y = my - cy;
+
+    // 2. rotate(LOOK.angle)
+    const cosA = Math.cos(LOOK.angle);
+    const sinA = Math.sin(LOOK.angle);
+    const rx = x * cosA - y * sinA;
+    const ry = x * sinA + y * cosA;
+
+    // 3. scale(cam.scale, cam.scale)
+    x = rx * cam.scale;
+    y = ry * cam.scale;
+
+    // 4. translate(cam.tx, cam.ty)
+    x += cam.tx;
+    y += cam.ty;
+
+    // 5. translate(viewW / 2, viewH / 2)
+    return { sx: x + viewW / 2, sy: y + viewH / 2 };
   };
 
   // オブジェクト選択（マップ座標mx,myが矩形内か）
@@ -1093,6 +1118,39 @@ export default function Home() {
         const isKnownType = knownTypes.includes(type);
         ctx.fillStyle = isKnownType ? "#111" : "#fff";
         ctx.fillText(label, 0, 0);
+
+        // 溶鉱炉レベル表示（都市ドメインの名前の上に小さく表示）
+        if (type === "CITY" && o.Fire) {
+          const fireValue = String(o.Fire).trim();
+          
+          // FC1～FC10の画像表示
+          if (fireValue.match(/^FC([1-9]|10)$/i)) {
+            const imageName = fireValue.toUpperCase();
+            const img = fireLevelImagesRef.current[imageName];
+            
+            if (img && img.complete) {
+              const imgWidth = 22 / cam.scale; // 小さく表示
+              const imgHeight = 22 / cam.scale;
+              const imgY = -28 / cam.scale; // ラベルの上
+              
+              ctx.save();
+              ctx.globalAlpha = 0.9;
+              ctx.drawImage(img, -imgWidth / 2, imgY, imgWidth, imgHeight);
+              ctx.restore();
+            }
+          }
+          // 数字1～30の場合はLvテキスト表示
+          else if (fireValue.match(/^([1-9]|[12][0-9]|30)$/)) {
+            const level = parseInt(fireValue, 10);
+            ctx.save();
+            ctx.font = "10px system-ui";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "bottom";
+            ctx.fillStyle = "#ff6b00";
+            ctx.fillText(`Lv${level}`, 0, -12 / cam.scale);
+            ctx.restore();
+          }
+        }
 
         ctx.restore();
       }
@@ -2449,7 +2507,453 @@ export default function Home() {
 
       ctx.restore();
     }
+
+    ctx.restore(); // カメラ変換終了
+
+    // 花火アニメーションの描画（マップ座標をスクリーン座標に変換）
+    if (fireworks.length > 0) {
+      const now = Date.now();
+      
+      fireworks.forEach((fw, fwIdx) => {
+        if (now < fw.startTime) return; // まだ開始していない
+        
+        // マップ座標から現在のスクリーン座標を計算
+        const { sx: screenX, sy: screenY } = mapToScreen(fw.mapX, fw.mapY, viewW, viewH);
+        
+        fw.particles.forEach((p) => {
+          if (p.life <= 0) return;
+          
+          ctx.save();
+          const alpha = p.life / p.maxLife;
+          ctx.globalAlpha = alpha;
+          ctx.fillStyle = p.color;
+          ctx.shadowColor = p.color;
+          ctx.shadowBlur = 15;
+          
+          // 大きめの円で描画
+          const size = 4 + (1 - alpha) * 3;
+          ctx.beginPath();
+          ctx.arc(screenX + p.x, screenY + p.y, size, 0, Math.PI * 2);
+          ctx.fill();
+          
+          // 光の尾
+          ctx.globalAlpha = alpha * 0.5;
+          ctx.beginPath();
+          ctx.arc(screenX + p.x * 0.8, screenY + p.y * 0.8, size * 0.6, 0, Math.PI * 2);
+          ctx.fill();
+          
+          ctx.restore();
+        });
+      });
+    }
+
+    // キラキラエフェクトの描画（マップ座標をスクリーン座標に変換）
+    if (sparkles.length > 0) {
+      sparkles.forEach((sp) => {
+        // マップ座標から現在のスクリーン座標を計算
+        const { sx: screenX, sy: screenY } = mapToScreen(sp.mapX, sp.mapY, viewW, viewH);
+        
+        sp.particles.forEach((p) => {
+          if (p.life <= 0) return;
+          
+          ctx.save();
+          ctx.translate(screenX + p.offsetX, screenY + p.offsetY);
+          ctx.rotate(p.rotation);
+          
+          const alpha = p.life / p.maxLife;
+          ctx.globalAlpha = alpha;
+          
+          // 星の形を描画
+          ctx.fillStyle = p.color;
+          ctx.shadowColor = p.color;
+          ctx.shadowBlur = 15;
+          
+          const size = p.size * (0.8 + alpha * 0.2); // 少し脈動
+          
+          // 4方向の光線（+型）
+          ctx.lineWidth = size * 0.3;
+          ctx.strokeStyle = p.color;
+          ctx.lineCap = 'round';
+          
+          // 縦線
+          ctx.beginPath();
+          ctx.moveTo(0, -size);
+          ctx.lineTo(0, size);
+          ctx.stroke();
+          
+          // 横線
+          ctx.beginPath();
+          ctx.moveTo(-size, 0);
+          ctx.lineTo(size, 0);
+          ctx.stroke();
+          
+          // 斜め線（X型）
+          ctx.globalAlpha = alpha * 0.7;
+          const diagSize = size * 0.7;
+          ctx.lineWidth = size * 0.2;
+          
+          ctx.beginPath();
+          ctx.moveTo(-diagSize, -diagSize);
+          ctx.lineTo(diagSize, diagSize);
+          ctx.stroke();
+          
+          ctx.beginPath();
+          ctx.moveTo(diagSize, -diagSize);
+          ctx.lineTo(-diagSize, diagSize);
+          ctx.stroke();
+          
+          // 中心の明るい点
+          ctx.globalAlpha = alpha;
+          ctx.fillStyle = '#ffffff';
+          ctx.beginPath();
+          ctx.arc(0, 0, size * 0.25, 0, Math.PI * 2);
+          ctx.fill();
+          
+          ctx.restore();
+        });
+      });
+    }
+
+    // 花吹雪描画（キラキラと同じパターン）
+    if (cherryBlossoms.length > 0) {
+      cherryBlossoms.forEach((cb) => {
+        // マップ座標からスクリーン座標に変換（カメラ移動に追従）
+        const { sx: centerScreenX, sy: centerScreenY } = mapToScreen(cb.mapX, cb.mapY, viewW, viewH);
+        
+        cb.particles.forEach((p) => {
+          const screenX = centerScreenX + p.offsetX;
+          const screenY = centerScreenY + p.offsetY;
+          
+          ctx.save();
+          ctx.translate(screenX, screenY);
+          ctx.rotate(p.rotation);
+          ctx.globalAlpha = p.life;
+          
+          // 花びらを描画（楕円形）
+          ctx.fillStyle = p.color;
+          ctx.beginPath();
+          ctx.ellipse(0, 0, p.size, p.size * 0.6, 0, 0, Math.PI * 2);
+          ctx.fill();
+          
+          // ハイライト効果
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+          ctx.beginPath();
+          ctx.ellipse(-p.size * 0.2, -p.size * 0.2, p.size * 0.4, p.size * 0.3, 0, 0, Math.PI * 2);
+          ctx.fill();
+          
+          ctx.restore();
+        });
+      });
+    }
+
+    // 隕石描画
+    if (meteors.length > 0 && meteorImageRef.current) {
+      meteors.forEach((m) => {
+        m.meteors.forEach((meteor) => {
+          const screenX = m.x + meteor.offsetX;
+          const screenY = m.y + meteor.offsetY;
+          
+          ctx.save();
+          ctx.translate(screenX, screenY);
+          // 回転なし（45度の角度は画像自体に含まれる）
+          ctx.globalAlpha = meteor.life;
+          
+          // サイズに応じて明度を調整（全体的に明るく、大きいほどさらに明るい）
+          const brightness = 1.2 + meteor.size * 0.6; // 小(0.2)→1.32, 大(1.3)→1.98
+          ctx.filter = `brightness(${brightness})`;
+          
+          // 隕石画像を描画
+          const img = meteorImageRef.current!;
+          const w = img.width * meteor.size * 0.5; // スケール調整
+          const h = img.height * meteor.size * 0.5;
+          ctx.drawImage(img, -w / 2, -h / 2, w, h);
+          
+          ctx.restore();
+        });
+      });
+    }
+
+    // pendingPosition（クリックした位置）に赤い+マークを描画（編集モード時のみ）
+    // カメラ変換の外で画面座標に直接描画
+    if (isEditMode && pendingPosition) {
+      ctx.save();
+      
+      // ワールド座標をスクリーン座標に変換
+      const worldX = (pendingPosition.x + 0.5) * cfg.cell;
+      const worldY = (pendingPosition.y + 0.5) * cfg.cell;
+      
+      // カメラ変換を手動で適用
+      const cx = (cfg.cols * cfg.cell) / 2;
+      const cy = (cfg.rows * cfg.cell) / 2;
+      
+      // 回転を考慮した座標変換
+      const rotatedX = Math.cos(LOOK.angle) * (worldX - cx) - Math.sin(LOOK.angle) * (worldY - cy);
+      const rotatedY = Math.sin(LOOK.angle) * (worldX - cx) + Math.cos(LOOK.angle) * (worldY - cy);
+      
+      // スケールとパンを適用
+      const screenX = (viewW / 2) + (rotatedX * cam.scale) + cam.tx;
+      const screenY = (viewH / 2) + (rotatedY * cam.scale) + cam.ty;
+      
+      // +マークの描画（スクリーン座標で）
+      const markSize = 20;
+      const lineWidth = 4;
+      
+      // 影付き赤い+マーク
+      ctx.shadowColor = "rgba(239, 68, 68, 0.6)";
+      ctx.shadowBlur = 8;
+      ctx.strokeStyle = "#ef4444";
+      ctx.lineWidth = lineWidth;
+      ctx.lineCap = "round";
+      
+      // 縦線
+      ctx.beginPath();
+      ctx.moveTo(screenX, screenY - markSize / 2);
+      ctx.lineTo(screenX, screenY + markSize / 2);
+      ctx.stroke();
+      
+      // 横線
+      ctx.beginPath();
+      ctx.moveTo(screenX - markSize / 2, screenY);
+      ctx.lineTo(screenX + markSize / 2, screenY);
+      ctx.stroke();
+      
+      // 白い縁取り（視認性向上）
+      ctx.shadowBlur = 0;
+      ctx.strokeStyle = "white";
+      ctx.lineWidth = lineWidth + 2;
+      ctx.globalAlpha = 0.3;
+      
+      ctx.beginPath();
+      ctx.moveTo(screenX, screenY - markSize / 2);
+      ctx.lineTo(screenX, screenY + markSize / 2);
+      ctx.stroke();
+      
+      ctx.beginPath();
+      ctx.moveTo(screenX - markSize / 2, screenY);
+      ctx.lineTo(screenX + markSize / 2, screenY);
+      ctx.stroke();
+      
+      ctx.restore();
+    }
   };
+
+  // アニメーション判定関数：どのアニメーションを表示するか決定
+  const getActiveAnimation = (obj: Obj): string | null => {
+    // 1. 誕生日チェック（最優先）
+    if (obj.birthday) {
+      const birthdayPattern = /(\d{1,2})月(\d{1,2})日/;
+      const match = obj.birthday.match(birthdayPattern);
+      if (match) {
+        const birthdayMonth = parseInt(match[1], 10);
+        const currentMonth = new Date().getMonth() + 1;
+        if (birthdayMonth === currentMonth) {
+          return 'birthday'; // 誕生日アニメを返す（既存の紙吹雪）
+        }
+      }
+    }
+    
+    // 2. Type固有アニメ
+    if (obj.type === 'BEAR_TRAP') {
+      return 'beartrap';
+    }
+    
+    // 3. Animationフィールド
+    if (obj.Animation && obj.Animation.trim()) {
+      const anim = obj.Animation.toLowerCase();
+      if (['fireworks', 'sparkle', 'beartrap', 'birthday', 'cherryblossom', 'meteor'].includes(anim)) {
+        return anim;
+      }
+    }
+    
+    return null; // アニメーションなし
+  };
+
+  // 花火アニメーション開始関数
+  const startFireworksAnimation = (obj: Obj) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
+    const rect = canvas.getBoundingClientRect();
+    const viewW = rect.width;
+    const viewH = rect.height;
+    
+    // オブジェクトのマップ座標を取得（中心位置）
+    const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell;
+    const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell;
+    
+    // マップ座標からスクリーン座標に変換
+    const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH);
+    
+    // オブジェクト中心から360度に広がる花火
+    const newFireworks: Firework[] = [];
+    const colors = ['#ff1744', '#00e676', '#2979ff', '#ffd600', '#e040fb', '#00e5ff', '#ff6e40', '#ff4081'];
+    
+    const particles = [];
+    const particleCount = 150; // 粒子数を増やして豪華に
+    
+    for (let j = 0; j < particleCount; j++) {
+      // 360度均等に配置 + ランダム性
+      const angle = (Math.PI * 2 * j) / particleCount + (Math.random() - 0.5) * 0.2;
+      const speed = 8 + Math.random() * 12; // 速度を緩める（8-20）
+      particles.push({
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        life: 1.0,
+        maxLife: 1.0,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        x: 0,
+        y: 0,
+      });
+    }
+    
+    newFireworks.push({
+      x: centerX,
+      y: centerY,
+      mapX: objMapX,
+      mapY: objMapY,
+      particles,
+      startTime: Date.now(),
+    });
+    
+    setFireworks(newFireworks);
+  };
+
+  // キラキラエフェクト開始関数
+  const startSparkleAnimation = (obj: Obj) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
+    const rect = canvas.getBoundingClientRect();
+    const viewW = rect.width;
+    const viewH = rect.height;
+    
+    // オブジェクトのマップ座標を取得（中心位置）
+    const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell;
+    const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell;
+    
+    // マップ座標からスクリーン座標に変換
+    const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH);
+    
+    const particles = [];
+    const particleCount = 120; // 粒子数を増やす
+    const colors = ['#ffd700', '#ffed4e', '#fff59d', '#ffffff', '#ffe082', '#ffb300'];
+    
+    for (let i = 0; i < particleCount; i++) {
+      // 360度均等に配置 + ランダム性
+      const angle = (Math.PI * 2 * i) / particleCount + (Math.random() - 0.5) * 0.2;
+      const speed = 6 + Math.random() * 10; // 速度を緩める（6-16）
+      
+      particles.push({
+        offsetX: 0,
+        offsetY: 0,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        size: 6 + Math.random() * 10,
+        rotation: Math.random() * Math.PI * 2,
+        life: 1.0,
+        maxLife: 1.0,
+        color: colors[Math.floor(Math.random() * colors.length)],
+      });
+    }
+    
+    setSparkles([{
+      x: centerX,
+      y: centerY,
+      mapX: objMapX, // マップ座標を保存
+      mapY: objMapY,
+      particles,
+      startTime: Date.now(),
+      targetObj: obj,
+    }]);
+  };
+
+  // 花吹雪アニメーション開始（オブジェクトを出発点とする）
+  const startCherryBlossomAnimation = (obj: Obj) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
+    const rect = canvas.getBoundingClientRect();
+    const viewW = rect.width;
+    const viewH = rect.height;
+    
+    // オブジェクトのマップ座標を取得（中心位置）
+    const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell;
+    const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell;
+    
+    // マップ座標からスクリーン座標に変換
+    const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH);
+    
+    const particles = [];
+    const particleCount = 100;
+    const colors = ['#ffb7c5', '#ffc0cb', '#ffcce5', '#ffe4e1', '#fff0f5', '#ffd1dc', '#ff69b4', '#ffaad5'];
+    
+    for (let i = 0; i < particleCount; i++) {
+      // 360度均等に配置 + ランダム性（キラキラと同じパターン）
+      const angle = (Math.PI * 2 * i) / particleCount + (Math.random() - 0.5) * 0.2;
+      const speed = 2 + Math.random() * 4; // 速度を遅く（2-6）散っていく様子が見えるように
+      
+      particles.push({
+        offsetX: 0,
+        offsetY: 0,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        size: 8 + Math.random() * 6,
+        rotation: Math.random() * Math.PI * 2,
+        life: 1.0,
+        maxLife: 1.0,
+        color: colors[Math.floor(Math.random() * colors.length)],
+      });
+    }
+    
+    setCherryBlossoms([{
+      x: centerX,
+      y: centerY,
+      mapX: objMapX,
+      mapY: objMapY,
+      particles,
+      startTime: Date.now(),
+      targetObj: obj,
+    }]);
+  };
+
+  // 隕石アニメーション開始
+  const startMeteorAnimation = (obj: Obj) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
+    const rect = canvas.getBoundingClientRect();
+    const viewW = rect.width;
+    const viewH = rect.height;
+    
+    // 画面右上から左下へ（ビュー座標系で開始）
+    const startX = viewW + 100; // 右端外
+    const startY = -200 + Math.random() * 400; // 上端外（高さランダム -200～200）
+    
+    const meteorsList = [];
+    
+    // ランダムな大きさの隕石1つ
+    const randomSize = 0.2 + Math.random() * 1.1; // 0.2～1.3のランダムサイズ（幅拡大）
+    meteorsList.push({
+      offsetX: 0,
+      offsetY: 0,
+      vx: -2.0, // 左へ（スピードアップ）
+      vy: 2.0, // 下へ（スピードアップ）
+      size: randomSize, // ランダムサイズ
+      rotation: -Math.PI / 4, // -45度（表示用、実際は回転しない）
+      swayOffset: Math.random() * Math.PI * 2,
+      swaySpeed: 0.08, // 揺れを細かく
+      life: 1.0,
+    });
+    
+    // 既存の隕石に追加（消さない）
+    setMeteors(prev => [...prev, {
+      x: startX,
+      y: startY,
+      meteors: meteorsList,
+      startTime: Date.now(),
+    }]);
+  };
+
   // 兵士アニメーション開始関数
   const startSoldierAnimation = (bearTrap: Obj) => {
     // アニメーション開始中または実行中の場合は何もしない
@@ -2615,6 +3119,249 @@ export default function Home() {
     };
   }, [soldierAnimations.length > 0 ? soldierAnimations[0]?.startTime : 0]);
 
+  // 花火アニメーションループ
+  useEffect(() => {
+    if (fireworks.length === 0) return;
+
+    const ANIMATION_DURATION = 12000; // 12秒で強制終了
+
+    const animate = () => {
+      const now = Date.now();
+      
+      // 最初の花火の開始時刻から一定時間経過したら全てクリア
+      if (fireworks.length > 0 && fireworks[0] && now - fireworks[0].startTime > ANIMATION_DURATION) {
+        setFireworks([]);
+        fireworksAnimationRef.current = null;
+        return;
+      }
+      
+      const updated = fireworks.map(fw => {
+        if (now < fw.startTime) return fw; // まだ開始していない
+        
+        const elapsed = (now - fw.startTime) / 1000; // 秒
+        const updatedParticles = fw.particles.map(p => {
+          const newX = p.x + p.vx;
+          const newY = p.y + p.vy + 0.15; // 重力効果を強く（0.02→0.15）
+          const newLife = Math.max(0, p.life - 0.0003);
+          
+          return {
+            ...p,
+            x: newX,
+            y: newY,
+            vy: p.vy + 0.15, // 重力加速を強く（0.02→0.15）
+            life: newLife,
+          };
+        }).filter(p => p.life > 0);
+        
+        return {
+          ...fw,
+          particles: updatedParticles,
+        };
+      }).filter(fw => fw.particles.length > 0 || now < fw.startTime);
+      
+      setFireworks(updated);
+      
+      if (updated.length > 0) {
+        fireworksAnimationRef.current = requestAnimationFrame(animate);
+      } else {
+        fireworksAnimationRef.current = null;
+      }
+    };
+    
+    fireworksAnimationRef.current = requestAnimationFrame(animate);
+    
+    return () => {
+      if (fireworksAnimationRef.current) {
+        cancelAnimationFrame(fireworksAnimationRef.current);
+        fireworksAnimationRef.current = null;
+      }
+    };
+  }, [fireworks]);
+
+  // キラキラエフェクトアニメーションループ
+  useEffect(() => {
+    if (sparkles.length === 0) return;
+
+    const ANIMATION_DURATION = 10000; // 10秒で強制終了
+
+    const animate = () => {
+      const now = Date.now();
+      
+      // 開始時刻から一定時間経過したら全てクリア
+      if (sparkles.length > 0 && sparkles[0] && now - sparkles[0].startTime > ANIMATION_DURATION) {
+        setSparkles([]);
+        sparklesAnimationRef.current = null;
+        return;
+      }
+      
+      const updated = sparkles.map(sp => {
+        const elapsed = (now - sp.startTime) / 1000; // 秒
+        
+        const updatedParticles = sp.particles.map(p => {
+          // 速度ベクトルで移動
+          const newOffsetX = p.offsetX + p.vx;
+          const newOffsetY = p.offsetY + p.vy;
+          const newLife = Math.max(0, p.life - 0.0003); // 寿命をさらに延ばす（0.001→0.0003 = 約3333フレーム = 約55秒）
+          const newRotation = p.rotation + 0.15;
+          
+          return {
+            ...p,
+            offsetX: newOffsetX,
+            offsetY: newOffsetY,
+            rotation: newRotation,
+            life: newLife,
+          };
+        }).filter(p => p.life > 0);
+        
+        return {
+          ...sp,
+          particles: updatedParticles,
+        };
+      }).filter(sp => sp.particles.length > 0);
+      
+      setSparkles(updated);
+      
+      if (updated.length > 0) {
+        sparklesAnimationRef.current = requestAnimationFrame(animate);
+      } else {
+        sparklesAnimationRef.current = null;
+      }
+    };
+    
+    sparklesAnimationRef.current = requestAnimationFrame(animate);
+    
+    return () => {
+      if (sparklesAnimationRef.current) {
+        cancelAnimationFrame(sparklesAnimationRef.current);
+        sparklesAnimationRef.current = null;
+      }
+    };
+  }, [sparkles]);
+
+  // 花吹雪アニメーションループ
+  useEffect(() => {
+    if (cherryBlossoms.length === 0) return;
+    
+    const ANIMATION_DURATION = 10000; // 10秒で強制終了
+    
+    const animate = () => {
+      const now = Date.now();
+      
+      // 開始時刻から一定時間経過したら全てクリア
+      if (cherryBlossoms.length > 0 && cherryBlossoms[0] && now - cherryBlossoms[0].startTime > ANIMATION_DURATION) {
+        setCherryBlossoms([]);
+        cherryBlossomsAnimationRef.current = null;
+        return;
+      }
+      
+      const updated = cherryBlossoms.map(cb => {
+        const updatedParticles = cb.particles.map(p => {
+          // 速度ベクトルで移動
+          const newOffsetX = p.offsetX + p.vx;
+          const newOffsetY = p.offsetY + p.vy;
+          const newLife = Math.max(0, p.life - 0.0003);
+          const newRotation = p.rotation + 0.15;
+          
+          return {
+            ...p,
+            offsetX: newOffsetX,
+            offsetY: newOffsetY,
+            vy: p.vy + 0.1, // 重力を弱めに（ゆっくり落ちる）
+            rotation: newRotation,
+            life: newLife,
+          };
+        }).filter(p => p.life > 0);
+        
+        return {
+          ...cb,
+          particles: updatedParticles,
+        };
+      }).filter(cb => cb.particles.length > 0);
+      
+      setCherryBlossoms(updated);
+      
+      // canvas全体を再描画
+      requestDraw();
+      
+      if (updated.length > 0) {
+        cherryBlossomsAnimationRef.current = requestAnimationFrame(animate);
+      } else {
+        cherryBlossomsAnimationRef.current = null;
+      }
+    };
+    
+    cherryBlossomsAnimationRef.current = requestAnimationFrame(animate);
+    
+    return () => {
+      if (cherryBlossomsAnimationRef.current) {
+        cancelAnimationFrame(cherryBlossomsAnimationRef.current);
+        cherryBlossomsAnimationRef.current = null;
+      }
+    };
+  }, [cherryBlossoms]);
+
+  // 隕石アニメーションループ
+  useEffect(() => {
+    if (meteors.length === 0) return;
+    
+    const ANIMATION_DURATION = 15000; // 15秒で強制終了
+    
+    const animate = () => {
+      const now = Date.now();
+      
+      // 開始時刻から一定時間経過したら全てクリア
+      if (meteors.length > 0 && meteors[0] && now - meteors[0].startTime > ANIMATION_DURATION) {
+        setMeteors([]);
+        meteorsAnimationRef.current = null;
+        return;
+      }
+      
+      const updated = meteors.map(m => {
+        const updatedMeteors = m.meteors.map(meteor => {
+          // 微震しながら移動
+          meteor.swayOffset += meteor.swaySpeed;
+          const swayX = Math.sin(meteor.swayOffset) * 2; // 微震（揺れ幅小さく）
+          
+          const newOffsetX = meteor.offsetX + meteor.vx + swayX * 0.1;
+          const newOffsetY = meteor.offsetY + meteor.vy;
+          const newLife = Math.max(0, meteor.life - 0.0001); // ゆっくりフェード
+          
+          return {
+            ...meteor,
+            offsetX: newOffsetX,
+            offsetY: newOffsetY,
+            life: newLife,
+          };
+        }).filter(meteor => meteor.life > 0);
+        
+        return {
+          ...m,
+          meteors: updatedMeteors,
+        };
+      }).filter(m => m.meteors.length > 0);
+      
+      setMeteors(updated);
+      
+      // canvas全体を再描画
+      requestDraw();
+      
+      if (updated.length > 0) {
+        meteorsAnimationRef.current = requestAnimationFrame(animate);
+      } else {
+        meteorsAnimationRef.current = null;
+      }
+    };
+    
+    meteorsAnimationRef.current = requestAnimationFrame(animate);
+    
+    return () => {
+      if (meteorsAnimationRef.current) {
+        cancelAnimationFrame(meteorsAnimationRef.current);
+        meteorsAnimationRef.current = null;
+      }
+    };
+  }, [meteors]);
+
 
   // 初期表示：最初は少し引き気味にして“ゲームっぽく”
   useEffect(() => {
@@ -2627,7 +3374,7 @@ export default function Home() {
   useEffect(() => {
     requestDraw();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [objects, cfg.cols, cfg.rows, cfg.cell, cam, selectedId, showMoveArrows, myObjectId, isEditMode]);
+  }, [objects, cfg.cols, cfg.rows, cfg.cell, cam, selectedId, showMoveArrows, myObjectId, isEditMode, pendingPosition]);
 
   // 兵士アニメーション変更時も再描画
   useEffect(() => {
@@ -2635,6 +3382,20 @@ export default function Home() {
       requestDraw();
     }
   }, [soldierAnimations]);
+
+  // 花火アニメーション変更時も再描画
+  useEffect(() => {
+    if (fireworks.length > 0) {
+      requestDraw();
+    }
+  }, [fireworks]);
+
+  // キラキラエフェクト変更時も再描画
+  useEffect(() => {
+    if (sparkles.length > 0) {
+      requestDraw();
+    }
+  }, [sparkles]);
 
   // ====== 入力:パン＆ズーム（タッチ/マウス） ======
   const onPointerDown = (e: React.PointerEvent) => {
@@ -2994,6 +3755,81 @@ export default function Home() {
     const sy = e.clientY - rect.top;
 
     const { mx, my } = screenToMap(sx, sy, rect.width, rect.height);
+    const gridX = Math.floor(mx / cfg.cell);
+    const gridY = Math.floor(my / cfg.cell);
+    
+    const now = Date.now();
+    const lastClick = lastClickRef.current;
+    
+    // ダブルクリック判定（300ms以内 & 同じグリッド位置）
+    const isDoubleClick = lastClick && 
+      (now - lastClick.time) < 300 && 
+      lastClick.gridX === gridX && 
+      lastClick.gridY === gridY;
+    
+    if (isDoubleClick) {
+      // タイマーをクリア
+      if (clickTimerRef.current) {
+        clearTimeout(clickTimerRef.current);
+        clickTimerRef.current = null;
+      }
+      lastClickRef.current = null;
+      
+      // ダブルクリック処理を実行
+      if (isEditMode) {
+        const hit = hitTest(mx, my);
+        
+        if (hit && hit.id) {
+          // 既存オブジェクトをダブルクリック → 編集
+          pushToHistory(objects);
+          setShowMoveArrows(null);
+          setEditingObject(hit);
+          setOriginalEditingId(hit.id || null);
+          if (isMobile) setIsPositionSizeExpanded(false);
+          setPendingPosition(null);
+        } else {
+          // 空白エリアをダブルクリック → 新規追加モーダル
+          setPendingPosition({ x: gridX, y: gridY });
+          setShowAddObjectModal(true);
+          setModalSelectedType(lastSelectedType || "FLAG");
+          setSelectedId(null);
+        }
+      }
+      return;
+    }
+    
+    // 今回のクリックを記録
+    lastClickRef.current = { time: now, gridX, gridY };
+    
+    // ダブルクリック検出のため、シングルクリック処理を遅延
+    // 既存のタイマーをクリア
+    if (clickTimerRef.current) {
+      clearTimeout(clickTimerRef.current);
+      clickTimerRef.current = null;
+    }
+    
+    // まず最初にhit判定
+    const hit = hitTest(mx, my);
+    
+    // 編集モードでの空白エリアクリックは遅延処理（ダブルクリック優先）
+    if (isEditMode && !hit && !e.ctrlKey) {
+      clickTimerRef.current = setTimeout(() => {
+        // 空白箇所をクリック：その位置をpendingPositionに設定
+        setPendingPosition({ x: gridX, y: gridY });
+        setShowMoveArrows(null);
+        setSelectedId(null);
+        clickTimerRef.current = null;
+      }, 250); // 250ms遅延
+      return;
+    }
+    
+    // 参照モードでの空白エリアクリック：アニメーションをクリア＋選択解除
+    if (!isEditMode && !hit) {
+      setFireworks([]);
+      setSparkles([]);
+      setSelectedId(null);
+      return;
+    }
     
     // OKボタンのクリック判定（矢印表示中のみ）
     if (isEditMode && showMoveArrows) {
@@ -3077,8 +3913,6 @@ export default function Home() {
     // Ctrl+クリックで新規オブジェクト追加（編集モード時）
     if (isEditMode && e.ctrlKey) {
       pushToHistory(objects);
-      const gridX = Math.floor(mx / cfg.cell);
-      const gridY = Math.floor(my / cfg.cell);
       const newId = `obj_${Date.now()}`;
       const defaultSize = getDefaultSize("FLAG");
       const newObj: Obj = {
@@ -3096,15 +3930,63 @@ export default function Home() {
       setOriginalEditingId(newId);  // 新規追加時も元のIDとして設定
       if (isMobile) setIsPositionSizeExpanded(false); // モバイルではアコーディオンを閉じる
       setHasUnsavedChanges(true);
+      setPendingPosition(null);
       return;
     }
 
-    const hit = hitTest(mx, my);
+    // hit変数を取得（再利用）
+    // const hit = hitTest(mx, my); // 既に上で定義済み
     
-    // 参照モード時に熊罠をタップした場合、兵士アニメーション開始
-    if (!isEditMode && hit && hit.type === "BEAR_TRAP") {
-      startSoldierAnimation(hit);
-      setSelectedId(hit?.id ? String(hit.id) : null);
+    // 参照モード時にオブジェクトをタップした場合、アニメーション判定
+    if (!isEditMode && hit) {
+      // 参照モードではダブルクリック判定をスキップ
+      lastClickRef.current = null;
+      if (clickTimerRef.current) {
+        clearTimeout(clickTimerRef.current);
+        clickTimerRef.current = null;
+      }
+      
+      const animationType = getActiveAnimation(hit);
+      
+      // 隕石以外のアニメーションをクリックした場合のみクリア
+      if (animationType !== 'meteor') {
+        // 他のオブジェクトをクリックした場合、進行中のアニメーションをクリア
+        setFireworks([]);
+        setSparkles([]);
+        setCherryBlossoms([]);
+        setMeteors([]);
+      }
+      
+      if (animationType === 'birthday') {
+        // 誕生日アニメーション（紙吹雪）
+        // 一度falseにしてからtrueにすることで、useEffectを確実に発火させる
+        setShowBirthdayCelebration(false);
+        setTimeout(() => setShowBirthdayCelebration(true), 0);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (animationType === 'beartrap') {
+        // 熊罠アニメーション
+        startSoldierAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (animationType === 'fireworks') {
+        // 花火アニメーション
+        startFireworksAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (animationType === 'sparkle') {
+        // キラキラエフェクト
+        startSparkleAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (animationType === 'cherryblossom') {
+        // 花吹雪アニメーション
+        startCherryBlossomAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (animationType === 'meteor') {
+        // 隕石アニメーション
+        startMeteorAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else {
+        // アニメーションなし：通常の選択
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      }
       return;
     }
     
@@ -3126,6 +4008,15 @@ export default function Home() {
   // ダブルクリックで編集（編集モード時のみ）
   const onDoubleClick = (e: React.MouseEvent) => {
     if (!isEditMode) return;
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // シングルクリックのタイマーをクリア
+    if (clickTimerRef.current) {
+      clearTimeout(clickTimerRef.current);
+      clickTimerRef.current = null;
+    }
+    
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -3134,20 +4025,23 @@ export default function Home() {
     const sy = e.clientY - rect.top;
 
     const { mx, my } = screenToMap(sx, sy, rect.width, rect.height);
+    const gridX = Math.floor(mx / cfg.cell);
+    const gridY = Math.floor(my / cfg.cell);
+    
     const hit = hitTest(mx, my);
+    
     if (hit) {
-      // 編集開始前の状態を保存
+      // オブジェクト上でダブルクリック：編集
       pushToHistory(objects);
-      setShowMoveArrows(null); // 編集ダイアログを開くときは矢印を閉じる
+      setShowMoveArrows(null);
       setEditingObject(hit);
       setOriginalEditingId(hit.id || null);
-      if (isMobile) setIsPositionSizeExpanded(false); // モバイルではアコーディオンを閉じる
+      if (isMobile) setIsPositionSizeExpanded(false);
+      setPendingPosition(null);
     } else {
-      // 空白箱所で新規追加モーダルを表示
-      const gridX = Math.floor(mx / cfg.cell);
-      const gridY = Math.floor(my / cfg.cell);
+      // 空白箇所でダブルクリック：新規追加モーダル表示
       setPendingPosition({ x: gridX, y: gridY });
-      setModalSelectedType(lastSelectedType);
+      setModalSelectedType(lastSelectedType || "FLAG");
       setShowAddObjectModal(true);
     }
   };
@@ -4438,8 +5332,14 @@ export default function Home() {
             </button>
             <button
               onClick={() => {
-                setModalSelectedType(lastSelectedType);
+                // pendingPositionがあればそれを使用、なければマップ中央
+                if (!pendingPosition) {
+                  const centerX = Math.floor(cfg.cols / 2);
+                  const centerY = Math.floor(cfg.rows / 2);
+                  setPendingPosition({ x: centerX, y: centerY });
+                }
                 setShowAddObjectModal(true);
+                setModalSelectedType(lastSelectedType || "FLAG");
               }}
               style={{
                 padding: isMobile ? "6px 8px" : "6px 10px",
@@ -5315,12 +6215,74 @@ export default function Home() {
                   e.currentTarget.style.borderColor = "#e5e7eb";
                 }}
               >
-                <span>📐 位置・サイズ設定</span>
+                <span>溶鉱炉/アニメーション/位置/サイズ設定</span>
                 <span style={{ fontSize: 12, transition: "transform 0.2s", transform: isPositionSizeExpanded ? "rotate(180deg)" : "rotate(0deg)" }}>▼</span>
               </button>
               
               {isPositionSizeExpanded && (
                 <div style={{ marginTop: 12 }}>
+                  {/* 溶鉱炉Lv (Fire) */}
+                  <div style={{ marginBottom: 10 }}>
+                    <label style={{ display: "block", marginBottom: 6, fontSize: 13, fontWeight: 600, color: "#374151", userSelect: "none" }}>
+                      溶鉱炉Lv
+                    </label>
+                    <select
+                      value={editingObject.Fire || ""}
+                      onChange={(e) => setEditingObject({ ...editingObject, Fire: e.target.value })}
+                      style={{
+                        width: "100%",
+                        padding: "10px 12px",
+                        border: "2px solid #e5e7eb",
+                        borderRadius: 8,
+                        fontSize: 14,
+                        boxSizing: "border-box",
+                        backgroundColor: "white",
+                        color: "#1f2937",
+                        outline: "none",
+                        cursor: "pointer",
+                      }}
+                    >
+                      <option value="">選択してください</option>
+                      {Array.from({ length: 30 }, (_, i) => i + 1).map(num => (
+                        <option key={num} value={String(num)}>{num}</option>
+                      ))}
+                      {Array.from({ length: 10 }, (_, i) => i + 1).map(num => (
+                        <option key={`FC${num}`} value={`FC${num}`}>FC{num}</option>
+                      ))}
+                    </select>
+                  </div>
+                  
+                  {/* Animation */}
+                  <div style={{ marginBottom: 10 }}>
+                    <label style={{ display: "block", marginBottom: 6, fontSize: 13, fontWeight: 600, color: "#374151", userSelect: "none" }}>
+                      アニメーション
+                    </label>
+                    <select
+                      value={editingObject.Animation || ""}
+                      onChange={(e) => setEditingObject({ ...editingObject, Animation: e.target.value })}
+                      style={{
+                        width: "100%",
+                        padding: "10px 12px",
+                        border: "2px solid #e5e7eb",
+                        borderRadius: 8,
+                        fontSize: 14,
+                        boxSizing: "border-box",
+                        backgroundColor: "white",
+                        color: "#1f2937",
+                        outline: "none",
+                        cursor: "pointer",
+                      }}
+                    >
+                      <option value="">なし</option>
+                      <option value="fireworks">花火</option>
+                      <option value="sparkle">キラキラ</option>
+                      <option value="beartrap">熊罠</option>
+                      <option value="birthday">誕生日じゃないけど</option>
+                      <option value="cherryblossom">花吹雪</option>
+                      <option value="meteor">隕石</option>
+                    </select>
+                  </div>
+                  
                   {/* X座標 */}
                   <div style={{ marginBottom: 10 }}>
                     <label style={{ display: "block", marginBottom: 6, fontSize: 13, fontWeight: 600, color: "#374151", userSelect: "none" }}>
@@ -5712,7 +6674,7 @@ export default function Home() {
                   }}
                 />
                 <span style={{ fontSize: 15, fontWeight: 600, color: "#92400e", userSelect: "none" }}>
-                  ⭐ お気に入り（注目マーク）
+                  お気に入り（注目マーク）
                 </span>
               </label>
               <p style={{ margin: "8px 0 0 30px", fontSize: 12, color: "#78350f", lineHeight: 1.5, userSelect: "none" }}>
@@ -5735,7 +6697,6 @@ export default function Home() {
                 color: "#374151",
                 userSelect: "none",
               }}>
-                <span>📝</span>
                 <span>メモ</span>
                 <span style={{ fontSize: 11, color: "#9ca3af", fontWeight: 400, userSelect: "none" }}>（選択時に吹き出しで表示されます）</span>
               </label>
