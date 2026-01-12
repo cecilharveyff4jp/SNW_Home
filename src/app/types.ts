@@ -31,7 +31,7 @@ export type Obj = {
   isFavorite?: boolean;
   note?: string;
   Animation?: string;
-  Fire?: string;
+  Fire?: string | number;
 };
 
 export type SoldierAnimation = {
