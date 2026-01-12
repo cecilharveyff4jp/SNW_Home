@@ -2929,7 +2929,17 @@ export default function Home() {
     const startX = viewW + 100; // 右端外
     const startY = -200 + Math.random() * 400; // 上端外（高さランダム -200～200）
     
-    const meteorsList = [];
+    const meteorsList: Array<{
+      offsetX: number;
+      offsetY: number;
+      vx: number;
+      vy: number;
+      size: number;
+      rotation: number;
+      swayOffset: number;
+      swaySpeed: number;
+      life: number;
+    }> = [];
     
     // ランダムな大きさの隕石1つ
     const randomSize = 0.2 + Math.random() * 1.1; // 0.2～1.3のランダムサイズ（幅拡大）
