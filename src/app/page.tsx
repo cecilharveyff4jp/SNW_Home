@@ -91,6 +91,7 @@ export default function Home() {
   const [myObjectId, setMyObjectId] = useState<string | null>(null);
   const [showMyObjectSelector, setShowMyObjectSelector] = useState(false);
   const [myObjectSearchText, setMyObjectSearchText] = useState('');
+  const [myObjectSortBy, setMyObjectSortBy] = useState<'name' | 'fire' | 'birthday'>('name');
 
   // テロップアニメーション用（LocalStorageで永続化）
   const [tickerHidden, setTickerHidden] = useState(false);
@@ -7443,7 +7444,7 @@ export default function Home() {
             
             <p style={{
               margin: "0 0 20px 0",
-              fontSize: 14,
+              fontSize: 12,
               color: "#6b7280",
               userSelect: "none",
             }}>
@@ -7452,7 +7453,7 @@ export default function Home() {
             </p>
             
             {/* 検索フィールド */}
-            <div style={{ marginBottom: 20 }}>
+            <div style={{ marginBottom: 12 }}>
               <input
                 type="text"
                 placeholder="🔍 都市名で検索..."
@@ -7470,6 +7471,43 @@ export default function Home() {
                 onFocus={(e) => e.currentTarget.style.borderColor = "#5b21b6"}
                 onBlur={(e) => e.currentTarget.style.borderColor = "#e5e7eb"}
               />
+            </div>
+            
+            {/* 並び替えボタン */}
+            <div style={{ 
+              marginBottom: 20, 
+              display: 'flex', 
+              gap: 6,
+              flexWrap: 'wrap'
+            }}>
+              {(['name', 'fire', 'birthday'] as const).map((sortType) => {
+                const isActive = myObjectSortBy === sortType;
+                const labels = {
+                  name: '名前順',
+                  fire: '溶鉱炉LV',
+                  birthday: '誕生日順'
+                };
+                return (
+                  <button
+                    key={sortType}
+                    onClick={() => setMyObjectSortBy(sortType)}
+                    style={{
+                      padding: '6px 12px',
+                      background: isActive ? '#5b21b6' : '#f3f4f6',
+                      color: isActive ? 'white' : '#6b7280',
+                      border: 'none',
+                      borderRadius: 6,
+                      cursor: 'pointer',
+                      fontSize: 12,
+                      fontWeight: 600,
+                      userSelect: 'none',
+                      transition: 'all 0.2s',
+                    }}
+                  >
+                    {labels[sortType]}
+                  </button>
+                );
+              })}
             </div>
             
             {/* クリアボタン */}
@@ -7591,7 +7629,48 @@ export default function Home() {
               const cityObjects = objects.filter(obj => obj.id && obj.label && obj.type === 'CITY');
               const filteredCities = cityObjects.filter(obj => 
                 flexibleMatch(obj.label || '', myObjectSearchText)
-              ).sort((a, b) => (a.label || '').localeCompare(b.label || '', 'ja'));
+              ).sort((a, b) => {
+                // ソート処理
+                if (myObjectSortBy === 'name') {
+                  return (a.label || '').localeCompare(b.label || '', 'ja');
+                } else if (myObjectSortBy === 'fire') {
+                  // 溶鉱炉LVでソート（FC優先、数字降順）
+                  const parseFireLevel = (fire?: string | number) => {
+                    if (fire === undefined || fire === null) return { hasFC: false, level: 0 };
+                    const fireStr = String(fire);
+                    const hasFC = fireStr.toUpperCase().includes('FC');
+                    const levelMatch = fireStr.match(/(\d+)/);
+                    const level = levelMatch ? parseInt(levelMatch[1], 10) : 0;
+                    return { hasFC, level };
+                  };
+                  const aFire = parseFireLevel(a.Fire);
+                  const bFire = parseFireLevel(b.Fire);
+                  // FC持ちを優先
+                  if (aFire.hasFC !== bFire.hasFC) return aFire.hasFC ? -1 : 1;
+                  // レベル降順
+                  if (aFire.level !== bFire.level) return bFire.level - aFire.level;
+                  // 同じレベルなら名前順
+                  return (a.label || '').localeCompare(b.label || '', 'ja');
+                } else if (myObjectSortBy === 'birthday') {
+                  // 誕生日でソート（月→日の順）
+                  const parseBirthday = (bd?: string) => {
+                    if (!bd) return { month: 99, day: 99 };
+                    const monthMatch = bd.match(/(\d+)月/);
+                    const dayMatch = bd.match(/(\d+)日/);
+                    return {
+                      month: monthMatch ? parseInt(monthMatch[1], 10) : 99,
+                      day: dayMatch ? parseInt(dayMatch[1], 10) : 99
+                    };
+                  };
+                  const aBd = parseBirthday(a.birthday);
+                  const bBd = parseBirthday(b.birthday);
+                  if (aBd.month !== bBd.month) return aBd.month - bBd.month;
+                  if (aBd.day !== bBd.day) return aBd.day - bBd.day;
+                  // 同じ誕生日なら名前順
+                  return (a.label || '').localeCompare(b.label || '', 'ja');
+                }
+                return 0;
+              });
               
               return (
                 <>
@@ -7707,8 +7786,18 @@ export default function Home() {
                       <div style={{ fontWeight: 600, color: "#1f2937", fontSize: 15 }}>
                         {obj.label}
                       </div>
-                      <div style={{ fontSize: 12, color: "#9ca3af", marginTop: 2 }}>
-                        ID: {obj.id} | タイプ: {obj.type || "未設定"}
+                      <div style={{ fontSize: 12, color: "#9ca3af", marginTop: 2, display: 'flex', gap: 6 }}>
+                        <span style={{ display: 'inline-block', width: 95 }}>
+                          ID: {obj.id && obj.id.length >= 10 ? obj.id.substring(0, 10) + '...' : obj.id}
+                        </span>
+                        <span>|</span>
+                        <span style={{ display: 'inline-block', width: 40 }}>
+                          🔥 {obj.Fire !== undefined && obj.Fire !== null ? obj.Fire : '0'}
+                        </span>
+                        <span>|</span>
+                        <span>
+                          🎂 {obj.birthday || '未設定'}
+                        </span>
                       </div>
                     </div>
                   </div>
