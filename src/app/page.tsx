@@ -7708,7 +7708,7 @@ export default function Home() {
                     marginBottom: 12,
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 10,
+                    justifyContent: 'space-between',
                   }}>
                     <div style={{
                       fontSize: 13,
@@ -7721,7 +7721,7 @@ export default function Home() {
                     <button
                       onClick={() => setShowFireLevelStats(true)}
                       style={{
-                        padding: '5px 12px',
+                        padding: '5px 20px',
                         background: '#3b82f6',
                         color: 'white',
                         border: 'none',
@@ -7730,6 +7730,7 @@ export default function Home() {
                         fontSize: 12,
                         fontWeight: 600,
                         userSelect: 'none',
+                        minWidth: 70,
                       }}
                     >
                       集計
