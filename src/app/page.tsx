@@ -92,6 +92,7 @@ export default function Home() {
   const [showMyObjectSelector, setShowMyObjectSelector] = useState(false);
   const [myObjectSearchText, setMyObjectSearchText] = useState('');
   const [myObjectSortBy, setMyObjectSortBy] = useState<'name' | 'fire' | 'birthday'>('name');
+  const [showFireLevelStats, setShowFireLevelStats] = useState(false);
 
   // テロップアニメーション用（LocalStorageで永続化）
   const [tickerHidden, setTickerHidden] = useState(false);
@@ -1142,15 +1143,37 @@ export default function Home() {
               ctx.restore();
             }
           }
-          // 数字1～30の場合はLvテキスト表示
+          // 数字1～30の場合は水色の丸に白字で表示
           else if (fireValue.match(/^([1-9]|[12][0-9]|30)$/)) {
             const level = parseInt(fireValue, 10);
             ctx.save();
-            ctx.font = "10px system-ui";
+            
+            // FCアイコンより少し小さいサイズの円を描画
+            const circleSize = 18 / cam.scale;
+            const circleY = -28 / cam.scale; // ラベルの上（FCと同じ位置）
+            
+            // 白い縁取りの円を描画
+            ctx.fillStyle = "#ffffff";
+            ctx.beginPath();
+            ctx.arc(0, circleY + circleSize / 2, circleSize / 2 + 1.5 / cam.scale, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // ロイヤルブルーの円を描画
+            ctx.fillStyle = "#4169E1"; // ロイヤルブルー
+            ctx.beginPath();
+            ctx.arc(0, circleY + circleSize / 2, circleSize / 2, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 白い数字を描画
+            ctx.fillStyle = "#ffffff";
             ctx.textAlign = "center";
-            ctx.textBaseline = "bottom";
-            ctx.fillStyle = "#ff6b00";
-            ctx.fillText(`Lv${level}`, 0, -12 / cam.scale);
+            ctx.textBaseline = "middle";
+            
+            // 数字の桁数に応じてフォントサイズを調整
+            const fontSize = level >= 10 ? 9 / cam.scale : 11 / cam.scale;
+            ctx.font = `bold ${fontSize}px system-ui`;
+            ctx.fillText(String(level), 0, circleY + circleSize / 2);
+            
             ctx.restore();
           }
         }
@@ -7683,12 +7706,34 @@ export default function Home() {
                 <>
                   <div style={{
                     marginBottom: 12,
-                    fontSize: 13,
-                    color: "#6b7280",
-                    fontWeight: 600,
-                    userSelect: "none",
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10,
                   }}>
-                    都市数: {filteredCities.length} / {cityObjects.length}
+                    <div style={{
+                      fontSize: 13,
+                      color: "#6b7280",
+                      fontWeight: 600,
+                      userSelect: "none",
+                    }}>
+                      都市数: {filteredCities.length} / {cityObjects.length}
+                    </div>
+                    <button
+                      onClick={() => setShowFireLevelStats(true)}
+                      style={{
+                        padding: '5px 12px',
+                        background: '#3b82f6',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: 6,
+                        cursor: 'pointer',
+                        fontSize: 12,
+                        fontWeight: 600,
+                        userSelect: 'none',
+                      }}
+                    >
+                      集計
+                    </button>
                   </div>
                   
                   <div style={{
@@ -7799,11 +7844,19 @@ export default function Home() {
                         </span>
                         <span>|</span>
                         <span style={{ display: 'inline-block', width: 50 }}>
-                          {obj.Fire !== undefined && obj.Fire !== null ? obj.Fire : '0'}
+                          {(() => {
+                            const fireValue = obj.Fire !== undefined && obj.Fire !== null ? String(obj.Fire) : '0';
+                            // FC付きはそのまま表示
+                            if (fireValue.toUpperCase().includes('FC')) {
+                              return fireValue;
+                            }
+                            // 数字のみの場合はLvを付ける
+                            return `Lv${fireValue}`;
+                          })()}
                         </span>
                         <span>|</span>
                         <span>
-                          🎂 {obj.birthday || '未設定'}
+                          {obj.birthday || '未設定'}
                         </span>
                       </div>
                     </div>
@@ -7833,6 +7886,226 @@ export default function Home() {
                 fontSize: 14,
                 fontWeight: 600,
                 marginTop: 20,
+                userSelect: "none",
+              }}
+            >
+              閉じる
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* 溶鉱炉レベル集計モーダル */}
+      {showFireLevelStats && (
+        <div style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: "rgba(0, 0, 0, 0.6)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 10001,
+          padding: 20,
+        }}>
+          <div style={{
+            background: "white",
+            borderRadius: 16,
+            padding: isMobile ? 20 : 30,
+            maxWidth: 450,
+            width: "100%",
+            maxHeight: "80vh",
+            overflowY: "auto",
+            position: "relative",
+            boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
+          }}>
+            <button
+              onClick={() => setShowFireLevelStats(false)}
+              style={{
+                position: "absolute",
+                top: 15,
+                right: 15,
+                background: "transparent",
+                border: "none",
+                fontSize: 24,
+                cursor: "pointer",
+                color: "#9ca3af",
+                padding: 5,
+                lineHeight: 1,
+              }}
+            >
+              ✕
+            </button>
+            
+            <h2 style={{ 
+              margin: "0 0 20px 0", 
+              fontSize: isMobile ? 20 : 22, 
+              fontWeight: 600,
+              color: "#1f2937",
+              userSelect: "none",
+            }}>
+              集計
+            </h2>
+            
+            {(() => {
+              const cityObjects = objects.filter(obj => obj.id && obj.label && obj.type === 'CITY');
+              const stats: { [key: string]: number } = {};
+              
+              cityObjects.forEach(obj => {
+                const fireValue = obj.Fire !== undefined && obj.Fire !== null ? String(obj.Fire).trim() : '0';
+                stats[fireValue] = (stats[fireValue] || 0) + 1;
+              });
+              
+              // FC10からFC1
+              const fcLevels = [];
+              for (let i = 10; i >= 1; i--) {
+                const key = `FC${i}`;
+                if (stats[key]) {
+                  fcLevels.push({ label: key, count: stats[key], isFC: true, level: i });
+                }
+              }
+              
+              // Lv30からLv21
+              const highLevels = [];
+              for (let i = 30; i >= 21; i--) {
+                const count = stats[String(i)] || 0;
+                if (count > 0) {
+                  highLevels.push({ label: `Lv${i}`, count, isFC: false, level: i });
+                }
+              }
+              
+              // Lv20以下をまとめる
+              let low20Count = 0;
+              for (let i = 1; i <= 20; i++) {
+                low20Count += stats[String(i)] || 0;
+              }
+              
+              const allStats = [...fcLevels, ...highLevels];
+              if (low20Count > 0) {
+                allStats.push({ label: 'Lv20以下', count: low20Count, isFC: false, level: 0 });
+              }
+              
+              const basePath = process.env.NODE_ENV === 'production' ? '/SNW_Home' : '';
+              
+              return (
+                <div style={{ marginBottom: 20 }}>
+                  {allStats.map((item, index) => (
+                    <div
+                      key={index}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        padding: '6px 12px',
+                        borderBottom: index < allStats.length - 1 ? '1px solid #e5e7eb' : 'none',
+                        gap: 12,
+                      }}
+                    >
+                      <div style={{
+                        width: 80,
+                        fontWeight: 600,
+                        color: '#1f2937',
+                        fontSize: 15,
+                      }}>
+                        {item.label}
+                      </div>
+                      <div style={{
+                        width: 24,
+                        height: 24,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}>
+                        {item.isFC ? (
+                          <img 
+                            src={`${basePath}/fire-levels/FC${item.level}.webp`}
+                            alt={`FC${item.level}`}
+                            style={{
+                              width: 22,
+                              height: 22,
+                              opacity: 0.9,
+                            }}
+                          />
+                        ) : item.level > 0 ? (
+                          <svg width="18" height="18" viewBox="0 0 18 18">
+                            <circle cx="9" cy="9" r="9" fill="#ffffff" />
+                            <circle cx="9" cy="9" r="8" fill="#4169E1" />
+                            <text
+                              x="9"
+                              y="9"
+                              textAnchor="middle"
+                              dominantBaseline="central"
+                              fill="#ffffff"
+                              fontSize={item.level >= 10 ? "9" : "11"}
+                              fontWeight="bold"
+                              fontFamily="system-ui"
+                            >
+                              {item.level}
+                            </text>
+                          </svg>
+                        ) : (
+                          <div style={{
+                            width: 18,
+                            height: 18,
+                            background: '#4169E1',
+                            borderRadius: '50%',
+                            border: '1.5px solid #ffffff',
+                          }} />
+                        )}
+                      </div>
+                      <div style={{
+                        flex: 1,
+                        textAlign: 'right',
+                        fontSize: 18,
+                        fontWeight: 700,
+                        color: '#5b21b6',
+                      }}>
+                        {item.count}
+                      </div>
+                    </div>
+                  ))}
+                  
+                  <div style={{
+                    marginTop: 20,
+                    padding: '12px',
+                    background: '#f3f4f6',
+                    borderRadius: 8,
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                  }}>
+                    <div style={{
+                      fontSize: 16,
+                      fontWeight: 700,
+                      color: '#1f2937',
+                    }}>
+                      合計
+                    </div>
+                    <div style={{
+                      fontSize: 20,
+                      fontWeight: 700,
+                      color: '#5b21b6',
+                    }}>
+                      {cityObjects.length}
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
+            
+            <button
+              onClick={() => setShowFireLevelStats(false)}
+              style={{
+                width: "100%",
+                padding: "11px 28px",
+                background: "#6b7280",
+                color: "white",
+                border: "none",
+                borderRadius: 8,
+                cursor: "pointer",
+                fontSize: 14,
+                fontWeight: 600,
                 userSelect: "none",
               }}
             >
