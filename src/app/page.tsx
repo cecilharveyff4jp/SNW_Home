@@ -7630,46 +7630,51 @@ export default function Home() {
               const filteredCities = cityObjects.filter(obj => 
                 flexibleMatch(obj.label || '', myObjectSearchText)
               ).sort((a, b) => {
-                // ソート処理
-                if (myObjectSortBy === 'name') {
-                  return (a.label || '').localeCompare(b.label || '', 'ja');
-                } else if (myObjectSortBy === 'fire') {
-                  // 溶鉱炉LVでソート（FC優先、数字降順）
-                  const parseFireLevel = (fire?: string | number) => {
-                    if (fire === undefined || fire === null) return { hasFC: false, level: 0 };
-                    const fireStr = String(fire);
-                    const hasFC = fireStr.toUpperCase().includes('FC');
-                    const levelMatch = fireStr.match(/(\d+)/);
-                    const level = levelMatch ? parseInt(levelMatch[1], 10) : 0;
-                    return { hasFC, level };
-                  };
-                  const aFire = parseFireLevel(a.Fire);
-                  const bFire = parseFireLevel(b.Fire);
-                  // FC持ちを優先
-                  if (aFire.hasFC !== bFire.hasFC) return aFire.hasFC ? -1 : 1;
-                  // レベル降順
-                  if (aFire.level !== bFire.level) return bFire.level - aFire.level;
-                  // 同じレベルなら名前順
-                  return (a.label || '').localeCompare(b.label || '', 'ja');
-                } else if (myObjectSortBy === 'birthday') {
-                  // 誕生日でソート（月→日の順）
-                  const parseBirthday = (bd?: string) => {
-                    if (!bd) return { month: 99, day: 99 };
-                    const monthMatch = bd.match(/(\d+)月/);
-                    const dayMatch = bd.match(/(\d+)日/);
-                    return {
-                      month: monthMatch ? parseInt(monthMatch[1], 10) : 99,
-                      day: dayMatch ? parseInt(dayMatch[1], 10) : 99
+                try {
+                  // ソート処理
+                  if (myObjectSortBy === 'name') {
+                    return (a.label || '').localeCompare(b.label || '', 'ja');
+                  } else if (myObjectSortBy === 'fire') {
+                    // 溶鉱炉LVでソート（FC優先、数字降順）
+                    const parseFireLevel = (fire?: string | number) => {
+                      if (fire === undefined || fire === null) return { hasFC: false, level: 0 };
+                      const fireStr = String(fire);
+                      const hasFC = fireStr.toUpperCase().includes('FC');
+                      const levelMatch = fireStr.match(/(\d+)/);
+                      const level = levelMatch ? parseInt(levelMatch[1], 10) : 0;
+                      return { hasFC, level };
                     };
-                  };
-                  const aBd = parseBirthday(a.birthday);
-                  const bBd = parseBirthday(b.birthday);
-                  if (aBd.month !== bBd.month) return aBd.month - bBd.month;
-                  if (aBd.day !== bBd.day) return aBd.day - bBd.day;
-                  // 同じ誕生日なら名前順
-                  return (a.label || '').localeCompare(b.label || '', 'ja');
+                    const aFire = parseFireLevel(a.Fire);
+                    const bFire = parseFireLevel(b.Fire);
+                    // FC持ちを優先
+                    if (aFire.hasFC !== bFire.hasFC) return aFire.hasFC ? -1 : 1;
+                    // レベル降順
+                    if (aFire.level !== bFire.level) return bFire.level - aFire.level;
+                    // 同じレベルなら名前順
+                    return (a.label || '').localeCompare(b.label || '', 'ja');
+                  } else if (myObjectSortBy === 'birthday') {
+                    // 誕生日でソート（月→日の順）
+                    const parseBirthday = (bd?: string) => {
+                      if (!bd) return { month: 99, day: 99 };
+                      const monthMatch = bd.match(/(\d+)月/);
+                      const dayMatch = bd.match(/(\d+)日/);
+                      return {
+                        month: monthMatch ? parseInt(monthMatch[1], 10) : 99,
+                        day: dayMatch ? parseInt(dayMatch[1], 10) : 99
+                      };
+                    };
+                    const aBd = parseBirthday(a.birthday);
+                    const bBd = parseBirthday(b.birthday);
+                    if (aBd.month !== bBd.month) return aBd.month - bBd.month;
+                    if (aBd.day !== bBd.day) return aBd.day - bBd.day;
+                    // 同じ誕生日なら名前順
+                    return (a.label || '').localeCompare(b.label || '', 'ja');
+                  }
+                  return 0;
+                } catch (err) {
+                  console.error('Sort error:', err);
+                  return 0;
                 }
-                return 0;
               });
               
               return (
