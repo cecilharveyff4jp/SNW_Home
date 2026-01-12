@@ -7795,11 +7795,11 @@ export default function Home() {
                       </div>
                       <div style={{ fontSize: 12, color: "#9ca3af", marginTop: 2, display: 'flex', gap: 6 }}>
                         <span style={{ display: 'inline-block', width: 95 }}>
-                          ID: {obj.id && obj.id.length >= 10 ? obj.id.substring(0, 10) + '...' : obj.id}
+                          {obj.id && obj.id.length >= 10 ? obj.id.substring(0, 10) + '...' : obj.id}
                         </span>
                         <span>|</span>
-                        <span style={{ display: 'inline-block', width: 40 }}>
-                          🔥 {obj.Fire !== undefined && obj.Fire !== null ? obj.Fire : '0'}
+                        <span style={{ display: 'inline-block', width: 50 }}>
+                          {obj.Fire !== undefined && obj.Fire !== null ? obj.Fire : '0'}
                         </span>
                         <span>|</span>
                         <span>
