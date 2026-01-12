@@ -1990,36 +1990,235 @@ export default function Home() {
             const attackOffsetY = ((idx * 3137) % 40) - 20; // -20 to +20
             ctx.translate(attackOffsetX, attackOffsetY);
             
-            // 攻撃の衝撃波
-            const shockRadius = attackPhase * size * 3;
-            const shockAlpha = 0.8 * (1 - attackPhase);
+            // img-01の熊（インデックス0）の時は可愛いエフェクト
+            const isCuteBear = anim.bearIndex === 0;
             
-            const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, shockRadius);
-            gradient.addColorStop(0, `rgba(255,182,193,${shockAlpha * 0.8})`); // ライトピンク
-            gradient.addColorStop(0.5, `rgba(221,160,221,${shockAlpha * 0.5})`); // プラム
-            gradient.addColorStop(1, `rgba(255,182,193,0)`);
-            
-            ctx.fillStyle = gradient;
-            ctx.beginPath();
-            ctx.arc(0, 0, shockRadius, 0, Math.PI * 2);
-            ctx.fill();
-            
-            // 攻撃の火花（携帯対応：さらに軽量化）
-            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-            const sparkCount = isMobile ? 3 : 6; // 携帯では3個に削減
-            for (let i = 0; i < sparkCount; i++) {
-              const angle = (i / sparkCount) * Math.PI * 2 + time / 100;
-              const distance = attackPhase * size * 2.5;
-              const sparkX = Math.cos(angle) * distance;
-              const sparkY = Math.sin(angle) * distance;
-              const sparkSize = (1 - attackPhase) * size * 0.15;
+            if (isCuteBear) {
+              // 可愛い「なでなで」エフェクト - 複数の波紋リング
+              const shockAlpha = 0.8 * (1 - attackPhase);
               
-              ctx.fillStyle = `rgba(255,${200 - attackPhase * 150},0,${(1 - attackPhase) * 0.3})`; // 透明度をさらに下げる
-              ctx.shadowColor = "rgba(255,150,0,0.3)"; // shadowBlurをさらに薄く
-              ctx.shadowBlur = isMobile ? 4 : 8; // 携帯では4に
+              // 3つの重なる波紋リング（パステルカラー）
+              const rings = [
+                { radius: attackPhase * size * 3.2, color: [255, 192, 203], alpha: shockAlpha * 0.7 }, // パステルピンク
+                { radius: attackPhase * size * 2.8, color: [255, 218, 185], alpha: shockAlpha * 0.8 }, // ピーチ
+                { radius: attackPhase * size * 2.4, color: [221, 160, 221], alpha: shockAlpha * 0.9 }, // ラベンダー
+              ];
+              
+              rings.forEach(ring => {
+                const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, ring.radius);
+                gradient.addColorStop(0, `rgba(${ring.color[0]},${ring.color[1]},${ring.color[2]},${ring.alpha})`);
+                gradient.addColorStop(0.4, `rgba(${ring.color[0]},${ring.color[1]},${ring.color[2]},${ring.alpha * 0.6})`);
+                gradient.addColorStop(0.7, `rgba(255,240,245,${ring.alpha * 0.3})`);
+                gradient.addColorStop(1, `rgba(255,240,245,0)`);
+                
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.arc(0, 0, ring.radius, 0, Math.PI * 2);
+                ctx.fill();
+              });
+              
+              // キラキラ星のエフェクト（リングの周りに）- 可愛いサイズ！
+              const starCount = 12;
+              for (let i = 0; i < starCount; i++) {
+                const angle = (i / starCount) * Math.PI * 2 + time / 200;
+                const distance = attackPhase * size * 3.5 + Math.sin(time / 100 + i) * size * 0.8;
+                const starX = Math.cos(angle) * distance;
+                const starY = Math.sin(angle) * distance;
+                const starSize = (1 - attackPhase) * size * 0.6; // 適切な可愛いサイズ
+                
+                ctx.save();
+                ctx.translate(starX, starY);
+                ctx.rotate(time / 80 + i); // もっと速く回る
+                
+                // 星の色（もっと明るいパステルカラー）
+                const starColors = [
+                  { fill: 'rgba(255,218,185,1.0)', glow: 'rgba(255,218,185,0.8)' }, // ピーチ
+                  { fill: 'rgba(175,238,238,1.0)', glow: 'rgba(175,238,238,0.8)' }, // ミント
+                  { fill: 'rgba(255,192,203,1.0)', glow: 'rgba(255,192,203,0.8)' }, // ピンク
+                  { fill: 'rgba(255,255,224,1.0)', glow: 'rgba(255,255,224,0.8)' }, // ライトイエロー
+                ];
+                const starColor = starColors[i % 4];
+                
+                // 強力な発光エフェクト
+                ctx.shadowColor = starColor.glow;
+                ctx.shadowBlur = 30; // 8から30に
+                
+                // グラデーションで立体感
+                const starGradient = ctx.createRadialGradient(0, 0, 0, 0, 0, starSize);
+                starGradient.addColorStop(0, starColor.fill);
+                starGradient.addColorStop(0.7, starColor.fill.replace('1.0', `${(1 - attackPhase) * 0.9}`));
+                starGradient.addColorStop(1, starColor.fill.replace('1.0', `${(1 - attackPhase) * 0.5}`));
+                ctx.fillStyle = starGradient;
+                
+                // 8点星を描画（もっと豪華に）
+                ctx.beginPath();
+                for (let j = 0; j < 8; j++) {
+                  const starAngle = (j / 8) * Math.PI * 2;
+                  const isOuter = j % 2 === 0;
+                  const radius = isOuter ? starSize : starSize * 0.4;
+                  const x = Math.cos(starAngle) * radius;
+                  const y = Math.sin(starAngle) * radius;
+                  if (j === 0) ctx.moveTo(x, y);
+                  else ctx.lineTo(x, y);
+                }
+                ctx.closePath();
+                ctx.fill();
+                
+                // 中心に白いハイライト
+                ctx.shadowBlur = 0;
+                ctx.fillStyle = 'rgba(255,255,255,0.9)';
+                ctx.beginPath();
+                ctx.arc(0, 0, starSize * 0.25, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.restore();
+              }
+              
+              // ハート型エフェクト（火花の代わり）- もっと可愛く豪華に！
+              const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+              const heartCount = isMobile ? 8 : 18; // 携帯8個、PC18個に大幅増量
+              
+              // パステルカラーパレット（より豊富に、もっと明るく）
+              const heartColors = [
+                { fill: 'rgba(255,182,193,1.0)', glow: 'rgba(255,182,193,0.9)' }, // ライトピンク
+                { fill: 'rgba(255,192,203,1.0)', glow: 'rgba(255,192,203,0.9)' }, // ピンク
+                { fill: 'rgba(221,160,221,1.0)', glow: 'rgba(221,160,221,0.9)' }, // プラム
+                { fill: 'rgba(230,190,255,1.0)', glow: 'rgba(230,190,255,0.9)' }, // ライラック
+                { fill: 'rgba(175,238,238,1.0)', glow: 'rgba(175,238,238,0.9)' }, // パウダーブルー
+                { fill: 'rgba(255,218,185,1.0)', glow: 'rgba(255,218,185,0.9)' }, // ピーチパフ
+                { fill: 'rgba(255,228,225,1.0)', glow: 'rgba(255,228,225,0.9)' }, // ミスティローズ
+                { fill: 'rgba(240,248,255,1.0)', glow: 'rgba(240,248,255,0.9)' }, // アリスブルー
+              ];
+              
+              for (let i = 0; i < heartCount; i++) {
+                const angle = (i / heartCount) * Math.PI * 2 + time / 70;
+                const distance = attackPhase * size * 4.5 + Math.sin(time / 90 + i * 0.5) * size * 0.8;
+                const heartX = Math.cos(angle) * distance;
+                const heartY = Math.sin(angle) * distance;
+                
+                // ハートのサイズを可愛く適切に！
+                const sizeVariation = 1.2 + (i % 4) * 0.4; // 1.2, 1.6, 2.0, 2.4のバリエーション
+                const heartSize = (1 - attackPhase) * size * 0.7 * sizeVariation; // 適切な可愛いサイズ
+                
+                // 脈打つアニメーション（もっと激しく）
+                const pulseScale = 1 + Math.sin(time / 40 + i) * 0.25; // 0.15から0.25に
+                
+                ctx.save();
+                ctx.translate(heartX, heartY);
+                ctx.rotate(angle + Math.sin(time / 80 + i) * 0.5); // もっと揺れる
+                ctx.scale(pulseScale, pulseScale);
+                
+                const colorIndex = i % heartColors.length;
+                const color = heartColors[colorIndex];
+                
+                // 外側の光るオーラ（もっと強力に）
+                ctx.shadowColor = color.glow;
+                ctx.shadowBlur = isMobile ? 30 : 50; // 15から30、PCは50に大幅アップ
+                ctx.shadowBlur = isMobile ? 15 : 25;
+                
+                // グラデーションで立体感を出す
+                const heartGradient = ctx.createRadialGradient(
+                  -heartSize * 0.2, -heartSize * 0.2, 0,
+                  0, 0, heartSize * 1.2
+                );
+                heartGradient.addColorStop(0, color.fill.replace(/[\d.]+\)$/g, '1)'));
+                heartGradient.addColorStop(0.6, color.fill);
+                heartGradient.addColorStop(1, color.fill.replace(/[\d.]+\)$/g, '0.5)'));
+                
+                ctx.fillStyle = heartGradient;
+                
+                // ハート形を描画（より丸みを帯びた形に）
+                ctx.beginPath();
+                const topCurveHeight = heartSize * 0.35;
+                ctx.moveTo(0, topCurveHeight);
+                
+                // 左上の曲線（より丸く）
+                ctx.bezierCurveTo(
+                  -heartSize / 2, -topCurveHeight * 1.2,
+                  -heartSize * 1.1, topCurveHeight / 3,
+                  0, heartSize * 1.1
+                );
+                
+                // 右上の曲線（より丸く）
+                ctx.bezierCurveTo(
+                  heartSize * 1.1, topCurveHeight / 3,
+                  heartSize / 2, -topCurveHeight * 1.2,
+                  0, topCurveHeight
+                );
+                ctx.closePath();
+                ctx.fill();
+                
+                // ハートの中心にハイライト（キラキラ感）
+                ctx.shadowBlur = 0;
+                ctx.fillStyle = 'rgba(255,255,255,0.6)';
+                ctx.beginPath();
+                ctx.arc(-heartSize * 0.2, -heartSize * 0.1, heartSize * 0.15, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.restore();
+              }
+              
+              // 追加：ふわふわ浮遊する小さなハート（花吹雪みたいに）
+              const floatingHeartCount = isMobile ? 3 : 6;
+              for (let i = 0; i < floatingHeartCount; i++) {
+                const angle = (i / floatingHeartCount) * Math.PI * 2 + time / 150;
+                const floatOffset = Math.sin(time / 80 + i * 1.5) * size * 0.5;
+                const distance = attackPhase * size * 3.5 + floatOffset;
+                const heartX = Math.cos(angle) * distance;
+                const heartY = Math.sin(angle) * distance;
+                const tinyHeartSize = (1 - attackPhase) * size * 0.12;
+                
+                ctx.save();
+                ctx.translate(heartX, heartY);
+                ctx.rotate(time / 60 + i * 0.8);
+                
+                const colorIndex = (i * 2) % heartColors.length;
+                ctx.fillStyle = heartColors[colorIndex].fill.replace(/[\d.]+\)$/g, `${(1 - attackPhase) * 0.7})`);
+                ctx.shadowColor = heartColors[colorIndex].glow;
+                ctx.shadowBlur = isMobile ? 8 : 15;
+                
+                ctx.beginPath();
+                const topH = tinyHeartSize * 0.3;
+                ctx.moveTo(0, topH);
+                ctx.bezierCurveTo(-tinyHeartSize / 2, -topH, -tinyHeartSize, topH / 2, 0, tinyHeartSize);
+                ctx.bezierCurveTo(tinyHeartSize, topH / 2, tinyHeartSize / 2, -topH, 0, topH);
+                ctx.closePath();
+                ctx.fill();
+                
+                ctx.restore();
+              }
+            } else {
+              // 通常の攻撃エフェクト
+              const shockRadius = attackPhase * size * 3;
+              const shockAlpha = 0.8 * (1 - attackPhase);
+              
+              const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, shockRadius);
+              gradient.addColorStop(0, `rgba(255,182,193,${shockAlpha * 0.8})`); // ライトピンク
+              gradient.addColorStop(0.5, `rgba(221,160,221,${shockAlpha * 0.5})`); // プラム
+              gradient.addColorStop(1, `rgba(255,182,193,0)`);
+              
+              ctx.fillStyle = gradient;
               ctx.beginPath();
-              ctx.arc(sparkX, sparkY, sparkSize, 0, Math.PI * 2);
+              ctx.arc(0, 0, shockRadius, 0, Math.PI * 2);
               ctx.fill();
+              
+              // 攻撃の火花（携帯対応：さらに軽量化）
+              const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+              const sparkCount = isMobile ? 3 : 6; // 携帯では3個に削減
+              for (let i = 0; i < sparkCount; i++) {
+                const angle = (i / sparkCount) * Math.PI * 2 + time / 100;
+                const distance = attackPhase * size * 2.5;
+                const sparkX = Math.cos(angle) * distance;
+                const sparkY = Math.sin(angle) * distance;
+                const sparkSize = (1 - attackPhase) * size * 0.15;
+                
+                ctx.fillStyle = `rgba(255,${200 - attackPhase * 150},0,${(1 - attackPhase) * 0.3})`; // 透明度をさらに下げる
+                ctx.shadowColor = "rgba(255,150,0,0.3)"; // shadowBlurをさらに薄く
+                ctx.shadowBlur = isMobile ? 4 : 8; // 携帯では4に
+                ctx.beginPath();
+                ctx.arc(sparkX, sparkY, sparkSize, 0, Math.PI * 2);
+                ctx.fill();
+              }
             }
             
             ctx.restore();
@@ -2028,12 +2227,25 @@ export default function Home() {
           // 戦闘オーラ（攻撃時のみ強化 - 兵士が到着してから）
           if (soldierProgress > 0.4 && soldierProgress < 0.7) {
             ctx.save();
+            const isCuteBear = anim.bearIndex === 0;
             const auraAlpha = isAttacking ? 0.8 + Math.sin(time / 50 + idx) * 0.2 : 0.4 + Math.sin(time / 100 + idx) * 0.2;
-            const auraColor = isAttacking ? `rgba(255,100,50,${auraAlpha})` : `rgba(255,50,50,${auraAlpha})`;
-            ctx.strokeStyle = auraColor;
-            ctx.lineWidth = isAttacking ? 4 : 2;
-            ctx.shadowColor = isAttacking ? "rgba(255,100,0,0.9)" : "rgba(255,0,0,0.6)";
-            ctx.shadowBlur = isAttacking ? 25 : 15;
+            
+            if (isCuteBear) {
+              // 可愛い「なでなで」オーラ（パステルカラー）
+              const auraColor = isAttacking ? `rgba(255,182,193,${auraAlpha})` : `rgba(255,192,203,${auraAlpha})`; // ピンク系
+              ctx.strokeStyle = auraColor;
+              ctx.lineWidth = isAttacking ? 3 : 2;
+              ctx.shadowColor = isAttacking ? "rgba(255,182,193,0.8)" : "rgba(255,192,203,0.6)";
+              ctx.shadowBlur = isAttacking ? 20 : 12;
+            } else {
+              // 通常の戦闘オーラ
+              const auraColor = isAttacking ? `rgba(255,100,50,${auraAlpha})` : `rgba(255,50,50,${auraAlpha})`;
+              ctx.strokeStyle = auraColor;
+              ctx.lineWidth = isAttacking ? 4 : 2;
+              ctx.shadowColor = isAttacking ? "rgba(255,100,0,0.9)" : "rgba(255,0,0,0.6)";
+              ctx.shadowBlur = isAttacking ? 25 : 15;
+            }
+            
             ctx.beginPath();
             ctx.arc(0, size * 0.5, size * 1.2 + Math.sin(time / 80 + idx) * 3, 0, Math.PI * 2);
             ctx.stroke();
