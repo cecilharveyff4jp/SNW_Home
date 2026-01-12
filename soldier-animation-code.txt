@@ -1,0 +1,91 @@
+  // 兵士アニメーション開始関数
+  const startSoldierAnimation = (bearTrap: Obj) => {
+    // すべての都市を検索（近くにあるオブジェクトを都市とみなす）
+    const cities = objects.filter(obj => {
+      // 都市判定：熊罠でも本部でもないもので、ラベルがあるもの
+      if (!obj.label) return false;
+      if (obj.label === "熊罠1" || obj.label === "熊罠2") return false;
+      if (obj.label === "雪原本部") return false;
+      if (obj.label === "🚩") return false; // 旗を除外
+      if ((obj.type || "").toUpperCase() === "DEPOT") return false; // 資源も除外
+      if ((obj.type || "").toUpperCase() === "STATUE") return false; // 像も除外
+      return true;
+    });
+
+    // 各都市から兵士を出す
+    const newAnimations: SoldierAnimation[] = cities.map(city => {
+      // 複数の兵士を生成（8-15人の兵士）
+      const soldierCount = 8 + Math.floor(Math.random() * 8);
+      const soldiers = [];
+      
+      for (let i = 0; i < soldierCount; i++) {
+        soldiers.push({
+          offsetX: (Math.random() - 0.5) * 30, // ランダムな横ずれ
+          offsetY: (Math.random() - 0.5) * 30, // ランダムな縦ずれ
+          delay: Math.random() * 0.2, // 0-0.2の出発遅延
+        });
+      }
+
+      return {
+        from: {
+          x: num(city.x, 0),
+          y: num(city.y, 0),
+          label: city.label || "",
+        },
+        to: {
+          x: num(bearTrap.x, 0),
+          y: num(bearTrap.y, 0),
+          label: bearTrap.label || "",
+        },
+        progress: 0,
+        startTime: Date.now(),
+        soldiers,
+      };
+    });
+
+    setSoldierAnimations(newAnimations);
+  };
+
+  // 兵士アニメーションのループ
+  useEffect(() => {
+    if (soldierAnimations.length === 0) return;
+
+    const animate = () => {
+      const now = Date.now();
+      let allComplete = true;
+
+      setSoldierAnimations(prev => {
+        return prev.map(anim => {
+          const elapsed = now - anim.startTime;
+          const duration = 2500; // 2.5秒かけて移動
+          const progress = Math.min(elapsed / duration, 1);
+          
+          if (progress < 1) allComplete = false;
+          
+          return { ...anim, progress };
+        });
+      });
+
+      if (!allComplete) {
+        soldierAnimationRef.current = requestAnimationFrame(animate);
+      } else {
+        // アニメーション完了：少し待ってからクリア
+        setTimeout(() => {
+          setSoldierAnimations([]);
+        }, 500);
+      }
+      
+      draw(); // 再描画
+    };
+
+    soldierAnimationRef.current = requestAnimationFrame(animate);
+
+    return () => {
+      if (soldierAnimationRef.current) {
+        cancelAnimationFrame(soldierAnimationRef.current);
+        soldierAnimationRef.current = null;
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [soldierAnimations.length > 0 ? soldierAnimations[0]?.startTime : 0]);
+

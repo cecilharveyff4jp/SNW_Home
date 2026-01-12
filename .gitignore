@@ -39,3 +39,12 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# backup files
+/public/backup-png/
+
+# animation test page
+/src/app/animation-test/
+
+# game pages
+/src/app/game/

@@ -1,0 +1,198 @@
+// ===============================================
+// 熊罠タップ時の兵士アニメーション実装ガイド
+// ===============================================
+
+// ============ 1. State定義の追加 ============
+// 216行目付近（isMobileとisDarkModeの定義の後）に以下を追加：
+
+  // 熊罠→兵士アニメーション用
+  type SoldierAnimation = {
+    from: { x: number; y: number; label: string }; // 出発地（都市）
+    to: { x: number; y: number; label: string }; // 目的地（熊罠）
+    progress: number; // 0-1のアニメーション進捗
+    startTime: number; // アニメーション開始時刻
+    soldiers: Array<{ // 兵士群（複数の兵士が行進）
+      offsetX: number; // 隊列のオフセット
+      offsetY: number;
+      delay: number; // 出発タイミングのずれ
+    }>;
+  };
+  const [soldierAnimations, setSoldierAnimations] = useState<SoldierAnimation[]>([]);
+  const soldierAnimationRef = useRef<number | null>(null);
+
+
+// ============ 2. onClick関数の修正 ============
+// 1824行目付近の onClick 関数内、hit = hitTest(mx, my) の直後に以下を追加：
+
+    const hit = hitTest(mx, my);
+    
+    // 参照モード時に熊罠をタップした場合、兵士アニメーション開始
+    if (!isEditMode && hit && (hit.label === "熊罠1" || hit.label === "熊罠2")) {
+      startSoldierAnimation(hit);
+      setSelectedId(hit?.id ? String(hit.id) : null);
+      return;
+    }
+
+
+// ============ 3. draw関数内にアニメーション描画を追加 ============
+// 1369行目付近、draw関数の終わり（}; の直前）に以下を追加：
+
+    // 兵士アニメーションの描画
+    if (soldierAnimations.length > 0) {
+      ctx.save();
+      ctx.translate(viewW / 2, viewH / 2);
+      ctx.translate(cam.tx, cam.ty);
+      ctx.scale(cam.scale, cam.scale);
+      ctx.rotate(LOOK.angle);
+      ctx.translate(-cx, -cy);
+
+      soldierAnimations.forEach((anim) => {
+        const { from, to, progress, soldiers } = anim;
+        const fromX = from.x * cell + (Math.max(1, 2) * cell) / 2; // 都市の中心
+        const fromY = from.y * cell + (Math.max(1, 2) * cell) / 2;
+        const toX = to.x * cell + (Math.max(1, 3) * cell) / 2; // 熊罠の中心
+        const toY = to.y * cell + (Math.max(1, 3) * cell) / 2;
+
+        soldiers.forEach((soldier) => {
+          const soldierProgress = Math.max(0, Math.min(1, (progress - soldier.delay) / (1 - soldier.delay)));
+          if (soldierProgress <= 0) return; // まだ出発していない
+
+          const currentX = fromX + (toX - fromX) * soldierProgress + soldier.offsetX;
+          const currentY = fromY + (toY - fromY) * soldierProgress + soldier.offsetY;
+
+          // 兵士を描画（絵文字またはアイコン）
+          ctx.save();
+          ctx.translate(currentX, currentY);
+          ctx.rotate(-LOOK.angle); // 文字を水平に
+
+          // 兵士のサイズと見た目
+          const soldierSize = 16;
+          ctx.font = `${soldierSize}px serif`;
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          
+          // 複数種類の兵士絵文字をランダムに（seedベース）
+          const soldierEmojis = ['🏃', '🏃‍♂️', '🏃‍♀️', '🚶', '🚶‍♂️', '🚶‍♀️'];
+          const seed = Math.floor(soldier.offsetX * 1000 + soldier.offsetY * 1000);
+          const emoji = soldierEmojis[seed % soldierEmojis.length];
+          
+          // 影を追加
+          ctx.shadowColor = "rgba(0,0,0,0.3)";
+          ctx.shadowBlur = 4;
+          ctx.shadowOffsetY = 2;
+          ctx.fillText(emoji, 0, 0);
+          
+          ctx.restore();
+        });
+      });
+
+      ctx.restore();
+    }
+
+
+// ============ 4. 関数定義の追加 ============
+// draw関数の直後（1371行目付近）に以下を追加：
+
+  // 兵士アニメーション開始関数
+  const startSoldierAnimation = (bearTrap: Obj) => {
+    // すべての都市を検索（近くにあるオブジェクトを都市とみなす）
+    const cities = objects.filter(obj => {
+      // 都市判定：熊罠でも本部でもないもので、ラベルがあるもの
+      if (!obj.label) return false;
+      if (obj.label === "熊罠1" || obj.label === "熊罠2") return false;
+      if (obj.label === "雪原本部") return false;
+      if (obj.label === "🚩") return false; // 旗を除外
+      if ((obj.type || "").toUpperCase() === "DEPOT") return false; // 資源も除外
+      if ((obj.type || "").toUpperCase() === "STATUE") return false; // 像も除外
+      return true;
+    });
+
+    // 各都市から兵士を出す
+    const newAnimations: SoldierAnimation[] = cities.map(city => {
+      // 複数の兵士を生成（8-15人の兵士）
+      const soldierCount = 8 + Math.floor(Math.random() * 8);
+      const soldiers = [];
+      
+      for (let i = 0; i < soldierCount; i++) {
+        soldiers.push({
+          offsetX: (Math.random() - 0.5) * 30, // ランダムな横ずれ
+          offsetY: (Math.random() - 0.5) * 30, // ランダムな縦ずれ
+          delay: Math.random() * 0.2, // 0-0.2の出発遅延
+        });
+      }
+
+      return {
+        from: {
+          x: num(city.x, 0),
+          y: num(city.y, 0),
+          label: city.label || "",
+        },
+        to: {
+          x: num(bearTrap.x, 0),
+          y: num(bearTrap.y, 0),
+          label: bearTrap.label || "",
+        },
+        progress: 0,
+        startTime: Date.now(),
+        soldiers,
+      };
+    });
+
+    setSoldierAnimations(newAnimations);
+  };
+
+  // 兵士アニメーションのループ
+  useEffect(() => {
+    if (soldierAnimations.length === 0) return;
+
+    const animate = () => {
+      const now = Date.now();
+      let allComplete = true;
+
+      setSoldierAnimations(prev => {
+        return prev.map(anim => {
+          const elapsed = now - anim.startTime;
+          const duration = 2500; // 2.5秒かけて移動
+          const progress = Math.min(elapsed / duration, 1);
+          
+          if (progress < 1) allComplete = false;
+          
+          return { ...anim, progress };
+        });
+      });
+
+      if (!allComplete) {
+        soldierAnimationRef.current = requestAnimationFrame(animate);
+      } else {
+        // アニメーション完了：少し待ってからクリア
+        setTimeout(() => {
+          setSoldierAnimations([]);
+        }, 500);
+      }
+      
+      draw(); // 再描画
+    };
+
+    soldierAnimationRef.current = requestAnimationFrame(animate);
+
+    return () => {
+      if (soldierAnimationRef.current) {
+        cancelAnimationFrame(soldierAnimationRef.current);
+        soldierAnimationRef.current = null;
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [soldierAnimations.length > 0 ? soldierAnimations[0]?.startTime : 0]);
+
+
+// ============ 実装完了！ ============
+// 上記の4つの変更を行うと、参照モード（閲覧モード）で熊罠1または熊罠2をタップすると、
+// マップ上のすべての都市から兵士が熊罠に向かって行進するアニメーションが表示されます。
+//
+// アニメーションの特徴：
+// - 各都市から8-15人の兵士が出発
+// - 兵士は少しずつ出発タイミングがずれる（リアルな行進）
+// - 隊列がバラけて行進（ランダムなオフセット）
+// - 2.5秒かけて目的地に到達
+// - 🏃や🚶などの絵文字でビジュアル化
+// - 影付きでよりリアルに
