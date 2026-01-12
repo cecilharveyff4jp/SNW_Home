@@ -234,18 +234,20 @@ export default function Home() {
 
   // 溶鉱炉レベル画像のプリロード
   useEffect(() => {
+    const basePath = process.env.NODE_ENV === 'production' ? '/SNW_Home' : '';
     const imagesToLoad = ['FC1', 'FC2', 'FC3', 'FC4', 'FC5', 'FC6', 'FC7', 'FC8', 'FC9', 'FC10'];
     imagesToLoad.forEach(name => {
       const img = new Image();
-      img.src = `/fire-levels/${name}.webp`;
+      img.src = `${basePath}/fire-levels/${name}.webp`;
       fireLevelImagesRef.current[name] = img;
     });
   }, []);
 
   // 隕石画像のプリロード
   useEffect(() => {
+    const basePath = process.env.NODE_ENV === 'production' ? '/SNW_Home' : '';
     const img = new Image();
-    img.src = '/meteor.webp';
+    img.src = `${basePath}/meteor.webp`;
     img.onload = () => {
       meteorImageRef.current = img;
     };
