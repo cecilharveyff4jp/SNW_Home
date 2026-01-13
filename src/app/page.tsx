@@ -81,6 +81,7 @@ export default function Home() {
     opacity: 1.0,
   });
   const [showBgConfigModal, setShowBgConfigModal] = useState(false);
+  const [isBgSliderActive, setIsBgSliderActive] = useState(false); // スライダー操作中フラグ
   const bgImageRef = useRef<HTMLImageElement | null>(null);
   
   // 熊と熊罠の画像用ref
@@ -7161,12 +7162,13 @@ export default function Home() {
             left: 0,
             right: 0,
             bottom: 0,
-            background: "rgba(0,0,0,0.5)",
+            background: isBgSliderActive ? "rgba(0,0,0,0.15)" : "rgba(0,0,0,0.5)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             zIndex: 1000,
             padding: isMobile ? "16px" : "20px",
+            transition: "background 0.2s ease",
           }}
           onClick={() => setShowBgConfigModal(false)}
         >
@@ -7180,6 +7182,8 @@ export default function Home() {
               maxHeight: "90vh",
               overflowY: "auto",
               boxShadow: "0 8px 32px rgba(0,0,0,0.15)",
+              opacity: isBgSliderActive ? 0.15 : 1,
+              transition: "opacity 0.2s ease",
             }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -7248,6 +7252,9 @@ export default function Home() {
                 step="1"
                 value={bgConfig.centerX}
                 onChange={(e) => setBgConfig({...bgConfig, centerX: Number(e.target.value)})}
+                onPointerDown={() => setIsBgSliderActive(true)}
+                onPointerUp={() => setIsBgSliderActive(false)}
+                onPointerCancel={() => setIsBgSliderActive(false)}
                 style={{
                   width: "100%",
                   cursor: "pointer",
@@ -7274,6 +7281,9 @@ export default function Home() {
                 step="1"
                 value={bgConfig.centerY}
                 onChange={(e) => setBgConfig({...bgConfig, centerY: Number(e.target.value)})}
+                onPointerDown={() => setIsBgSliderActive(true)}
+                onPointerUp={() => setIsBgSliderActive(false)}
+                onPointerCancel={() => setIsBgSliderActive(false)}
                 style={{
                   width: "100%",
                   cursor: "pointer",
@@ -7300,6 +7310,9 @@ export default function Home() {
                 step="0.05"
                 value={bgConfig.scale}
                 onChange={(e) => setBgConfig({...bgConfig, scale: Number(e.target.value)})}
+                onPointerDown={() => setIsBgSliderActive(true)}
+                onPointerUp={() => setIsBgSliderActive(false)}
+                onPointerCancel={() => setIsBgSliderActive(false)}
                 style={{
                   width: "100%",
                   cursor: "pointer",
@@ -7326,6 +7339,9 @@ export default function Home() {
                 step="0.05"
                 value={bgConfig.opacity}
                 onChange={(e) => setBgConfig({...bgConfig, opacity: Number(e.target.value)})}
+                onPointerDown={() => setIsBgSliderActive(true)}
+                onPointerUp={() => setIsBgSliderActive(false)}
+                onPointerCancel={() => setIsBgSliderActive(false)}
                 style={{
                   width: "100%",
                   cursor: "pointer",
