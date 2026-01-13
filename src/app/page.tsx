@@ -214,6 +214,52 @@ export default function Home() {
   const meteorsAnimationRef = useRef<number | null>(null);
   const meteorImageRef = useRef<HTMLImageElement | null>(null);
 
+  // コインアニメーション用
+  type CoinDrop = {
+    x: number; // スクリーン座標X（開始位置）
+    y: number; // スクリーン座標Y（開始位置）
+    coins: Array<{
+      offsetX: number;
+      offsetY: number;
+      vx: number; // 横方向速度
+      vy: number; // 縦方向速度（初速）
+      rotation: number;
+      rotationSpeed: number; // 回転速度
+      rotationAxis: 'x' | 'y' | 'z'; // 回転軸（縦回転、横回転、斜め回転）
+      rotationAngle: number; // 3D回転角度
+      size: number; // 大きさ（1=通常、1.5=大当たり）
+      life: number;
+      isJackpot: boolean; // 大当たりかどうか
+    }>;  
+    startTime: number;
+    totalCoins: number; // このドロップで獲得したコイン枚数
+  };
+  const [coinDrops, setCoinDrops] = useState<CoinDrop[]>([]);
+  const coinDropsAnimationRef = useRef<number | null>(null);
+  const coinImageRef = useRef<HTMLImageElement | null>(null);
+  const [totalCoins, setTotalCoins] = useState<number>(0);
+
+  // スロットアニメーション用
+  type SlotAnimation = {
+    x: number; // スクリーン座標X
+    y: number; // スクリーン座標Y
+    reels: Array<{
+      symbols: string[]; // 絵柄配列
+      offset: number; // リールのオフセット
+      speed: number; // 回転速度
+      stopping: boolean; // 停止中か
+      stopped: boolean; // 停止完了か
+      finalIndex: number; // 最終的に止まる絵柄のインデックス
+      stopTime: number; // 停止開始時刻
+    }>;
+    startTime: number;
+    result: string[]; // 結果（3つの絵柄）
+    payout: number; // 配当
+    isWin: boolean; // 当たりかどうか
+  };
+  const [slotAnimations, setSlotAnimations] = useState<SlotAnimation[]>([]);
+  const slotAnimationsRef = useRef<number | null>(null);
+
   // カメラ：パン(tx,ty)は「画面座標系」での移動量（ピクセル）、scaleは倍率
   // 初期ズーム: 統一して1.0でスタート（SSRハイドレーションエラー回避）
   const [cam, setCam] = useState({ 
@@ -231,6 +277,18 @@ export default function Home() {
       }
     } catch (e) {
       console.error('Failed to load bearTrapMaxDamage:', e);
+    }
+  }, []);
+
+  // コインの合計枚数をlocalStorageから読み込み
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('totalCoins');
+      if (stored) {
+        setTotalCoins(parseInt(stored, 10));
+      }
+    } catch (e) {
+      console.error('Failed to load totalCoins:', e);
     }
   }, []);
 
@@ -252,6 +310,16 @@ export default function Home() {
     img.src = `${basePath}/meteor.webp`;
     img.onload = () => {
       meteorImageRef.current = img;
+    };
+  }, []);
+
+  // コイン画像のプリロード
+  useEffect(() => {
+    const basePath = process.env.NODE_ENV === 'production' ? '/SNW_Home' : '';
+    const img = new Image();
+    img.src = `${basePath}/coin.webp`;
+    img.onload = () => {
+      coinImageRef.current = img;
     };
   }, []);
 
@@ -2700,6 +2768,355 @@ export default function Home() {
       });
     }
 
+    // コイン描画
+    if (coinDrops.length > 0) {
+      coinDrops.forEach((drop, dropIndex) => {
+        // 獲得枚数表示（アニメーション開始後2秒間表示）
+        const elapsed = (Date.now() - drop.startTime) / 1000;
+        if (elapsed < 2.5) {
+          ctx.save();
+          ctx.translate(drop.x, drop.y);
+          
+          // 獲得枚数のテキスト（1行目）
+          const displayText = drop.totalCoins >= 100 
+            ? `🎉 JACKPOT! ${drop.totalCoins}枚 🎉`
+            : `+${drop.totalCoins}枚`;
+          
+          // フォントサイズ（大当たりは大きく）
+          const fontSize = drop.totalCoins >= 100 ? 32 : 24;
+          ctx.font = `bold ${fontSize}px Arial`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          
+          // 影（より目立つように）
+          ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+          ctx.shadowBlur = 10;
+          ctx.shadowOffsetX = 3;
+          ctx.shadowOffsetY = 3;
+          
+          // テキストの縁取り（白）
+          ctx.strokeStyle = 'white';
+          ctx.lineWidth = 8;
+          ctx.strokeText(displayText, 0, 50);
+          
+          // テキスト本体（金色または虹色）
+          if (drop.totalCoins >= 100) {
+            const gradient = ctx.createLinearGradient(-100, 50, 100, 50);
+            gradient.addColorStop(0, '#ff0080');
+            gradient.addColorStop(0.25, '#ff8c00');
+            gradient.addColorStop(0.5, '#ffd700');
+            gradient.addColorStop(0.75, '#00ff00');
+            gradient.addColorStop(1, '#0080ff');
+            ctx.fillStyle = gradient;
+          } else {
+            ctx.fillStyle = '#ffd700';
+          }
+          ctx.fillText(displayText, 0, 50);
+          
+          // 2行目：累積枚数表示
+          const totalText = `（所有：${totalCoins.toLocaleString()}枚）`;
+          const totalFontSize = drop.totalCoins >= 100 ? 18 : 16;
+          ctx.font = `bold ${totalFontSize}px Arial`;
+          
+          // 2行目の縁取り（白）
+          ctx.strokeStyle = 'white';
+          ctx.lineWidth = 6;
+          ctx.strokeText(totalText, 0, 78);
+          
+          // 2行目の本体（濃い金色）
+          ctx.fillStyle = '#ffa500';
+          ctx.fillText(totalText, 0, 78);
+          
+          ctx.restore();
+        }
+        
+        // 各コインを描画
+        drop.coins.forEach((coin) => {
+          const screenX = drop.x + coin.offsetX;
+          const screenY = drop.y + coin.offsetY;
+          
+          ctx.save();
+          ctx.translate(screenX, screenY);
+          
+          // 3D回転を擬似的に表現
+          let scaleX = 1;
+          let scaleY = 1;
+          
+          if (coin.rotationAxis === 'x') {
+            // 縦回転（X軸中心）
+            scaleY = Math.abs(Math.cos(coin.rotationAngle));
+          } else if (coin.rotationAxis === 'y') {
+            // 横回転（Y軸中心）
+            scaleX = Math.abs(Math.cos(coin.rotationAngle));
+          } else {
+            // 斜め回転（Z軸中心）
+            ctx.rotate(coin.rotation);
+          }
+          
+          ctx.scale(scaleX, scaleY);
+          ctx.globalAlpha = coin.life;
+          
+          // コインの基本サイズ
+          const coinSize = 30 * coin.size;
+          
+          // コイン画像があれば画像を描画、なければ円を描画
+          if (coinImageRef.current) {
+            const img = coinImageRef.current;
+            ctx.drawImage(img, -coinSize / 2, -coinSize / 2, coinSize, coinSize);
+          } else {
+            // フォールバック：金色の円
+            const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, coinSize / 2);
+            if (coin.isJackpot) {
+              // 大当たりは虚色（レインボー）
+              gradient.addColorStop(0, '#fff');
+              gradient.addColorStop(0.3, '#ffd700');
+              gradient.addColorStop(0.6, '#ff69b4');
+              gradient.addColorStop(1, '#8a2be2');
+            } else {
+              // 通常は金色
+              gradient.addColorStop(0, '#fff8dc');
+              gradient.addColorStop(0.5, '#ffd700');
+              gradient.addColorStop(1, '#b8860b');
+            }
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(0, 0, coinSize / 2, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 縁取り
+            ctx.strokeStyle = coin.isJackpot ? '#ff1493' : '#8b6914';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+          }
+          
+          ctx.restore();
+        });
+      });
+    }
+
+    // スロット描画
+    if (slotAnimations.length > 0) {
+      slotAnimations.forEach((slot) => {
+        // 画面の左右中央に配置
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const rect = canvas.getBoundingClientRect();
+        const centerX = rect.width / 2;
+        
+        ctx.save();
+        ctx.translate(centerX, slot.y);
+        
+        const slotWidth = 280;
+        const slotHeight = 240;
+        const reelWidth = 70;
+        const reelHeight = 120;
+        const symbolHeight = 60;
+        
+        // スロットマシンの背景（淡い青系、丸角）
+        const gradient = ctx.createLinearGradient(-slotWidth / 2, -slotHeight / 2, slotWidth / 2, slotHeight / 2);
+        gradient.addColorStop(0, '#dbeafe'); // 淡い青
+        gradient.addColorStop(1, '#bfdbfe'); // 淡い青（少し濃いめ）
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.roundRect(-slotWidth / 2, -slotHeight / 2, slotWidth, slotHeight, 12);
+        ctx.fill();
+        
+        // 外枠
+        ctx.strokeStyle = 'rgba(59, 130, 246, 0.3)';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+        
+        // ヘッダー部分（保有コイン表示）
+        ctx.fillStyle = 'rgba(59, 130, 246, 0.15)';
+        ctx.fillRect(-slotWidth / 2, -slotHeight / 2, slotWidth, 28);
+        
+        // 保有コイン表示（コインアイコン付き）
+        const headerY = -slotHeight / 2 + 14;
+        
+        // 「保有」テキスト
+        ctx.font = 'bold 14px Arial';
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = '#1e40af';
+        ctx.fillText('保有', -35, headerY);
+        
+        // コインアイコン（小さく）
+        ctx.fillStyle = '#fbbf24'; // 金色
+        ctx.beginPath();
+        ctx.arc(-20, headerY, 8, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#f59e0b';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+        
+        // コイン枚数（大きいフォント）
+        ctx.font = 'bold 24px Arial';
+        ctx.textAlign = 'left';
+        ctx.fillStyle = '#1e40af';
+        ctx.fillText(`${totalCoins}`, -8, headerY);
+        
+        // 「枚」テキスト
+        const coinsWidth = ctx.measureText(`${totalCoins}`).width;
+        ctx.font = 'bold 14px Arial';
+        ctx.fillText('枚', -8 + coinsWidth + 4, headerY);
+        
+        // 3つのリール
+        slot.reels.forEach((reel, reelIndex) => {
+          const reelX = -slotWidth / 2 + 35 + reelIndex * 75;
+          const reelY = -slotHeight / 2 + 38;
+          
+          // リール背景
+          ctx.fillStyle = '#ffffff'; // 白
+          ctx.fillRect(reelX, reelY, reelWidth, reelHeight);
+          ctx.strokeStyle = '#93c5fd';
+          ctx.lineWidth = 2;
+          ctx.strokeRect(reelX, reelY, reelWidth, reelHeight);
+          
+          // クリッピング領域を設定（リールの外にはみ出さないように）
+          ctx.save();
+          ctx.beginPath();
+          ctx.rect(reelX, reelY, reelWidth, reelHeight);
+          ctx.clip();
+          
+          // シンボルを描画
+          const currentOffset = reel.offset % (reel.symbols.length * symbolHeight);
+          for (let i = -1; i < 4; i++) {
+            const symbolIndex = Math.floor((currentOffset / symbolHeight + i) % reel.symbols.length);
+            const adjustedIndex = symbolIndex < 0 ? reel.symbols.length + symbolIndex : symbolIndex;
+            const symbol = reel.symbols[adjustedIndex];
+            const symbolY = reelY + reelHeight / 2 - symbolHeight / 2 + i * symbolHeight - (currentOffset % symbolHeight);
+            
+            ctx.font = 'bold 38px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = '#000000';
+            ctx.fillText(symbol, reelX + reelWidth / 2, symbolY + symbolHeight / 2);
+          }
+          
+          ctx.restore();
+        });
+        
+        // フッター部分（今回の結果表示）
+        ctx.fillStyle = 'rgba(59, 130, 246, 0.15)';
+        ctx.fillRect(-slotWidth / 2, slotHeight / 2 - 28, slotWidth, 28);
+        
+        // 結果テキストと回すボタンで共通利用する変数
+        const allStopped = slot.reels.every(r => r.stopped);
+        const elapsed = (Date.now() - slot.startTime) / 1000;
+        const canSpin = allStopped && elapsed >= 3 && totalCoins >= 10;
+        
+        // 結果テキスト
+        ctx.font = 'bold 20px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        
+        // テキストに影を追加（視認性向上）
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+        ctx.shadowBlur = 3;
+        ctx.shadowOffsetX = 1;
+        ctx.shadowOffsetY = 1;
+        
+        if (allStopped) {
+          // 停止後は結果を表示
+          if (slot.isWin) {
+            ctx.fillStyle = '#16a34a'; // 濃い緑
+            ctx.fillText(`あたり ${slot.payout}枚`, 0, slotHeight / 2 - 14);
+          } else {
+            ctx.fillStyle = '#dc2626'; // 濃い赤
+            ctx.fillText('はずれ', 0, slotHeight / 2 - 14);
+          }
+        } else {
+          // 回転中はbet -10枚を表示
+          ctx.fillStyle = '#1e40af'; // 濃い青
+          ctx.fillText('bet -10枚', 0, slotHeight / 2 - 14);
+        }
+        
+        // 影をリセット
+        ctx.shadowColor = 'transparent';
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 0;
+        
+        // ×ボタン（右上）
+        const closeButtonSize = 24;
+        const closeButtonX = slotWidth / 2 - 30;
+        const closeButtonY = -slotHeight / 2 + 5;
+        
+        // ボタン背景（白）
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(closeButtonX + closeButtonSize / 2, closeButtonY + closeButtonSize / 2, closeButtonSize / 2, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // ボタン枠（青）
+        ctx.strokeStyle = '#2563eb';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        
+        // ×マーク（青）
+        ctx.strokeStyle = '#2563eb';
+        ctx.lineWidth = 3;
+        ctx.lineCap = 'round';
+        const crossSize = 10;
+        ctx.beginPath();
+        ctx.moveTo(closeButtonX + closeButtonSize / 2 - crossSize / 2, closeButtonY + closeButtonSize / 2 - crossSize / 2);
+        ctx.lineTo(closeButtonX + closeButtonSize / 2 + crossSize / 2, closeButtonY + closeButtonSize / 2 + crossSize / 2);
+        ctx.moveTo(closeButtonX + closeButtonSize / 2 + crossSize / 2, closeButtonY + closeButtonSize / 2 - crossSize / 2);
+        ctx.lineTo(closeButtonX + closeButtonSize / 2 - crossSize / 2, closeButtonY + closeButtonSize / 2 + crossSize / 2);
+        ctx.stroke();
+        
+        // 回すボタン（常に表示）
+        
+        const buttonWidth = 100;
+        const buttonHeight = 35;
+        const buttonX = -buttonWidth / 2;
+        const buttonY = slotHeight / 2 - 65; // リールの下、フッターの上
+        
+        // ボタン背景（押せる時は白、押せない時はグレー）
+        if (canSpin) {
+          // 有効時：白背景と影
+          ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+          ctx.shadowBlur = 8;
+          ctx.shadowOffsetY = 3;
+          
+          ctx.fillStyle = '#ffffff';
+        } else {
+          // 無効時：グレー
+          ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
+          ctx.shadowBlur = 4;
+          ctx.shadowOffsetY = 2;
+          ctx.fillStyle = '#6b7280';
+        }
+        
+        ctx.beginPath();
+        ctx.roundRect(buttonX, buttonY, buttonWidth, buttonHeight, 8);
+        ctx.fill();
+        
+        // ボタン枠
+        ctx.shadowColor = 'transparent';
+        ctx.shadowBlur = 0;
+        ctx.strokeStyle = canSpin ? '#2563eb' : '#4b5563';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        
+        // ボタンテキスト（強調）
+        ctx.font = 'bold 20px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        
+        // テキスト色（白背景の時は青、グレー背景の時は白）
+        ctx.fillStyle = canSpin ? '#2563eb' : '#ffffff';
+        ctx.fillText('回す', buttonX + buttonWidth / 2, buttonY + buttonHeight / 2);
+        
+        // 影をリセット
+        ctx.shadowColor = 'transparent';
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetY = 0;
+        
+        ctx.restore();
+      });
+    }
+
     // pendingPosition（クリックした位置）に赤い+マークを描画（編集モード時のみ）
     // カメラ変換の外で画面座標に直接描画
     if (isEditMode && pendingPosition) {
@@ -2787,7 +3204,7 @@ export default function Home() {
     // 3. Animationフィールド
     if (obj.Animation && obj.Animation.trim()) {
       const anim = obj.Animation.toLowerCase();
-      if (['fireworks', 'sparkle', 'beartrap', 'birthday', 'cherryblossom', 'meteor'].includes(anim)) {
+      if (['fireworks', 'sparkle', 'beartrap', 'birthday', 'cherryblossom', 'meteor', 'coin', 'slot'].includes(anim)) {
         return anim;
       }
     }
@@ -2988,6 +3405,187 @@ export default function Home() {
       y: startY,
       meteors: meteorsList,
       startTime: Date.now(),
+    }]);
+  };
+
+  // コインアニメーション開始
+  const startCoinAnimation = (obj: Obj) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
+    const rect = canvas.getBoundingClientRect();
+    const viewW = rect.width;
+    const viewH = rect.height;
+    
+    // オブジェクトのマップ座標を取得（中心位置）
+    const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell;
+    const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell;
+    
+    // マップ座標からスクリーン座標に変換
+    const { sx: startX, sy: startY } = mapToScreen(objMapX, objMapY, viewW, viewH);
+    
+    // コイン枚数決定（1-25枚のランダム、大当たり100枚は1%）
+    const isJackpot = Math.random() < 0.01; // 1%の確率で大当たり
+    const coinCount = isJackpot ? 100 : Math.floor(Math.random() * 25) + 1; // 1-25枚
+    
+    const coinsList: Array<{
+      offsetX: number;
+      offsetY: number;
+      vx: number;
+      vy: number;
+      rotation: number;
+      rotationSpeed: number;
+      rotationAxis: 'x' | 'y' | 'z';
+      rotationAngle: number;
+      size: number;
+      life: number;
+      isJackpot: boolean;
+    }> = [];
+    
+    // コインを生成（上向きの扇状に飛び散る）
+    for (let i = 0; i < coinCount; i++) {
+      // 扇状の角度（上向き中心に左右120度の範囲）
+      const fanAngle = -Math.PI / 2 + (Math.random() - 0.5) * (Math.PI * 0.67); // -90度を中心に±60度
+      const speed = 4 + Math.random() * 8; // 速度をアップ
+      const vx = Math.cos(fanAngle) * speed;
+      const vy = Math.sin(fanAngle) * speed; // 上方向に強く飛ぶ
+      
+      // 回転軸をランダムに選択
+      const rotationAxes: ('x' | 'y' | 'z')[] = ['x', 'y', 'z'];
+      const rotationAxis = rotationAxes[Math.floor(Math.random() * 3)];
+      
+      coinsList.push({
+        offsetX: 0,
+        offsetY: 0,
+        vx: vx,
+        vy: vy,
+        rotation: Math.random() * Math.PI * 2,
+        rotationSpeed: (Math.random() - 0.5) * 0.4, // 回転速度を上げる
+        rotationAxis: rotationAxis,
+        rotationAngle: 0,
+        size: isJackpot ? 1.5 : 1.0, // 大当たりは1.5倍
+        life: 1.0,
+        isJackpot: isJackpot,
+      });
+    }
+    
+    // 既存のコインに追加（消さない）
+    setCoinDrops(prev => [...prev, {
+      x: startX,
+      y: startY,
+      coins: coinsList,
+      startTime: Date.now(),
+      totalCoins: coinCount,
+    }]);
+    
+    // コイン総数を加算してlocalStorageに保存
+    setTotalCoins(prev => {
+      const newTotal = prev + coinCount;
+      try {
+        localStorage.setItem('totalCoins', newTotal.toString());
+      } catch (e) {
+        console.error('Failed to save totalCoins:', e);
+      }
+      return newTotal;
+    });
+  };
+
+  // スロットアニメーション開始
+  const startSlotAnimation = (objOrX: Obj | number, y?: number) => {
+    // コインが10枚未満なら実行しない
+    if (totalCoins < 10) {
+      setToastMessage('⚠️ コインが足りません（10枚必要）');
+      return;
+    }
+    
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
+    const rect = canvas.getBoundingClientRect();
+    const viewW = rect.width;
+    const viewH = rect.height;
+    
+    let startX: number;
+    let startY: number;
+    
+    // 引数が数値の場合は直接座標として使用、オブジェクトの場合は画面中央に配置
+    if (typeof objOrX === 'number' && y !== undefined) {
+      // 既存のスロット位置を再利用
+      startX = objOrX;
+      startY = y;
+    } else {
+      // オブジェクトから開始する場合は画面の中央に配置
+      startX = viewW / 2;
+      startY = viewH / 2;
+    }
+    
+    // 10コイン消費
+    setTotalCoins(prev => {
+      const newTotal = Math.max(0, prev - 10);
+      try {
+        localStorage.setItem('totalCoins', newTotal.toString());
+      } catch (e) {
+        console.error('Failed to save totalCoins:', e);
+      }
+      return newTotal;
+    });
+    
+    // 絵柄の種類
+    const symbols = ['🍒', '🍋', '🔔', '7', 'BAR'];
+    
+    // 各リールの結果を事前に決定
+    const result = [
+      symbols[Math.floor(Math.random() * symbols.length)],
+      symbols[Math.floor(Math.random() * symbols.length)],
+      symbols[Math.floor(Math.random() * symbols.length)],
+    ];
+    
+    // 配当計算（10枚ベットなので大きめに）
+    let payout = 0;
+    let isWin = false;
+    
+    if (result[0] === result[1] && result[1] === result[2]) {
+      // 3つ揃い
+      isWin = true;
+      if (result[0] === '7') {
+        payout = 1000; // 777 大当たり
+      } else if (result[0] === 'BAR') {
+        payout = 500; // BAR揃い
+      } else {
+        payout = 300; // その他揃い
+      }
+    } else if (result[0] === result[1] || result[1] === result[2] || result[0] === result[2]) {
+      // 2つ揃い
+      isWin = true;
+      payout = 50;
+    }
+    
+    // 各リールの初期設定
+    const reels = result.map((finalSymbol, index) => {
+      // 結果の絵柄が何番目かを見つける
+      const finalIndex = symbols.indexOf(finalSymbol);
+      const symbolHeight = 60;
+      
+      return {
+        symbols: symbols,
+        offset: Math.random() * symbols.length * symbolHeight, // ランダムな初期位置
+        speed: 40 + Math.random() * 20, // 高速回転
+        stopping: false,
+        stopped: false,
+        finalIndex: finalIndex,
+        stopTime: 0,
+      };
+    });
+    
+    // スロットアニメーションを開始
+    setSlotAnimations(prev => [...prev, {
+      x: startX,
+      y: startY,
+      reels: reels,
+      startTime: Date.now(),
+      result: result,
+      payout: payout,
+      isWin: isWin,
     }]);
   };
 
@@ -3399,6 +3997,199 @@ export default function Home() {
     };
   }, [meteors]);
 
+  // コインアニメーションループ
+  useEffect(() => {
+    if (coinDrops.length === 0) return;
+    
+    const ANIMATION_DURATION = 10000; // 10秒で強制終了
+    
+    const animate = () => {
+      const now = Date.now();
+      
+      // 開始時刻から一定時間経過したら全てクリア
+      if (coinDrops.length > 0 && coinDrops[0] && now - coinDrops[0].startTime > ANIMATION_DURATION) {
+        setCoinDrops([]);
+        coinDropsAnimationRef.current = null;
+        return;
+      }
+      
+      const updated = coinDrops.map(drop => {
+        const updatedCoins = drop.coins.map(coin => {
+          // 重力加速度
+          const newVy = coin.vy + 0.3; // 重力
+          const newOffsetX = coin.offsetX + coin.vx;
+          const newOffsetY = coin.offsetY + coin.vy;
+          const newRotation = coin.rotation + coin.rotationSpeed;
+          const newRotationAngle = coin.rotationAngle + coin.rotationSpeed;
+          
+          // 画面下に落ちたら消す
+          const canvas = canvasRef.current;
+          const viewH = canvas ? canvas.getBoundingClientRect().height : 1000;
+          const screenY = drop.y + newOffsetY;
+          
+          const newLife = screenY > viewH + 50 ? 0 : Math.max(0, coin.life - 0.001);
+          
+          return {
+            ...coin,
+            offsetX: newOffsetX,
+            offsetY: newOffsetY,
+            vy: newVy,
+            rotation: newRotation,
+            rotationAngle: newRotationAngle,
+            life: newLife,
+          };
+        }).filter(coin => coin.life > 0);
+        
+        return {
+          ...drop,
+          coins: updatedCoins,
+        };
+      }).filter(drop => drop.coins.length > 0);
+      
+      setCoinDrops(updated);
+      
+      // canvas全体を再描画
+      requestDraw();
+      
+      if (updated.length > 0) {
+        coinDropsAnimationRef.current = requestAnimationFrame(animate);
+      } else {
+        coinDropsAnimationRef.current = null;
+      }
+    };
+    
+    coinDropsAnimationRef.current = requestAnimationFrame(animate);
+    
+    return () => {
+      if (coinDropsAnimationRef.current) {
+        cancelAnimationFrame(coinDropsAnimationRef.current);
+        coinDropsAnimationRef.current = null;
+      }
+    };
+  }, [coinDrops]);
+
+  // スロットアニメーションループ
+  useEffect(() => {
+    if (slotAnimations.length === 0) return;
+    
+    const animate = () => {
+      const now = Date.now();
+      
+      const updated = slotAnimations.map(slot => {
+        const elapsed = (now - slot.startTime) / 1000;
+        
+        const updatedReels = slot.reels.map((reel, index) => {
+          if (reel.stopped) return reel;
+          
+          // 各リールを順番に止める（1秒、2秒、3秒後）
+          const stopDelay = 1.5 + index * 0.7;
+          
+          if (elapsed >= stopDelay && !reel.stopping) {
+            // 停止開始
+            return {
+              ...reel,
+              stopping: true,
+              stopTime: now,
+            };
+          }
+          
+          if (reel.stopping) {
+            // 停止アニメーション（減速）
+            const stopElapsed = (now - reel.stopTime) / 1000;
+            if (stopElapsed < 0.5) {
+              // 減速しながら目標位置に近づく
+              const slowdownFactor = 1 - (stopElapsed / 0.5);
+              const newSpeed = reel.speed * slowdownFactor * 0.3;
+              const newOffset = reel.offset + newSpeed;
+              
+              return {
+                ...reel,
+                offset: newOffset,
+                speed: newSpeed,
+              };
+            } else {
+              // 完全停止（目標の絵柄に合わせる）
+              const symbolHeight = 60;
+              const finalOffset = reel.finalIndex * symbolHeight;
+              
+              // 全リール停止確認：最後のリール（index 2）が停止した瞬間に配当を加算
+              if (index === 2 && slot.payout > 0) {
+                setTotalCoins(prev => {
+                  const newTotal = prev + slot.payout;
+                  try {
+                    localStorage.setItem('totalCoins', newTotal.toString());
+                  } catch (e) {
+                    console.error('Failed to save totalCoins:', e);
+                  }
+                  return newTotal;
+                });
+              }
+              
+              return {
+                ...reel,
+                offset: finalOffset,
+                speed: 0,
+                stopped: true,
+              };
+            }
+          }
+          
+          // 通常の回転
+          return {
+            ...reel,
+            offset: reel.offset + reel.speed,
+          };
+        });
+        
+        return {
+          ...slot,
+          reels: updatedReels,
+        };
+      }).filter(s => s !== null);
+      
+      setSlotAnimations(updated as SlotAnimation[]);
+      
+      // canvas全体を再描画
+      requestDraw();
+      
+      if (updated.length > 0) {
+        slotAnimationsRef.current = requestAnimationFrame(animate);
+      } else {
+        slotAnimationsRef.current = null;
+      }
+    };
+    
+    slotAnimationsRef.current = requestAnimationFrame(animate);
+    
+    return () => {
+      if (slotAnimationsRef.current) {
+        cancelAnimationFrame(slotAnimationsRef.current);
+        slotAnimationsRef.current = null;
+      }
+    };
+  }, [slotAnimations]);
+
+  // スロットを閉じる関数（配当を加算してから閉じる）
+  const closeSlotMachine = () => {
+    if (slotAnimations.length > 0) {
+      const slot = slotAnimations[0];
+      // リールが全部停止していて配当がある場合、コインを追加
+      const allStopped = slot.reels.every(r => r.stopped);
+      if (allStopped && slot.payout > 0) {
+        setTotalCoins(prev => {
+          const newTotal = prev + slot.payout;
+          try {
+            localStorage.setItem('totalCoins', newTotal.toString());
+          } catch (e) {
+            console.error('Failed to save totalCoins:', e);
+          }
+          return newTotal;
+        });
+      }
+    }
+    setSlotAnimations([]);
+  };
+
 
   // 初期表示：最初は少し引き気味にして“ゲームっぽく”
   useEffect(() => {
@@ -3443,6 +4234,73 @@ export default function Home() {
     const rect = canvas.getBoundingClientRect();
     const sx = e.clientX - rect.left;
     const sy = e.clientY - rect.top;
+
+    // スロットマシンの判定（最優先で処理、全ての処理より前）
+    if (slotAnimations.length > 0) {
+      const slot = slotAnimations[0];
+      const centerX = rect.width / 2;
+      const centerY = slot.y;
+      const slotWidth = 280;
+      const slotHeight = 240;
+      
+      // スロットマシン全体の範囲判定（×ボタンも含むように大きめ）
+      const slotLeft = centerX - slotWidth / 2 - 20;
+      const slotRight = centerX + slotWidth / 2 + 20;
+      const slotTop = centerY - slotHeight / 2 - 40; // ×ボタン用に上部を拡大
+      const slotBottom = centerY + slotHeight / 2 + 20;
+      
+      // スロット範囲内のクリックかチェック
+      const isInSlotArea = sx >= slotLeft && sx <= slotRight && sy >= slotTop && sy <= slotBottom;
+      
+      if (isInSlotArea) {
+        // ★★★ スロット範囲内のクリックは全てここで処理 ★★★
+        // ×ボタンと回すボタンのみ有効、それ以外は無効化
+        
+        // 1. ×ボタンの判定（右上、クリック範囲を拡大）
+        const closeButtonX = centerX + slotWidth / 2 - 30;
+        const closeButtonY = centerY - slotHeight / 2 + 5;
+        const closeButtonSize = 24;
+        const closeButtonPadding = 10;
+        if (
+          sx >= closeButtonX - closeButtonPadding && 
+          sx <= closeButtonX + closeButtonSize + closeButtonPadding &&
+          sy >= closeButtonY - closeButtonPadding && 
+          sy <= closeButtonY + closeButtonSize + closeButtonPadding
+        ) {
+          closeSlotMachine();
+          return; // ×ボタンクリック：スロットを閉じて終了
+        }
+        
+        // 2. 回すボタンの判定
+        const allStopped = slot.reels.every(r => r.stopped);
+        const elapsed = (Date.now() - slot.startTime) / 1000;
+        const canSpin = allStopped && elapsed >= 3 && totalCoins >= 10;
+        
+        const buttonWidth = 100;
+        const buttonHeight = 35;
+        const buttonX = centerX - buttonWidth / 2;
+        const buttonY = centerY + slotHeight / 2 - 65;
+        
+        if (
+          sx >= buttonX && sx <= buttonX + buttonWidth &&
+          sy >= buttonY && sy <= buttonY + buttonHeight
+        ) {
+          if (canSpin) {
+            startSlotAnimation(slot.x, slot.y);
+          }
+          return; // 回すボタンクリック：スロット再開（または無効）して終了
+        }
+        
+        // 3. ×ボタンでも回すボタンでもない場合：何もせず終了
+        // → 下のオブジェクト選択を完全に無効化
+        return;
+      } else {
+        // スロット範囲外をクリック：スロットを閉じる
+        closeSlotMachine();
+        // そのまま下の処理に進む（オブジェクト選択など）
+      }
+    }
+
     const { mx, my } = screenToMap(sx, sy, rect.width, rect.height);
 
     // ポインター情報を先に登録
@@ -3646,6 +4504,37 @@ export default function Home() {
   };
 
   const onPointerUp = (e: React.PointerEvent) => {
+    // スロットマシン表示中はオブジェクト選択を完全にブロック
+    if (slotAnimations.length > 0) {
+      const canvas = canvasRef.current;
+      if (canvas) {
+        const rect = canvas.getBoundingClientRect();
+        const sx = e.clientX - rect.left;
+        const sy = e.clientY - rect.top;
+        const slot = slotAnimations[0];
+        const centerX = rect.width / 2;
+        const centerY = slot.y;
+        const slotWidth = 280;
+        const slotHeight = 240;
+        const slotLeft = centerX - slotWidth / 2 - 20;
+        const slotRight = centerX + slotWidth / 2 + 20;
+        const slotTop = centerY - slotHeight / 2 - 40;
+        const slotBottom = centerY + slotHeight / 2 + 20;
+        const isInSlotArea = sx >= slotLeft && sx <= slotRight && sy >= slotTop && sy <= slotBottom;
+        
+        if (isInSlotArea) {
+          // スロット範囲内のクリックは全て無視
+          if (longPressTimerRef.current) {
+            clearTimeout(longPressTimerRef.current);
+            longPressTimerRef.current = null;
+          }
+          pointerStartRef.current = null;
+          pointersRef.current.delete(e.pointerId);
+          return;
+        }
+      }
+    }
+    
     // 長押しタイマーをクリア
     if (longPressTimerRef.current) {
       clearTimeout(longPressTimerRef.current);
@@ -3784,6 +4673,31 @@ export default function Home() {
 
   // タップ選択（短いクリック/タップ）
   const onClick = (e: React.MouseEvent) => {
+    // スロットマシン表示中はオブジェクト選択を完全にブロック
+    if (slotAnimations.length > 0) {
+      const canvas = canvasRef.current;
+      if (canvas) {
+        const rect = canvas.getBoundingClientRect();
+        const sx = e.clientX - rect.left;
+        const sy = e.clientY - rect.top;
+        const slot = slotAnimations[0];
+        const centerX = rect.width / 2;
+        const centerY = slot.y;
+        const slotWidth = 280;
+        const slotHeight = 240;
+        const slotLeft = centerX - slotWidth / 2 - 20;
+        const slotRight = centerX + slotWidth / 2 + 20;
+        const slotTop = centerY - slotHeight / 2 - 40;
+        const slotBottom = centerY + slotHeight / 2 + 20;
+        const isInSlotArea = sx >= slotLeft && sx <= slotRight && sy >= slotTop && sy <= slotBottom;
+        
+        if (isInSlotArea) {
+          // スロット範囲内のクリックは全て無視
+          return;
+        }
+      }
+    }
+    
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -3985,13 +4899,14 @@ export default function Home() {
       
       const animationType = getActiveAnimation(hit);
       
-      // 隕石以外のアニメーションをクリックした場合のみクリア
-      if (animationType !== 'meteor') {
+      // 隕石とコイン以外のアニメーションをクリックした場合のみクリア
+      if (animationType !== 'meteor' && animationType !== 'coin') {
         // 他のオブジェクトをクリックした場合、進行中のアニメーションをクリア
         setFireworks([]);
         setSparkles([]);
         setCherryBlossoms([]);
         setMeteors([]);
+        setCoinDrops([]);
       }
       
       if (animationType === 'birthday') {
@@ -4019,6 +4934,14 @@ export default function Home() {
       } else if (animationType === 'meteor') {
         // 隕石アニメーション
         startMeteorAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (animationType === 'coin') {
+        // コインアニメーション
+        startCoinAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (animationType === 'slot') {
+        // スロットアニメーション
+        startSlotAnimation(hit);
         setSelectedId(hit?.id ? String(hit.id) : null);
       } else {
         // アニメーションなし：通常の選択
@@ -5161,6 +6084,63 @@ export default function Home() {
                     textShadow: "0 1px 2px rgba(0,0,0,0.3)"
                   }}>
                     {bearTrapMaxDamage.toLocaleString()}
+                  </div>
+                </div>
+              )}
+              
+              {/* コイン獲得枚数 */}
+              {!isEditMode && totalCoins > 0 && (
+                <div
+                  style={{
+                    padding: "12px 16px 12px 32px",
+                    fontSize: "14px",
+                    background: isDarkMode ? "#1f2937" : "white",
+                    color: isDarkMode ? "#e5e7eb" : "#1f2937",
+                    borderTop: `1px solid ${isDarkMode ? "#374151" : "#e5e7eb"}`,
+                  }}
+                >
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                    <span style={{ fontSize: "12px", color: isDarkMode ? "#9ca3af" : "#6b7280" }}>🪙 コイン獲得枚数</span>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setTotalCoins(0);
+                        setCoinDrops([]); // アニメーションもクリア
+                        try {
+                          localStorage.removeItem('totalCoins');
+                        } catch (err) {
+                          console.error('Failed to remove totalCoins:', err);
+                        }
+                      }}
+                      style={{
+                        padding: "4px 8px",
+                        fontSize: "11px",
+                        border: "1px solid #ef4444",
+                        background: "transparent",
+                        color: "#ef4444",
+                        borderRadius: "4px",
+                        cursor: "pointer",
+                        transition: "all 0.2s",
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = "#ef4444";
+                        e.currentTarget.style.color = "white";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = "transparent";
+                        e.currentTarget.style.color = "#ef4444";
+                      }}
+                    >
+                      リセット
+                    </button>
+                  </div>
+                  <div style={{ 
+                    fontSize: "18px", 
+                    fontWeight: "bold", 
+                    color: "#fbbf24",
+                    textShadow: "0 1px 2px rgba(0,0,0,0.3)"
+                  }}>
+                    {totalCoins.toLocaleString()}
                   </div>
                 </div>
               )}
@@ -6317,6 +7297,8 @@ export default function Home() {
                       <option value="birthday">誕生日じゃないけど</option>
                       <option value="cherryblossom">花吹雪</option>
                       <option value="meteor">隕石</option>
+                      <option value="coin">コイン</option>
+                      <option value="slot">スロット</option>
                     </select>
                   </div>
                   
