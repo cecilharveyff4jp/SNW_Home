@@ -233,6 +233,12 @@ export default function Home() {
     }>;  
     startTime: number;
     totalCoins: number; // このドロップで獲得したコイン枚数
+    textPhysics?: { // 「+N枚」テキストの物理演算
+      x: number;
+      y: number;
+      vx: number;
+      vy: number;
+    };
   };
   const [coinDrops, setCoinDrops] = useState<CoinDrop[]>([]);
   const coinDropsAnimationRef = useRef<number | null>(null);
@@ -259,6 +265,28 @@ export default function Home() {
   };
   const [slotAnimations, setSlotAnimations] = useState<SlotAnimation[]>([]);
   const slotAnimationsRef = useRef<number | null>(null);
+
+  // 猫アニメーション用
+  type CatAnimation = {
+    from: { x: number; y: number }; // 出発地（マップ座標）
+    to: { x: number; y: number }; // 目的地（マップ座標）
+    progress: number; // 0-1のアニメーション進捗
+    startTime: number; // アニメーション開始時刻
+    pawPrints: Array<{ // 足跡の配列
+      x: number; // マップ座標X
+      y: number; // マップ座標Y
+      rotation: number; // 回転角度（ラジアン）
+      scale: number; // スケール
+      alpha: number; // 透明度
+    }>;
+    showCat: boolean; // 猫を表示するか
+    catAlpha: number; // 猫の透明度
+  };
+  const [catAnimations, setCatAnimations] = useState<CatAnimation[]>([]);
+  const catAnimationsDataRef = useRef<CatAnimation[]>([]); // 最新のアニメーションデータ
+  const catAnimationRef = useRef<number | null>(null);
+  const catImageRef = useRef<HTMLImageElement | null>(null);
+  const pawImageRef = useRef<HTMLImageElement | null>(null);
 
   // カメラ：パン(tx,ty)は「画面座標系」での移動量（ピクセル）、scaleは倍率
   // 初期ズーム: 統一して1.0でスタート（SSRハイドレーションエラー回避）
@@ -407,6 +435,27 @@ export default function Home() {
     trapImg.onload = () => {
       bearTrapImageRef.current = trapImg;
       draw();
+    };
+    
+    // 猫と足跡の画像読み込み
+    const catImg = new Image();
+    catImg.src = `${basePath}/cat.webp`;
+    catImg.onload = () => {
+      catImageRef.current = catImg;
+      draw();
+    };
+    catImg.onerror = (e) => {
+      console.error('猫画像読み込みエラー:', e);
+    };
+    
+    const pawImg = new Image();
+    pawImg.src = `${basePath}/paw.webp`;
+    pawImg.onload = () => {
+      pawImageRef.current = pawImg;
+      draw();
+    };
+    pawImg.onerror = (e) => {
+      console.error('足跡画像読み込みエラー:', e);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -1737,8 +1786,9 @@ export default function Home() {
               }
             }
             
-            // 飛び散る破片・パーティクル
-            const particleCount = 30;
+            // 飛び散る破片・パーティクル（モバイル軽量化）
+            const isMobileDevice = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+            const particleCount = isMobileDevice ? 10 : 30;
             for (let i = 0; i < particleCount; i++) {
               const angle = (i / particleCount) * Math.PI * 2 + time / 300;
               const particlePhase = (time / 600 + i * 0.1) % 1;
@@ -1761,8 +1811,8 @@ export default function Home() {
               ctx.fill();
             }
             
-            // 地面の亀裂エフェクト（放射状の線）
-            const crackCount = 12;
+            // 地面の亀裂エフェクト（放射状の線・モバイル軽量化）
+            const crackCount = isMobileDevice ? 6 : 12;
             for (let i = 0; i < crackCount; i++) {
               const angle = (i / crackCount) * Math.PI * 2 + time / 1000;
               const crackPhase = ((time / 500 + i * 0.15) % 1);
@@ -2571,28 +2621,77 @@ export default function Home() {
               
               ctx.globalAlpha = damageAlpha;
               
-              const damageText = damage.toLocaleString();
+              // キュートな熊（ダメージ0）の場合はハートを表示
+              const isCuteBear = anim.bearIndex === 0;
               
-              // 黒い影（背景）を先に描画
-              ctx.shadowColor = "rgba(0, 0, 0, 0.8)";
-              ctx.shadowBlur = 8;
-              ctx.shadowOffsetX = 3;
-              ctx.shadowOffsetY = 3;
-              
-              // 白い縁取りを描画
-              ctx.strokeStyle = '#FFFFFF';
-              ctx.lineWidth = isCritical ? 6 : 4;
-              ctx.strokeText(damageText, offsetX, offsetY);
-              
-              // 影をリセット
-              ctx.shadowColor = "transparent";
-              ctx.shadowBlur = 0;
-              ctx.shadowOffsetX = 0;
-              ctx.shadowOffsetY = 0;
-              
-              // クリティカルはコーラルピンク、通常はローズピンク（アプリの雰囲気に合わせて）
-              ctx.fillStyle = isCritical ? '#FF8C8C' : '#FF69B4';
-              ctx.fillText(damageText, offsetX, offsetY);
+              if (isCuteBear) {
+                // ハートを描画
+                const heartSize = isCritical ? bearSize * 0.5 : bearSize * 0.4;
+                
+                ctx.save();
+                ctx.translate(offsetX, offsetY);
+                ctx.rotate((damageIndex * 30 + Date.now() / 100) * Math.PI / 180); // 回転アニメーション
+                
+                // ハートの色（パステルピンク）
+                const heartColors = [
+                  'rgba(255,182,193,1)', // ライトピンク
+                  'rgba(255,192,203,1)', // ピンク
+                  'rgba(221,160,221,1)', // プラム
+                ];
+                const heartColor = heartColors[damageIndex % 3];
+                
+                // 発光エフェクト
+                ctx.shadowColor = heartColor;
+                ctx.shadowBlur = 20;
+                ctx.fillStyle = heartColor;
+                
+                // ハート形を描画
+                ctx.beginPath();
+                const topCurveHeight = heartSize * 0.3;
+                ctx.moveTo(0, topCurveHeight);
+                ctx.bezierCurveTo(-heartSize / 2, -topCurveHeight, -heartSize, topCurveHeight / 2, 0, heartSize);
+                ctx.bezierCurveTo(heartSize, topCurveHeight / 2, heartSize / 2, -topCurveHeight, 0, topCurveHeight);
+                ctx.closePath();
+                ctx.fill();
+                
+                // 中心にハイライト
+                ctx.shadowBlur = 0;
+                ctx.fillStyle = 'rgba(255,255,255,0.6)';
+                ctx.beginPath();
+                ctx.arc(-heartSize * 0.2, -heartSize * 0.1, heartSize * 0.15, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.restore();
+              } else {
+                // 通常のダメージ数字を表示
+                const damageText = damage.toLocaleString();
+                
+                // モバイル用軽量化：影を簡略化
+                const isMobileDevice = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+                
+                if (!isMobileDevice) {
+                  // PCのみ影を描画
+                  ctx.shadowColor = "rgba(0, 0, 0, 0.6)";
+                  ctx.shadowBlur = 4;
+                  ctx.shadowOffsetX = 2;
+                  ctx.shadowOffsetY = 2;
+                }
+                
+                // 白い縁取りを描画
+                ctx.strokeStyle = '#FFFFFF';
+                ctx.lineWidth = isCritical ? 5 : 3;
+                ctx.strokeText(damageText, offsetX, offsetY);
+                
+                // 影をリセット
+                ctx.shadowColor = "transparent";
+                ctx.shadowBlur = 0;
+                ctx.shadowOffsetX = 0;
+                ctx.shadowOffsetY = 0;
+                
+                // クリティカルはコーラルピンク、通常はローズピンク（アプリの雰囲気に合わせて）
+                ctx.fillStyle = isCritical ? '#FF8C8C' : '#FF69B4';
+                ctx.fillText(damageText, offsetX, offsetY);
+              }
             }
           });
           
@@ -2604,6 +2703,64 @@ export default function Home() {
     }
 
     ctx.restore(); // カメラ変換終了
+
+    // 猫アニメーションの描画（マップ座標をスクリーン座標に変換）
+    const currentCatAnimations = catAnimationsDataRef.current;
+    if (currentCatAnimations.length > 0 && pawImageRef.current && catImageRef.current) {
+      currentCatAnimations.forEach((anim) => {
+        // 足跡を描画
+        anim.pawPrints.forEach((paw, pawIndex) => {
+          // マップ座標（ピクセル）からスクリーン座標に変換
+          const pawMapX = paw.x * cell;
+          const pawMapY = paw.y * cell;
+          const { sx: pawScreenX, sy: pawScreenY } = mapToScreen(pawMapX, pawMapY, viewW, viewH);
+          
+          // 古い足跡ほど薄くなる（最初の足跡＝インデックス0が最も薄い）
+          const fadeRatio = pawIndex / Math.max(1, anim.pawPrints.length - 1);
+          const fadeAlpha = 0.3 + fadeRatio * 0.7; // 0.3（最初）〜 1.0（最後）
+          
+          ctx.save();
+          ctx.translate(pawScreenX, pawScreenY);
+          ctx.rotate(paw.rotation);
+          ctx.globalAlpha = paw.alpha * fadeAlpha * 0.7;
+          
+          const pawSize = 11 * paw.scale; // サイズを小さく
+          ctx.drawImage(
+            pawImageRef.current!,
+            -pawSize / 2,
+            -pawSize / 2,
+            pawSize,
+            pawSize
+          );
+          ctx.restore();
+        });
+        
+        // 猫を描画
+        if (anim.showCat) {
+          const catMapX = anim.to.x * cell;
+          const catMapY = anim.to.y * cell;
+          const { sx: catScreenX, sy: catScreenY } = mapToScreen(catMapX, catMapY, viewW, viewH);
+          
+          ctx.save();
+          ctx.translate(catScreenX, catScreenY);
+          ctx.globalAlpha = anim.catAlpha;
+          
+          // ふわっと浮かぶアニメーション
+          const floatOffset = Math.sin(Date.now() / 300) * 5;
+          ctx.translate(0, floatOffset - 30);
+          
+          const catSize = 60;
+          ctx.drawImage(
+            catImageRef.current!,
+            -catSize / 2,
+            -catSize / 2,
+            catSize,
+            catSize
+          );
+          ctx.restore();
+        }
+      });
+    }
 
     // 花火アニメーションの描画（マップ座標をスクリーン座標に変換）
     if (fireworks.length > 0) {
@@ -2771,63 +2928,94 @@ export default function Home() {
     // コイン描画
     if (coinDrops.length > 0) {
       coinDrops.forEach((drop, dropIndex) => {
-        // 獲得枚数表示（アニメーション開始後2秒間表示）
         const elapsed = (Date.now() - drop.startTime) / 1000;
-        if (elapsed < 2.5) {
+        
+        // 「所有：NN枚」テキスト（1秒間表示）
+        if (elapsed < 1.0) {
           ctx.save();
-          ctx.translate(drop.x, drop.y);
+          ctx.translate(drop.x, drop.y - 40);
           
-          // 獲得枚数のテキスト（1行目）
-          const displayText = drop.totalCoins >= 100 
-            ? `🎉 JACKPOT! ${drop.totalCoins}枚 🎉`
-            : `+${drop.totalCoins}枚`;
-          
-          // フォントサイズ（大当たりは大きく）
-          const fontSize = drop.totalCoins >= 100 ? 32 : 24;
-          ctx.font = `bold ${fontSize}px Arial`;
+          const totalText = `（所有：${totalCoins.toLocaleString()}枚）`;
+          const totalFontSize = drop.totalCoins >= 100 ? 18 : 16;
+          ctx.font = `bold ${totalFontSize}px Arial`;
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
           
-          // 影（より目立つように）
+          // フェードアウト効果
+          const fadeAlpha = elapsed < 0.7 ? 1 : (1 - (elapsed - 0.7) / 0.3);
+          ctx.globalAlpha = fadeAlpha;
+          
+          // 影
           ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
           ctx.shadowBlur = 10;
           ctx.shadowOffsetX = 3;
           ctx.shadowOffsetY = 3;
           
-          // テキストの縁取り（白）
-          ctx.strokeStyle = 'white';
-          ctx.lineWidth = 8;
-          ctx.strokeText(displayText, 0, 50);
-          
-          // テキスト本体（金色または虹色）
-          if (drop.totalCoins >= 100) {
-            const gradient = ctx.createLinearGradient(-100, 50, 100, 50);
-            gradient.addColorStop(0, '#ff0080');
-            gradient.addColorStop(0.25, '#ff8c00');
-            gradient.addColorStop(0.5, '#ffd700');
-            gradient.addColorStop(0.75, '#00ff00');
-            gradient.addColorStop(1, '#0080ff');
-            ctx.fillStyle = gradient;
-          } else {
-            ctx.fillStyle = '#ffd700';
-          }
-          ctx.fillText(displayText, 0, 50);
-          
-          // 2行目：累積枚数表示
-          const totalText = `（所有：${totalCoins.toLocaleString()}枚）`;
-          const totalFontSize = drop.totalCoins >= 100 ? 18 : 16;
-          ctx.font = `bold ${totalFontSize}px Arial`;
-          
-          // 2行目の縁取り（白）
+          // 縁取り（白）
           ctx.strokeStyle = 'white';
           ctx.lineWidth = 6;
-          ctx.strokeText(totalText, 0, 78);
+          ctx.strokeText(totalText, 0, 0);
           
-          // 2行目の本体（濃い金色）
+          // 本体（濃い金色）
           ctx.fillStyle = '#ffa500';
-          ctx.fillText(totalText, 0, 78);
+          ctx.fillText(totalText, 0, 0);
           
           ctx.restore();
+        }
+        
+        // 「+N枚」テキスト（物理演算で弾き飛ばす）
+        if (drop.textPhysics && elapsed < 3.0) {
+          const textElapsed = elapsed;
+          const gravity = 800;
+          const textY = drop.textPhysics.y + drop.textPhysics.vy * textElapsed + 0.5 * gravity * textElapsed * textElapsed;
+          const textX = drop.textPhysics.x + drop.textPhysics.vx * textElapsed;
+          
+          // フェードアウト効果
+          const fadeAlpha = textElapsed < 2.0 ? 1 : (1 - (textElapsed - 2.0) / 1.0);
+          
+          if (fadeAlpha > 0) {
+            ctx.save();
+            ctx.translate(textX, textY);
+            ctx.globalAlpha = fadeAlpha;
+            
+            // 獲得枚数のテキスト
+            const displayText = drop.totalCoins >= 100 
+              ? `🎉 JACKPOT! ${drop.totalCoins}枚 🎉`
+              : `+${drop.totalCoins}枚`;
+            
+            // フォントサイズ（大当たりは大きく）
+            const fontSize = drop.totalCoins >= 100 ? 32 : 24;
+            ctx.font = `bold ${fontSize}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            // 影
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+            ctx.shadowBlur = 10;
+            ctx.shadowOffsetX = 3;
+            ctx.shadowOffsetY = 3;
+            
+            // テキストの縁取り（白）
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 8;
+            ctx.strokeText(displayText, 0, 0);
+            
+            // テキスト本体（金色または虹色）
+            if (drop.totalCoins >= 100) {
+              const gradient = ctx.createLinearGradient(-100, 0, 100, 0);
+              gradient.addColorStop(0, '#ff0080');
+              gradient.addColorStop(0.25, '#ff8c00');
+              gradient.addColorStop(0.5, '#ffd700');
+              gradient.addColorStop(0.75, '#00ff00');
+              gradient.addColorStop(1, '#0080ff');
+              ctx.fillStyle = gradient;
+            } else {
+              ctx.fillStyle = '#ffd700';
+            }
+            ctx.fillText(displayText, 0, 0);
+            
+            ctx.restore();
+          }
         }
         
         // 各コインを描画
@@ -3204,7 +3392,7 @@ export default function Home() {
     // 3. Animationフィールド
     if (obj.Animation && obj.Animation.trim()) {
       const anim = obj.Animation.toLowerCase();
-      if (['fireworks', 'sparkle', 'beartrap', 'birthday', 'cherryblossom', 'meteor', 'coin', 'slot'].includes(anim)) {
+      if (['fireworks', 'sparkle', 'beartrap', 'birthday', 'cherryblossom', 'meteor', 'coin', 'slot', 'cat'].includes(anim)) {
         return anim;
       }
     }
@@ -3476,6 +3664,12 @@ export default function Home() {
       coins: coinsList,
       startTime: Date.now(),
       totalCoins: coinCount,
+      textPhysics: {
+        x: startX,
+        y: startY,
+        vx: (Math.random() - 0.5) * 200, // -100 ~ 100の横方向速度
+        vy: -300 - Math.random() * 200, // -300 ~ -500の上方向初速
+      },
     }]);
     
     // コイン総数を加算してlocalStorageに保存
@@ -3621,7 +3815,8 @@ export default function Home() {
 
     // === ダメージ計算は1回だけ（全都市共通） ===
     const randomSeed = Math.random();
-    const maxDamagesBase = 10 + Math.floor(randomSeed * 90); // 10-100
+    const isMobileDevice = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    const maxDamagesBase = 10 + Math.floor(randomSeed * 90); // 常に10-100個で計算（合計は同じ）
     const now = Date.now();
     const timeBonus = 1.0 + (now % 10000000) / 1000000;
     
@@ -3638,6 +3833,11 @@ export default function Home() {
       calculatedTotalDamage += damage;
       damagesArray.push({ damage, isCritical });
     }
+    
+    // モバイルでは表示用に10個だけ選択（合計は変わらない）
+    const displayDamagesArray = isMobileDevice 
+      ? damagesArray.filter((_, i) => i % Math.floor(damagesArray.length / 10) === 0).slice(0, 10)
+      : damagesArray;
 
     // === 各都市からのアニメーションを作成（ダメージは共通、熊はランダム） ===
     const randomBearIndex = Math.floor(Math.random() * 9); // 0-8のランダムな熊を選択
@@ -3649,7 +3849,10 @@ export default function Home() {
     }
     
     const newAnimations: SoldierAnimation[] = selectedCities.map(city => {
-      const soldierCount = 1 + Math.floor(Math.random() * 4);
+      // モバイルでは兵士数を1-2人に削減、PCは1-5人
+      const soldierCount = isMobileDevice 
+        ? 1 + Math.floor(Math.random() * 2) 
+        : 1 + Math.floor(Math.random() * 4);
       const soldiers = [];
       
       const types: Array<'shield' | 'archer' | 'spear'> = ['shield', 'archer', 'spear'];
@@ -3678,7 +3881,7 @@ export default function Home() {
         startTime: Date.now(),
         randomSeed: randomSeed, // ダメージ計算用の固定シード
         totalDamage: calculatedTotalDamage, // 初期値として設定（固定値）
-        damages: damagesArray, // 個別ダメージ配列（固定値）
+        damages: displayDamagesArray, // 表示用ダメージ配列（モバイルは10個、PCは全部）
         bearIndex: randomBearIndex, // 全アニメーションで同じ熊を使用
         soldiers,
         recordSaved: false, // 記録保存フラグを初期化
@@ -3753,6 +3956,172 @@ export default function Home() {
       }
     };
   }, [soldierAnimations.length > 0 ? soldierAnimations[0]?.startTime : 0]);
+
+  // 猫アニメーション開始関数
+  const startCatAnimation = (fromObj: Obj, toObj: Obj) => {
+    const newAnimation: CatAnimation = {
+      from: { 
+        x: num(fromObj.x, 0) + num(fromObj.w, 1) / 2, 
+        y: num(fromObj.y, 0) + num(fromObj.h, 1) / 2 
+      }, // オブジェクトの真の中心（幅と高さを考慮）
+      to: { 
+        x: num(toObj.x, 0) + num(toObj.w, 1) / 2, 
+        y: num(toObj.y, 0) + num(toObj.h, 1) / 2 
+      }, // ターゲットの真の中心
+      progress: 0,
+      startTime: Date.now(),
+      pawPrints: [],
+      showCat: false,
+      catAlpha: 0,
+    };
+    
+    setCatAnimations([newAnimation]);
+    catAnimationsDataRef.current = [newAnimation];
+    requestDraw(); // 即座に描画
+  };
+
+  // 猫アニメーションループ
+  useEffect(() => {
+    if (catAnimations.length === 0) return;
+
+    const animate = () => {
+      const now = Date.now();
+      let allComplete = true;
+
+      const updated = catAnimations.map(anim => {
+        const elapsed = now - anim.startTime;
+        const duration = 5000; // 5秒
+        const progress = Math.min(elapsed / duration, 1);
+        
+        if (progress < 1) allComplete = false;
+        
+        // 足跡を追加（progress < 0.8の間、一定間隔で）
+        let updatedPawPrints = anim.pawPrints;
+        
+        // 距離に応じて足跡の数を調整（10-50個）
+        const dx = anim.to.x - anim.from.x;
+        const dy = anim.to.y - anim.from.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        const maxPawCount = Math.max(10, Math.min(50, Math.floor(distance * 3))); // 距離×3、最小10、最大50
+        
+        const targetPawCount = Math.floor(Math.min(progress / 0.8, 1) * maxPawCount);
+        
+        if (updatedPawPrints.length < targetPawCount) {
+          const newPawPrints = [...updatedPawPrints];
+          
+          while (newPawPrints.length < targetPawCount) {
+            const t = newPawPrints.length / maxPawCount; // 現在の足跡の位置（0-1）
+            
+            // ベジェ曲線で大きく回り道するパス（Uターンや円を描く動き）
+            const seed = anim.startTime;
+            
+            // ランダムな制御点を2つ作成（startTimeをシードにして再現性を持たせる）
+            const angle1 = Math.sin(seed * 0.001) * Math.PI * 2;
+            const angle2 = Math.cos(seed * 0.0015) * Math.PI * 2;
+            const distance = Math.sqrt(Math.pow(anim.to.x - anim.from.x, 2) + Math.pow(anim.to.y - anim.from.y, 2));
+            const controlDistance = distance * 0.6; // 制御点までの距離
+            
+            const cp1x = anim.from.x + Math.cos(angle1) * controlDistance;
+            const cp1y = anim.from.y + Math.sin(angle1) * controlDistance;
+            const cp2x = anim.to.x + Math.cos(angle2) * controlDistance;
+            const cp2y = anim.to.y + Math.sin(angle2) * controlDistance;
+            
+            // 3次ベジェ曲線の計算
+            const mt = 1 - t;
+            const baseX = mt * mt * mt * anim.from.x +
+                         3 * mt * mt * t * cp1x +
+                         3 * mt * t * t * cp2x +
+                         t * t * t * anim.to.x;
+            const baseY = mt * mt * mt * anim.from.y +
+                         3 * mt * mt * t * cp1y +
+                         3 * mt * t * t * cp2y +
+                         t * t * t * anim.to.y;
+            
+            // 細かい揺らぎを追加
+            const dx = anim.to.x - anim.from.x;
+            const dy = anim.to.y - anim.from.y;
+            const perpX = -dy;
+            const perpY = dx;
+            const perpLen = Math.sqrt(perpX * perpX + perpY * perpY) || 1;
+            
+            const wiggle = Math.sin(newPawPrints.length * 1.2 + seed * 0.001) * 0.3;
+            
+            const x = baseX + (perpX / perpLen) * wiggle;
+            const y = baseY + (perpY / perpLen) * wiggle;
+            
+            // 進行方向（接線方向）を計算
+            const dt = 0.01;
+            const nextT = Math.min(t + dt, 1);
+            const nextMt = 1 - nextT;
+            const nextBaseX = nextMt * nextMt * nextMt * anim.from.x +
+                             3 * nextMt * nextMt * nextT * cp1x +
+                             3 * nextMt * nextT * nextT * cp2x +
+                             nextT * nextT * nextT * anim.to.x;
+            const nextBaseY = nextMt * nextMt * nextMt * anim.from.y +
+                             3 * nextMt * nextMt * nextT * cp1y +
+                             3 * nextMt * nextT * nextT * cp2y +
+                             nextT * nextT * nextT * anim.to.y;
+            const nextWiggle = Math.sin((newPawPrints.length + 1) * 1.2 + seed * 0.001) * 0.3;
+            const nextX = nextBaseX + (perpX / perpLen) * nextWiggle;
+            const nextY = nextBaseY + (perpY / perpLen) * nextWiggle;
+            
+            // 実際の進行方向（接線方向）の角度
+            const tangentAngle = Math.atan2(nextY - y, nextX - x);
+            
+            // 左右判定は回転用に保持
+            const isLeft = newPawPrints.length % 2 === 0;
+            
+            // 足跡の向きを調整（接線方向 + 40度補正）
+            const rotation = tangentAngle + Math.PI / 2 + (40 * Math.PI / 180);
+            
+            newPawPrints.push({
+              x,
+              y,
+              rotation,
+              scale: 0.9 + (Math.sin(newPawPrints.length * 0.5) * 0.1),
+              alpha: 1,
+            });
+          }
+          
+          updatedPawPrints = newPawPrints;
+        }
+        
+        // 猫を表示（progress >= 0.8）
+        let showCat = anim.showCat;
+        let catAlpha = anim.catAlpha;
+        if (progress >= 0.8) {
+          showCat = true;
+          // フェードイン
+          const fadeProgress = (progress - 0.8) / 0.2;
+          catAlpha = Math.min(fadeProgress, 1);
+        }
+        
+        return { ...anim, progress, pawPrints: updatedPawPrints, showCat, catAlpha };
+      });
+
+      catAnimationsDataRef.current = updated; // refを即座に更新
+      setCatAnimations(updated);
+      requestDraw(); // 画面を更新
+
+      if (!allComplete) {
+        catAnimationRef.current = requestAnimationFrame(animate);
+      } else {
+        // アニメーション完了後、少し待ってからクリア
+        setTimeout(() => {
+          setCatAnimations([]);
+        }, 1000);
+      }
+    };
+
+    catAnimationRef.current = requestAnimationFrame(animate);
+
+    return () => {
+      if (catAnimationRef.current) {
+        cancelAnimationFrame(catAnimationRef.current);
+        catAnimationRef.current = null;
+      }
+    };
+  }, [catAnimations.length > 0 ? catAnimations[0]?.startTime : 0, bearTrapMaxDamage]);
 
   // 花火アニメーションループ
   useEffect(() => {
@@ -4778,7 +5147,10 @@ export default function Home() {
     if (!isEditMode && !hit) {
       setFireworks([]);
       setSparkles([]);
+      setCatAnimations([]);
+      catAnimationsDataRef.current = [];
       setSelectedId(null);
+      requestDraw();
       return;
     }
     
@@ -4907,6 +5279,8 @@ export default function Home() {
         setCherryBlossoms([]);
         setMeteors([]);
         setCoinDrops([]);
+        setCatAnimations([]);
+        catAnimationsDataRef.current = []; // refもクリア
       }
       
       if (animationType === 'birthday') {
@@ -4943,10 +5317,59 @@ export default function Home() {
         // スロットアニメーション
         startSlotAnimation(hit);
         setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (animationType === 'cat') {
+        // 猫アニメーション：画面内に見えている都市をターゲットに
+        
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        
+        const rect = canvas.getBoundingClientRect();
+        const viewW = rect.width;
+        const viewH = rect.height;
+        
+        // 画面内に見えているオブジェクトを取得
+        const visibleObjects = objects.filter(obj => {
+          // 自分自身も含める（散歩して帰ってくる動作を許可）
+          if (obj.type !== 'CITY') return false; // 都市のみ
+          
+          // オブジェクトの中心座標（マップ座標）
+          const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell;
+          const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell;
+          
+          // スクリーン座標に変換
+          const { sx, sy } = mapToScreen(objMapX, objMapY, viewW, viewH);
+          
+          // 画面内にあるかチェック（マージン付き）
+          const margin = 100; // 画面端から100px以内も含める
+          return sx >= -margin && sx <= viewW + margin && 
+                 sy >= -margin && sy <= viewH + margin;
+        });
+        
+        if (visibleObjects.length > 0) {
+          // ランダムに都市を選択
+          const randomTarget = visibleObjects[Math.floor(Math.random() * visibleObjects.length)];
+          startCatAnimation(hit, randomTarget);
+        }
+        setSelectedId(hit?.id ? String(hit.id) : null);
       } else {
         // アニメーションなし：通常の選択
         setSelectedId(hit?.id ? String(hit.id) : null);
       }
+      return;
+    }
+    
+    // 参照モード時に空欄をクリックした場合、アニメーションをクリア
+    if (!isEditMode && !hit) {
+      setFireworks([]);
+      setSparkles([]);
+      setCherryBlossoms([]);
+      setMeteors([]);
+      setCoinDrops([]);
+      setCatAnimations([]);
+      catAnimationsDataRef.current = [];
+      setSelectedId(null);
+      // requestDrawを呼び出して即座に反映
+      requestDraw();
       return;
     }
     
@@ -4959,9 +5382,31 @@ export default function Home() {
         // 他の場所をクリック：矢印を閉じて選択を変更
         setShowMoveArrows(null);
         setSelectedId(hit?.id ? String(hit.id) : null);
+        
+        // アニメーションをクリア（空欄クリック時も含む）
+        if (!hit || !getActiveAnimation(hit)) {
+          setFireworks([]);
+          setSparkles([]);
+          setCherryBlossoms([]);
+          setMeteors([]);
+          setCoinDrops([]);
+          setCatAnimations([]);
+          catAnimationsDataRef.current = [];
+        }
       }
     } else {
       setSelectedId(hit?.id ? String(hit.id) : null);
+      
+      // アニメーションをクリア（空欄クリック時も含む）
+      if (!hit || !getActiveAnimation(hit)) {
+        setFireworks([]);
+        setSparkles([]);
+        setCherryBlossoms([]);
+        setMeteors([]);
+        setCoinDrops([]);
+        setCatAnimations([]);
+        catAnimationsDataRef.current = [];
+      }
     }
   };
 
@@ -5115,8 +5560,6 @@ export default function Home() {
 
       const actorName = "anonymous"; // 常にanonymousで保存
 
-      console.log("保存開始:", { base, actorName, objectsCount: objects.length });
-
       const res = await fetch(`${base}?action=saveMap`, {
         method: "POST",
         headers: { "Content-Type": "text/plain" },
@@ -5135,9 +5578,7 @@ export default function Home() {
         }),
       });
 
-      console.log("レスポンスステータス:", res.status);
       const text = await res.text();
-      console.log("レスポンス本文:", text);
 
       let json;
       try {
@@ -7299,6 +7740,7 @@ export default function Home() {
                       <option value="meteor">隕石</option>
                       <option value="coin">コイン</option>
                       <option value="slot">スロット</option>
+                      <option value="cat">猫</option>
                     </select>
                   </div>
                   
