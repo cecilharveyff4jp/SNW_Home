@@ -478,6 +478,475 @@ export default function Home() {
   const [magicCircleAnimations, setMagicCircleAnimations] = useState<MagicCircleAnimation[]>([]);
   const magicCircleAnimationRef = useRef<number | null>(null);
 
+  // 炎アニメーション用
+  type FlameAnimation = {
+    x: number;
+    y: number;
+    mapX: number;
+    mapY: number;
+    flames: Array<{
+      offsetX: number;
+      offsetY: number;
+      size: number;
+      vy: number;
+      opacity: number;
+      color: string;
+      life: number;
+      flicker: number;
+    }>;
+    startTime: number;
+    targetObj: Obj;
+  };
+  const [flameAnimations, setFlameAnimations] = useState<FlameAnimation[]>([]);
+  const flameAnimationRef = useRef<number | null>(null);
+
+  // 雷アニメーション用
+  type ThunderAnimation = {
+    segments: Array<{
+      x: number;
+      y: number;
+      endX: number;
+      endY: number;
+      alpha: number;
+      thickness: number;
+    }>;
+    startTime: number;
+    life: number;
+  };
+  const [thunderAnimations, setThunderAnimations] = useState<ThunderAnimation[]>([]);
+  const thunderAnimationRef = useRef<number | null>(null);
+
+  // 波/水しぶきアニメーション用
+  type WaveAnimation = {
+    x: number;
+    y: number;
+    mapX: number;
+    mapY: number;
+    drops: Array<{
+      offsetX: number;
+      offsetY: number;
+      vx: number;
+      vy: number;
+      size: number;
+      opacity: number;
+      life: number;
+    }>;
+    rings: Array<{
+      radius: number;
+      alpha: number;
+      speed: number;
+    }>;
+    startTime: number;
+    targetObj: Obj;
+  };
+  const [waveAnimations, setWaveAnimations] = useState<WaveAnimation[]>([]);
+  const waveAnimationRef = useRef<number | null>(null);
+
+  // 風/葉アニメーション用
+  type WindAnimation = {
+    leaves: Array<{
+      x: number;
+      y: number;
+      vx: number;
+      vy: number;
+      size: number;
+      rotation: number;
+      rotationSpeed: number;
+      opacity: number;
+      life: number;
+      color: string;
+    }>;
+    startTime: number;
+    duration: number;
+  };
+  const [windAnimations, setWindAnimations] = useState<WindAnimation[]>([]);
+  const windAnimationRef = useRef<number | null>(null);
+
+  // 煙/霧アニメーション用
+  type SmokeAnimation = {
+    x: number;
+    y: number;
+    mapX: number;
+    mapY: number;
+    clouds: Array<{
+      offsetX: number;
+      offsetY: number;
+      size: number;
+      vy: number;
+      opacity: number;
+      expansion: number;
+      life: number;
+    }>;
+    startTime: number;
+    targetObj: Obj;
+  };
+  const [smokeAnimations, setSmokeAnimations] = useState<SmokeAnimation[]>([]);
+  const smokeAnimationRef = useRef<number | null>(null);
+
+  // 竜巻アニメーション用
+  type TornadoAnimation = {
+    x: number;
+    y: number;
+    mapX: number;
+    mapY: number;
+    particles: Array<{
+      angle: number;
+      height: number;
+      radius: number;
+      speed: number;
+      size: number;
+      opacity: number;
+    }>;
+    rotation: number;
+    startTime: number;
+    life: number;
+    targetObj: Obj;
+  };
+  const [tornadoAnimations, setTornadoAnimations] = useState<TornadoAnimation[]>([]);
+  const tornadoAnimationRef = useRef<number | null>(null);
+
+  // 宝石アニメーション用
+  type GemAnimation = {
+    x: number;
+    y: number;
+    mapX: number;
+    mapY: number;
+    gems: Array<{
+      offsetX: number;
+      offsetY: number;
+      vx: number;
+      vy: number;
+      size: number;
+      rotation: number;
+      rotationSpeed: number;
+      color: string;
+      sparkle: number;
+      life: number;
+    }>;
+    startTime: number;
+    targetObj: Obj;
+  };
+  const [gemAnimations, setGemAnimations] = useState<GemAnimation[]>([]);
+  const gemAnimationRef = useRef<number | null>(null);
+
+  // 星の軌跡アニメーション用
+  type StarTrailAnimation = {
+    x: number;
+    y: number;
+    mapX: number;
+    mapY: number;
+    stars: Array<{
+      angle: number;
+      radius: number;
+      size: number;
+      speed: number;
+      trail: Array<{ x: number; y: number; alpha: number }>;
+      color: string;
+    }>;
+    rotation: number;
+    startTime: number;
+    life: number;
+    targetObj: Obj;
+  };
+  const [starTrailAnimations, setStarTrailAnimations] = useState<StarTrailAnimation[]>([]);
+  const starTrailAnimationRef = useRef<number | null>(null);
+
+  // 光の粒アニメーション用
+  type LightParticleAnimation = {
+    x: number;
+    y: number;
+    mapX: number;
+    mapY: number;
+    particles: Array<{
+      offsetX: number;
+      offsetY: number;
+      vx: number;
+      vy: number;
+      size: number;
+      opacity: number;
+      color: string;
+      life: number;
+    }>;
+    startTime: number;
+    targetObj: Obj;
+  };
+  const [lightParticleAnimations, setLightParticleAnimations] = useState<LightParticleAnimation[]>([]);
+  const lightParticleAnimationRef = useRef<number | null>(null);
+
+  // スパイラルアニメーション用
+  type SpiralAnimation = {
+    x: number;
+    y: number;
+    mapX: number;
+    mapY: number;
+    particles: Array<{
+      angle: number;
+      radius: number;
+      height: number;
+      size: number;
+      color: string;
+      opacity: number;
+    }>;
+    rotation: number;
+    expansion: number;
+    startTime: number;
+    life: number;
+    targetObj: Obj;
+  };
+  const [spiralAnimations, setSpiralAnimations] = useState<SpiralAnimation[]>([]);
+  const spiralAnimationRef = useRef<number | null>(null);
+
+  // 鳥/羽アニメーション用
+  type BirdAnimation = {
+    birds: Array<{
+      x: number;
+      y: number;
+      vx: number;
+      vy: number;
+      size: number;
+      wingPhase: number;
+      rotation: number;
+      life: number;
+    }>;
+    feathers: Array<{
+      x: number;
+      y: number;
+      vx: number;
+      vy: number;
+      rotation: number;
+      rotationSpeed: number;
+      size: number;
+      opacity: number;
+      life: number;
+    }>;
+    startTime: number;
+    duration: number;
+  };
+  const [birdAnimations, setBirdAnimations] = useState<BirdAnimation[]>([]);
+  const birdAnimationRef = useRef<number | null>(null);
+
+  // ゴーストアニメーション用
+  type GhostAnimation = {
+    x: number;
+    y: number;
+    mapX: number;
+    mapY: number;
+    ghosts: Array<{
+      offsetX: number;
+      offsetY: number;
+      vx: number;
+      vy: number;
+      size: number;
+      opacity: number;
+      wavePhase: number;
+      life: number;
+    }>;
+    startTime: number;
+    targetObj: Obj;
+  };
+  const [ghostAnimations, setGhostAnimations] = useState<GhostAnimation[]>([]);
+  const ghostAnimationRef = useRef<number | null>(null);
+
+  // 蜂アニメーション用
+  type BeeAnimation = {
+    x: number;
+    y: number;
+    mapX: number;
+    mapY: number;
+    bees: Array<{
+      offsetX: number;
+      offsetY: number;
+      angle: number;
+      radius: number;
+      speed: number;
+      wingPhase: number;
+      size: number;
+      life: number;
+    }>;
+    startTime: number;
+    targetObj: Obj;
+  };
+  const [beeAnimations, setBeeAnimations] = useState<BeeAnimation[]>([]);
+  const beeAnimationRef = useRef<number | null>(null);
+
+  // 蛍アニメーション用
+  type FireflyAnimation = {
+    x: number;
+    y: number;
+    mapX: number;
+    mapY: number;
+    fireflies: Array<{
+      offsetX: number;
+      offsetY: number;
+      vx: number;
+      vy: number;
+      glow: number;
+      glowPhase: number;
+      size: number;
+      life: number;
+    }>;
+    startTime: number;
+    targetObj: Obj;
+  };
+  const [fireflyAnimations, setFireflyAnimations] = useState<FireflyAnimation[]>([]);
+  const fireflyAnimationRef = useRef<number | null>(null);
+
+  // 爆発アニメーション用
+  type ExplosionAnimation = {
+    x: number;
+    y: number;
+    mapX: number;
+    mapY: number;
+    particles: Array<{
+      offsetX: number;
+      offsetY: number;
+      vx: number;
+      vy: number;
+      size: number;
+      color: string;
+      opacity: number;
+      life: number;
+    }>;
+    shockwave: {
+      radius: number;
+      alpha: number;
+    };
+    flash: number;
+    startTime: number;
+    targetObj: Obj;
+  };
+  const [explosionAnimations, setExplosionAnimations] = useState<ExplosionAnimation[]>([]);
+  const explosionAnimationRef = useRef<number | null>(null);
+
+  // ターゲットアニメーション用
+  type TargetAnimation = {
+    x: number;
+    y: number;
+    mapX: number;
+    mapY: number;
+    rings: Array<{
+      radius: number;
+      alpha: number;
+      speed: number;
+    }>;
+    crosshair: {
+      size: number;
+      rotation: number;
+      alpha: number;
+    };
+    startTime: number;
+    life: number;
+    targetObj: Obj;
+  };
+  const [targetAnimations, setTargetAnimations] = useState<TargetAnimation[]>([]);
+  const targetAnimationRef = useRef<number | null>(null);
+
+  // 怒りマークアニメーション用
+  type AngerAnimation = {
+    x: number;
+    y: number;
+    mapX: number;
+    mapY: number;
+    marks: Array<{
+      offsetX: number;
+      offsetY: number;
+      size: number;
+      rotation: number;
+      opacity: number;
+      bounce: number;
+      life: number;
+    }>;
+    startTime: number;
+    targetObj: Obj;
+  };
+  const [angerAnimations, setAngerAnimations] = useState<AngerAnimation[]>([]);
+  const angerAnimationRef = useRef<number | null>(null);
+
+  // 花びらアニメーション用
+  type PetalAnimation = {
+    x: number;
+    y: number;
+    mapX: number;
+    mapY: number;
+    petals: Array<{
+      offsetX: number;
+      offsetY: number;
+      vx: number;
+      vy: number;
+      rotation: number;
+      rotationSpeed: number;
+      size: number;
+      color: string;
+      opacity: number;
+      life: number;
+    }>;
+    startTime: number;
+    targetObj: Obj;
+  };
+  const [petalAnimations, setPetalAnimations] = useState<PetalAnimation[]>([]);
+  const petalAnimationRef = useRef<number | null>(null);
+
+  // ひまわりアニメーション用
+  type SunflowerAnimation = {
+    x: number;
+    y: number;
+    mapX: number;
+    mapY: number;
+    flowers: Array<{
+      offsetX: number;
+      offsetY: number;
+      size: number;
+      rotation: number;
+      growth: number;
+      opacity: number;
+      life: number;
+    }>;
+    seeds: Array<{
+      offsetX: number;
+      offsetY: number;
+      vx: number;
+      vy: number;
+      size: number;
+      rotation: number;
+      life: number;
+    }>;
+    startTime: number;
+    targetObj: Obj;
+  };
+  const [sunflowerAnimations, setSunflowerAnimations] = useState<SunflowerAnimation[]>([]);
+  const sunflowerAnimationRef = useRef<number | null>(null);
+
+  // バラアニメーション用
+  type RoseAnimation = {
+    x: number;
+    y: number;
+    mapX: number;
+    mapY: number;
+    petals: Array<{
+      offsetX: number;
+      offsetY: number;
+      vx: number;
+      vy: number;
+      rotation: number;
+      rotationSpeed: number;
+      size: number;
+      layer: number;
+      opacity: number;
+      life: number;
+    }>;
+    sparkles: Array<{
+      offsetX: number;
+      offsetY: number;
+      size: number;
+      opacity: number;
+      life: number;
+    }>;
+    startTime: number;
+    targetObj: Obj;
+  };
+  const [roseAnimations, setRoseAnimations] = useState<RoseAnimation[]>([]);
+  const roseAnimationRef = useRef<number | null>(null);
+
   // カメラ：パン(tx,ty)は「画面座標系」での移動量（ピクセル）、scaleは倍率
   // 初期ズーム: 統一して1.0でスタート（SSRハイドレーションエラー回避）
   const [cam, setCam] = useState({ 
@@ -3321,6 +3790,427 @@ export default function Home() {
       });
     }
 
+    // 炎アニメーションの描画
+    flameAnimations.forEach(anim => {
+      const { sx: screenX, sy: screenY } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH);
+      anim.flames.forEach(flame => {
+        ctx.save();
+        ctx.globalAlpha = flame.opacity;
+        ctx.fillStyle = flame.color;
+        ctx.shadowColor = flame.color;
+        ctx.shadowBlur = 20;
+        ctx.beginPath();
+        ctx.arc(screenX + flame.offsetX, screenY + flame.offsetY, flame.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      });
+    });
+
+    // 雷アニメーションの描画
+    thunderAnimations.forEach(anim => {
+      anim.segments.forEach(seg => {
+        ctx.save();
+        ctx.strokeStyle = `rgba(255, 255, 100, ${seg.alpha})`;
+        ctx.lineWidth = seg.thickness;
+        ctx.shadowColor = '#ffff00';
+        ctx.shadowBlur = 15;
+        ctx.beginPath();
+        ctx.moveTo(seg.x, seg.y);
+        ctx.lineTo(seg.endX, seg.endY);
+        ctx.stroke();
+        ctx.restore();
+      });
+    });
+
+    // 波/水しぶきアニメーションの描画
+    waveAnimations.forEach(anim => {
+      const { sx: screenX, sy: screenY } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH);
+      anim.drops.forEach(drop => {
+        ctx.save();
+        ctx.globalAlpha = drop.opacity;
+        ctx.fillStyle = '#4dd0e1';
+        ctx.beginPath();
+        ctx.arc(screenX + drop.offsetX, screenY + drop.offsetY, drop.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      });
+      anim.rings.forEach(ring => {
+        ctx.save();
+        ctx.globalAlpha = ring.alpha;
+        ctx.strokeStyle = '#00bcd4';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(screenX, screenY, ring.radius, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+      });
+    });
+
+    // 風/葉アニメーションの描画
+    windAnimations.forEach(anim => {
+      anim.leaves.forEach(leaf => {
+        ctx.save();
+        ctx.translate(leaf.x, leaf.y);
+        ctx.rotate(leaf.rotation);
+        ctx.globalAlpha = leaf.opacity;
+        ctx.fillStyle = leaf.color;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, leaf.size, leaf.size * 0.5, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      });
+    });
+
+    // 煙/霧アニメーションの描画
+    smokeAnimations.forEach(anim => {
+      const { sx: screenX, sy: screenY } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH);
+      anim.clouds.forEach(cloud => {
+        ctx.save();
+        ctx.globalAlpha = cloud.opacity;
+        ctx.fillStyle = '#808080';
+        ctx.shadowBlur = 30;
+        ctx.shadowColor = '#808080';
+        ctx.beginPath();
+        ctx.arc(screenX + cloud.offsetX, screenY + cloud.offsetY, cloud.size * cloud.expansion, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      });
+    });
+
+    // 竜巻アニメーションの描画
+    tornadoAnimations.forEach(anim => {
+      const { sx: screenX, sy: screenY } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH);
+      anim.particles.forEach(p => {
+        const x = screenX + Math.cos(p.angle + anim.rotation) * p.radius;
+        const y = screenY - p.height + Math.sin(p.angle + anim.rotation) * p.radius * 0.5;
+        ctx.save();
+        ctx.globalAlpha = p.opacity;
+        ctx.fillStyle = '#a0a0a0';
+        ctx.beginPath();
+        ctx.arc(x, y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      });
+    });
+
+    // 宝石アニメーションの描画
+    gemAnimations.forEach(anim => {
+      const { sx: screenX, sy: screenY } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH);
+      anim.gems.forEach(gem => {
+        ctx.save();
+        ctx.translate(screenX + gem.offsetX, screenY + gem.offsetY);
+        ctx.rotate(gem.rotation);
+        ctx.fillStyle = gem.color;
+        ctx.shadowColor = gem.color;
+        ctx.shadowBlur = 15 * gem.sparkle;
+        ctx.fillRect(-gem.size/2, -gem.size/2, gem.size, gem.size);
+        ctx.restore();
+      });
+    });
+
+    // 星の軌跡アニメーションの描画
+    starTrailAnimations.forEach(anim => {
+      const { sx: screenX, sy: screenY } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH);
+      anim.stars.forEach(star => {
+        const x = Math.cos(anim.rotation + star.angle) * star.radius;
+        const y = Math.sin(anim.rotation + star.angle) * star.radius;
+        star.trail.forEach(t => {
+          ctx.save();
+          ctx.globalAlpha = t.alpha;
+          ctx.fillStyle = star.color;
+          ctx.shadowColor = star.color;
+          ctx.shadowBlur = 10;
+          ctx.beginPath();
+          ctx.arc(screenX + t.x, screenY + t.y, star.size * t.alpha, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        });
+      });
+    });
+
+    // 光の粒アニメーションの描画
+    lightParticleAnimations.forEach(anim => {
+      const { sx: screenX, sy: screenY } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH);
+      anim.particles.forEach(p => {
+        ctx.save();
+        ctx.globalAlpha = p.opacity;
+        ctx.fillStyle = p.color;
+        ctx.shadowColor = p.color;
+        ctx.shadowBlur = 10;
+        ctx.beginPath();
+        ctx.arc(screenX + p.offsetX, screenY + p.offsetY, p.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      });
+    });
+
+    // スパイラルアニメーションの描画
+    spiralAnimations.forEach(anim => {
+      const { sx: screenX, sy: screenY } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH);
+      anim.particles.forEach(p => {
+        const x = Math.cos(anim.rotation + p.angle) * p.radius;
+        const y = Math.sin(anim.rotation + p.angle) * p.radius + p.height;
+        ctx.save();
+        ctx.globalAlpha = p.opacity;
+        ctx.fillStyle = p.color;
+        ctx.shadowColor = p.color;
+        ctx.shadowBlur = 8;
+        ctx.beginPath();
+        ctx.arc(screenX + x, screenY + y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      });
+    });
+
+    // 鳥/羽アニメーションの描画
+    birdAnimations.forEach(anim => {
+      anim.birds.forEach(bird => {
+        ctx.save();
+        ctx.translate(bird.x, bird.y);
+        ctx.fillStyle = '#8b4513';
+        const wing = Math.sin(bird.wingPhase) * 10;
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(-bird.size/2, wing);
+        ctx.lineTo(-bird.size, 0);
+        ctx.moveTo(0, 0);
+        ctx.lineTo(bird.size/2, -wing);
+        ctx.lineTo(bird.size, 0);
+        ctx.stroke();
+        ctx.restore();
+      });
+      anim.feathers.forEach(f => {
+        ctx.save();
+        ctx.translate(f.x, f.y);
+        ctx.rotate(f.rotation);
+        ctx.globalAlpha = f.opacity;
+        ctx.fillStyle = '#d2691e';
+        ctx.fillRect(-f.size/2, -f.size, f.size, f.size * 2);
+        ctx.restore();
+      });
+    });
+
+    // ゴーストアニメーションの描画
+    ghostAnimations.forEach(anim => {
+      const { sx: screenX, sy: screenY } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH);
+      anim.ghosts.forEach(ghost => {
+        ctx.save();
+        ctx.globalAlpha = ghost.opacity;
+        ctx.fillStyle = 'rgba(200, 200, 255, 0.6)';
+        ctx.shadowColor = '#c8c8ff';
+        ctx.shadowBlur = 20;
+        const x = screenX + ghost.offsetX + Math.sin(ghost.wavePhase) * 10;
+        ctx.beginPath();
+        ctx.arc(x, screenY + ghost.offsetY, ghost.size/2, 0, Math.PI, true);
+        ctx.lineTo(x - ghost.size/2, screenY + ghost.offsetY + ghost.size/2);
+        for (let i = 0; i < 3; i++) {
+          ctx.lineTo(x - ghost.size/2 + ghost.size/3 * i, screenY + ghost.offsetY + ghost.size/2 + 5);
+          ctx.lineTo(x - ghost.size/2 + ghost.size/3 * (i+0.5), screenY + ghost.offsetY + ghost.size/2);
+        }
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+      });
+    });
+
+    // 蜂アニメーションの描画
+    beeAnimations.forEach(anim => {
+      const { sx: screenX, sy: screenY } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH);
+      anim.bees.forEach(bee => {
+        const x = screenX + Math.cos(bee.angle) * bee.radius;
+        const y = screenY + Math.sin(bee.angle) * bee.radius;
+        ctx.save();
+        ctx.fillStyle = '#ffcc00';
+        ctx.beginPath();
+        ctx.arc(x, y, bee.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 2;
+        for (let i = 0; i < 3; i++) {
+          ctx.beginPath();
+          ctx.moveTo(x - bee.size/2, y - bee.size/2 + i * bee.size/3);
+          ctx.lineTo(x + bee.size/2, y - bee.size/2 + i * bee.size/3);
+          ctx.stroke();
+        }
+        ctx.restore();
+      });
+    });
+
+    // 蛍アニメーションの描画
+    fireflyAnimations.forEach(anim => {
+      const { sx: screenX, sy: screenY } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH);
+      anim.fireflies.forEach(ff => {
+        ctx.save();
+        ctx.globalAlpha = ff.glow;
+        ctx.fillStyle = '#ffff00';
+        ctx.shadowColor = '#ffff00';
+        ctx.shadowBlur = 20 * ff.glow;
+        ctx.beginPath();
+        ctx.arc(screenX + ff.offsetX, screenY + ff.offsetY, ff.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      });
+    });
+
+    // 爆発アニメーションの描画
+    explosionAnimations.forEach(anim => {
+      const { sx: screenX, sy: screenY } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH);
+      if (anim.flash > 0.1) {
+        ctx.save();
+        ctx.globalAlpha = anim.flash;
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, viewW, viewH);
+        ctx.restore();
+      }
+      if (anim.shockwave.alpha > 0.05) {
+        ctx.save();
+        ctx.globalAlpha = anim.shockwave.alpha;
+        ctx.strokeStyle = '#ff6347';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(screenX, screenY, anim.shockwave.radius, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+      }
+      anim.particles.forEach(p => {
+        ctx.save();
+        ctx.globalAlpha = p.opacity;
+        ctx.fillStyle = p.color;
+        ctx.shadowColor = p.color;
+        ctx.shadowBlur = 15;
+        ctx.beginPath();
+        ctx.arc(screenX + p.offsetX, screenY + p.offsetY, p.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      });
+    });
+
+    // ターゲットアニメーションの描画
+    targetAnimations.forEach(anim => {
+      const { sx: screenX, sy: screenY } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH);
+      anim.rings.forEach(ring => {
+        ctx.save();
+        ctx.globalAlpha = ring.alpha;
+        ctx.strokeStyle = '#ff0000';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(screenX, screenY, ring.radius, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+      });
+      ctx.save();
+      ctx.translate(screenX, screenY);
+      ctx.rotate(anim.crosshair.rotation);
+      ctx.globalAlpha = anim.crosshair.alpha;
+      ctx.strokeStyle = '#ff0000';
+      ctx.lineWidth = 2;
+      const size = anim.crosshair.size;
+      ctx.beginPath();
+      ctx.moveTo(-size, 0);
+      ctx.lineTo(size, 0);
+      ctx.moveTo(0, -size);
+      ctx.lineTo(0, size);
+      ctx.stroke();
+      ctx.restore();
+    });
+
+    // 怒りマークアニメーションの描画
+    angerAnimations.forEach(anim => {
+      const { sx: screenX, sy: screenY } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH);
+      anim.marks.forEach(mark => {
+        ctx.save();
+        ctx.translate(screenX + mark.offsetX, screenY + mark.offsetY);
+        ctx.rotate(mark.rotation);
+        ctx.globalAlpha = mark.opacity;
+        ctx.fillStyle = '#ff0000';
+        ctx.font = `bold ${mark.size}px Arial`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('💢', 0, 0);
+        ctx.restore();
+      });
+    });
+
+    // 花びらアニメーションの描画
+    petalAnimations.forEach(anim => {
+      const { sx: screenX, sy: screenY } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH);
+      anim.petals.forEach(petal => {
+        ctx.save();
+        ctx.translate(screenX + petal.offsetX, screenY + petal.offsetY);
+        ctx.rotate(petal.rotation);
+        ctx.globalAlpha = petal.opacity;
+        ctx.fillStyle = petal.color;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, petal.size, petal.size * 1.5, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      });
+    });
+
+    // ひまわりアニメーションの描画
+    sunflowerAnimations.forEach(anim => {
+      const { sx: screenX, sy: screenY } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH);
+      anim.flowers.forEach(flower => {
+        if (flower.growth > 0) {
+          ctx.save();
+          ctx.translate(screenX + flower.offsetX, screenY + flower.offsetY);
+          ctx.rotate(flower.rotation);
+          ctx.globalAlpha = flower.opacity;
+          const petals = 12;
+          for (let i = 0; i < petals; i++) {
+            ctx.fillStyle = '#ffd700';
+            ctx.save();
+            ctx.rotate((i / petals) * Math.PI * 2);
+            ctx.beginPath();
+            ctx.ellipse(flower.size * 0.6, 0, flower.size * 0.3, flower.size * 0.15, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+          }
+          ctx.fillStyle = '#8b4513';
+          ctx.beginPath();
+          ctx.arc(0, 0, flower.size * 0.3, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+      });
+      anim.seeds.forEach(seed => {
+        ctx.save();
+        ctx.translate(screenX + seed.offsetX, screenY + seed.offsetY);
+        ctx.rotate(seed.rotation);
+        ctx.fillStyle = '#654321';
+        ctx.fillRect(-seed.size/2, -seed.size/2, seed.size, seed.size);
+        ctx.restore();
+      });
+    });
+
+    // バラアニメーションの描画
+    roseAnimations.forEach(anim => {
+      const { sx: screenX, sy: screenY } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH);
+      anim.petals.forEach(petal => {
+        ctx.save();
+        ctx.translate(screenX + petal.offsetX, screenY + petal.offsetY);
+        ctx.rotate(petal.rotation);
+        ctx.globalAlpha = petal.opacity;
+        const colors = ['#ff0066', '#ff3385', '#ff66a3'];
+        ctx.fillStyle = colors[petal.layer];
+        ctx.beginPath();
+        ctx.ellipse(0, 0, petal.size, petal.size * 1.3, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      });
+      anim.sparkles.forEach(sp => {
+        ctx.save();
+        ctx.globalAlpha = sp.opacity;
+        ctx.fillStyle = '#ffccff';
+        ctx.shadowColor = '#ffccff';
+        ctx.shadowBlur = 10;
+        ctx.beginPath();
+        ctx.arc(screenX + sp.offsetX, screenY + sp.offsetY, sp.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      });
+    });
+
     // 花火アニメーションの描画（マップ座標をスクリーン座標に変換）
     if (fireworks.length > 0) {
       const now = Date.now();
@@ -3953,7 +4843,10 @@ export default function Home() {
       const anim = obj.Animation.toLowerCase();
       if ([
         'fireworks', 'sparkle', 'beartrap', 'birthday', 'cherryblossom', 'meteor', 'coin', 'slot', 'cat',
-        'balloon', 'aurora', 'butterfly', 'shootingstar', 'autumnleaves', 'snow', 'confetti', 'rainbow', 'rain', 'magiccircle'
+        'balloon', 'aurora', 'butterfly', 'shootingstar', 'autumnleaves', 'snow', 'confetti', 'rainbow', 'rain', 'magiccircle',
+        'flame', 'thunder', 'wave', 'wind', 'smoke', 'tornado', 'gem', 'startrail', 'lightparticle', 'spiral',
+        'bird', 'ghost', 'bee', 'firefly', 'explosion', 'target', 'anger', 'petal', 'sunflower', 'rose',
+        'random'
       ].includes(anim)) {
         return anim;
       }
@@ -4558,6 +5451,460 @@ export default function Home() {
     }]);
   };
 
+  // 炎アニメーション開始関数
+  const startFlameAnimation = (obj: Obj) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const viewW = rect.width;
+    const viewH = rect.height;
+    const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell;
+    const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell;
+    const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH);
+    
+    const flames: FlameAnimation['flames'] = [];
+    for (let i = 0; i < 20; i++) {
+      flames.push({
+        offsetX: (Math.random() - 0.5) * 40,
+        offsetY: 0,
+        size: Math.random() * 15 + 10,
+        vy: -(Math.random() * 2 + 1),
+        opacity: Math.random() * 0.5 + 0.5,
+        color: ['#ff4500', '#ff6347', '#ffa500', '#ffff00'][Math.floor(Math.random() * 4)],
+        life: Math.random() * 2 + 1,
+        flicker: Math.random() * Math.PI * 2,
+      });
+    }
+    setFlameAnimations(prev => [...prev, { x: centerX, y: centerY, mapX: objMapX, mapY: objMapY, flames, startTime: Date.now(), targetObj: obj }]);
+  };
+
+  // 雷アニメーション開始関数
+  const startThunderAnimation = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const segments: ThunderAnimation['segments'] = [];
+    const startX = Math.random() * rect.width;
+    let currentX = startX;
+    let currentY = 0;
+    while (currentY < rect.height) {
+      const nextX = currentX + (Math.random() - 0.5) * 100;
+      const nextY = currentY + Math.random() * 80 + 40;
+      segments.push({ x: currentX, y: currentY, endX: nextX, endY: nextY, alpha: 1, thickness: Math.random() * 3 + 2 });
+      currentX = nextX;
+      currentY = nextY;
+    }
+    setThunderAnimations(prev => [...prev, { segments, startTime: Date.now(), life: 0.5 }]);
+  };
+
+  // 波/水しぶきアニメーション開始関数
+  const startWaveAnimation = (obj: Obj) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const viewW = rect.width;
+    const viewH = rect.height;
+    const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell;
+    const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell;
+    const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH);
+    
+    const drops: WaveAnimation['drops'] = [];
+    for (let i = 0; i < 30; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = Math.random() * 4 + 2;
+      drops.push({
+        offsetX: 0, offsetY: 0,
+        vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed - 3,
+        size: Math.random() * 5 + 3, opacity: 1, life: Math.random() + 1,
+      });
+    }
+    const rings: WaveAnimation['rings'] = [{ radius: 0, alpha: 1, speed: 3 }];
+    setWaveAnimations(prev => [...prev, { x: centerX, y: centerY, mapX: objMapX, mapY: objMapY, drops, rings, startTime: Date.now(), targetObj: obj }]);
+  };
+
+  // 風/葉アニメーション開始関数
+  const startWindAnimation = (count = 25) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const leaves: WindAnimation['leaves'] = [];
+    for (let i = 0; i < count; i++) {
+      leaves.push({
+        x: -50, y: Math.random() * rect.height,
+        vx: Math.random() * 3 + 2, vy: (Math.random() - 0.5) * 1,
+        size: Math.random() * 8 + 5, rotation: Math.random() * Math.PI * 2,
+        rotationSpeed: (Math.random() - 0.5) * 0.1, opacity: Math.random() * 0.5 + 0.5,
+        life: 10, color: ['#90ee90', '#7cfc00', '#00ff00', '#32cd32'][Math.floor(Math.random() * 4)],
+      });
+    }
+    setWindAnimations(prev => [...prev, { leaves, startTime: Date.now(), duration: 8 }]);
+  };
+
+  // 煙/霧アニメーション開始関数
+  const startSmokeAnimation = (obj: Obj) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const viewW = rect.width;
+    const viewH = rect.height;
+    const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell;
+    const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell;
+    const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH);
+    
+    const clouds: SmokeAnimation['clouds'] = [];
+    for (let i = 0; i < 8; i++) {
+      clouds.push({
+        offsetX: (Math.random() - 0.5) * 30, offsetY: 0,
+        size: Math.random() * 40 + 30, vy: -(Math.random() * 0.5 + 0.3),
+        opacity: Math.random() * 0.3 + 0.2, expansion: 1, life: Math.random() * 3 + 2,
+      });
+    }
+    setSmokeAnimations(prev => [...prev, { x: centerX, y: centerY, mapX: objMapX, mapY: objMapY, clouds, startTime: Date.now(), targetObj: obj }]);
+  };
+
+  // 竜巻アニメーション開始関数
+  const startTornadoAnimation = (obj: Obj) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const viewW = rect.width;
+    const viewH = rect.height;
+    const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell;
+    const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell;
+    const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH);
+    
+    const particles: TornadoAnimation['particles'] = [];
+    for (let i = 0; i < 40; i++) {
+      particles.push({
+        angle: Math.random() * Math.PI * 2, height: Math.random() * 150,
+        radius: Math.random() * 30 + 10, speed: Math.random() * 0.1 + 0.05,
+        size: Math.random() * 4 + 2, opacity: Math.random() * 0.5 + 0.3,
+      });
+    }
+    setTornadoAnimations(prev => [...prev, { x: centerX, y: centerY, mapX: objMapX, mapY: objMapY, particles, rotation: 0, startTime: Date.now(), life: 5, targetObj: obj }]);
+  };
+
+  // 宝石アニメーション開始関数
+  const startGemAnimation = (obj: Obj) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const viewW = rect.width;
+    const viewH = rect.height;
+    const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell;
+    const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell;
+    const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH);
+    
+    const gems: GemAnimation['gems'] = [];
+    for (let i = 0; i < 15; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = Math.random() * 3 + 1;
+      gems.push({
+        offsetX: 0, offsetY: 0, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed - 4,
+        size: Math.random() * 12 + 8, rotation: Math.random() * Math.PI * 2,
+        rotationSpeed: (Math.random() - 0.5) * 0.2,
+        color: ['#ff0080', '#00ffff', '#ffff00', '#00ff00', '#ff00ff'][Math.floor(Math.random() * 5)],
+        sparkle: Math.random(), life: Math.random() * 2 + 1.5,
+      });
+    }
+    setGemAnimations(prev => [...prev, { x: centerX, y: centerY, mapX: objMapX, mapY: objMapY, gems, startTime: Date.now(), targetObj: obj }]);
+  };
+
+  // 星の軌跡アニメーション開始関数
+  const startStarTrailAnimation = (obj: Obj) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const viewW = rect.width;
+    const viewH = rect.height;
+    const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell;
+    const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell;
+    const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH);
+    
+    const stars: StarTrailAnimation['stars'] = [];
+    for (let i = 0; i < 5; i++) {
+      stars.push({
+        angle: (Math.PI * 2 * i) / 5, radius: 60, size: 8, speed: 0.05,
+        trail: [], color: ['#ffff00', '#00ffff', '#ff00ff', '#00ff00'][Math.floor(Math.random() * 4)],
+      });
+    }
+    setStarTrailAnimations(prev => [...prev, { x: centerX, y: centerY, mapX: objMapX, mapY: objMapY, stars, rotation: 0, startTime: Date.now(), life: 5, targetObj: obj }]);
+  };
+
+  // 光の粒アニメーション開始関数
+  const startLightParticleAnimation = (obj: Obj) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const viewW = rect.width;
+    const viewH = rect.height;
+    const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell;
+    const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell;
+    const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH);
+    
+    const particles: LightParticleAnimation['particles'] = [];
+    for (let i = 0; i < 25; i++) {
+      particles.push({
+        offsetX: (Math.random() - 0.5) * 20, offsetY: 0,
+        vx: (Math.random() - 0.5) * 1, vy: -(Math.random() * 2 + 1),
+        size: Math.random() * 4 + 2, opacity: 1,
+        color: ['#ffffff', '#ffff00', '#00ffff', '#ff00ff'][Math.floor(Math.random() * 4)],
+        life: Math.random() * 2 + 1,
+      });
+    }
+    setLightParticleAnimations(prev => [...prev, { x: centerX, y: centerY, mapX: objMapX, mapY: objMapY, particles, startTime: Date.now(), targetObj: obj }]);
+  };
+
+  // スパイラルアニメーション開始関数
+  const startSpiralAnimation = (obj: Obj) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const viewW = rect.width;
+    const viewH = rect.height;
+    const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell;
+    const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell;
+    const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH);
+    
+    const particles: SpiralAnimation['particles'] = [];
+    for (let i = 0; i < 50; i++) {
+      particles.push({
+        angle: (Math.PI * 2 * i) / 50, radius: (i / 50) * 80, height: 0,
+        size: 4, color: `hsl(${(i / 50) * 360}, 100%, 50%)`, opacity: 0.8,
+      });
+    }
+    setSpiralAnimations(prev => [...prev, { x: centerX, y: centerY, mapX: objMapX, mapY: objMapY, particles, rotation: 0, expansion: 1, startTime: Date.now(), life: 4, targetObj: obj }]);
+  };
+
+  // 鳥/羽アニメーション開始関数
+  const startBirdAnimation = (count = 5) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const birds: BirdAnimation['birds'] = [];
+    for (let i = 0; i < count; i++) {
+      birds.push({
+        x: -50, y: Math.random() * rect.height * 0.5,
+        vx: Math.random() * 2 + 2, vy: (Math.random() - 0.5) * 0.5,
+        size: Math.random() * 15 + 10, wingPhase: Math.random() * Math.PI * 2,
+        rotation: 0, life: 10,
+      });
+    }
+    setBirdAnimations(prev => [...prev, { birds, feathers: [], startTime: Date.now(), duration: 10 }]);
+  };
+
+  // ゴーストアニメーション開始関数
+  const startGhostAnimation = (obj: Obj) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const viewW = rect.width;
+    const viewH = rect.height;
+    const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell;
+    const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell;
+    const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH);
+    
+    const ghosts: GhostAnimation['ghosts'] = [];
+    for (let i = 0; i < 3; i++) {
+      ghosts.push({
+        offsetX: (Math.random() - 0.5) * 60, offsetY: (Math.random() - 0.5) * 60,
+        vx: (Math.random() - 0.5) * 1, vy: -(Math.random() * 0.5 + 0.2),
+        size: Math.random() * 30 + 25, opacity: 0.6, wavePhase: Math.random() * Math.PI * 2, life: 5,
+      });
+    }
+    setGhostAnimations(prev => [...prev, { x: centerX, y: centerY, mapX: objMapX, mapY: objMapY, ghosts, startTime: Date.now(), targetObj: obj }]);
+  };
+
+  // 蜂アニメーション開始関数
+  const startBeeAnimation = (obj: Obj) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const viewW = rect.width;
+    const viewH = rect.height;
+    const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell;
+    const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell;
+    const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH);
+    
+    const bees: BeeAnimation['bees'] = [];
+    for (let i = 0; i < 6; i++) {
+      bees.push({
+        offsetX: 0, offsetY: 0, angle: (Math.PI * 2 * i) / 6, radius: 40,
+        speed: Math.random() * 0.05 + 0.08, wingPhase: Math.random() * Math.PI * 2,
+        size: 8, life: 6,
+      });
+    }
+    setBeeAnimations(prev => [...prev, { x: centerX, y: centerY, mapX: objMapX, mapY: objMapY, bees, startTime: Date.now(), targetObj: obj }]);
+  };
+
+  // 蛍アニメーション開始関数
+  const startFireflyAnimation = (obj: Obj) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const viewW = rect.width;
+    const viewH = rect.height;
+    const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell;
+    const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell;
+    const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH);
+    
+    const fireflies: FireflyAnimation['fireflies'] = [];
+    for (let i = 0; i < 12; i++) {
+      fireflies.push({
+        offsetX: (Math.random() - 0.5) * 80, offsetY: (Math.random() - 0.5) * 80,
+        vx: (Math.random() - 0.5) * 0.5, vy: (Math.random() - 0.5) * 0.5,
+        glow: Math.random(), glowPhase: Math.random() * Math.PI * 2, size: 5, life: 8,
+      });
+    }
+    setFireflyAnimations(prev => [...prev, { x: centerX, y: centerY, mapX: objMapX, mapY: objMapY, fireflies, startTime: Date.now(), targetObj: obj }]);
+  };
+
+  // 爆発アニメーション開始関数
+  const startExplosionAnimation = (obj: Obj) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const viewW = rect.width;
+    const viewH = rect.height;
+    const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell;
+    const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell;
+    const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH);
+    
+    const particles: ExplosionAnimation['particles'] = [];
+    for (let i = 0; i < 50; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = Math.random() * 5 + 2;
+      particles.push({
+        offsetX: 0, offsetY: 0, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed,
+        size: Math.random() * 8 + 4,
+        color: ['#ff4500', '#ff6347', '#ffa500', '#ffff00'][Math.floor(Math.random() * 4)],
+        opacity: 1, life: Math.random() + 1,
+      });
+    }
+    setExplosionAnimations(prev => [...prev, {
+      x: centerX, y: centerY, mapX: objMapX, mapY: objMapY, particles,
+      shockwave: { radius: 0, alpha: 1 }, flash: 1, startTime: Date.now(), targetObj: obj,
+    }]);
+  };
+
+  // ターゲットアニメーション開始関数
+  const startTargetAnimation = (obj: Obj) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const viewW = rect.width;
+    const viewH = rect.height;
+    const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell;
+    const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell;
+    const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH);
+    
+    const rings: TargetAnimation['rings'] = [
+      { radius: 80, alpha: 1, speed: -15 },
+      { radius: 100, alpha: 0.8, speed: -18 },
+      { radius: 120, alpha: 0.6, speed: -21 },
+    ];
+    setTargetAnimations(prev => [...prev, {
+      x: centerX, y: centerY, mapX: objMapX, mapY: objMapY, rings,
+      crosshair: { size: 40, rotation: 0, alpha: 1 },
+      startTime: Date.now(), life: 3, targetObj: obj,
+    }]);
+  };
+
+  // 怒りマークアニメーション開始関数
+  const startAngerAnimation = (obj: Obj) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const viewW = rect.width;
+    const viewH = rect.height;
+    const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell;
+    const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell;
+    const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH);
+    
+    const marks: AngerAnimation['marks'] = [];
+    for (let i = 0; i < 3; i++) {
+      marks.push({
+        offsetX: (Math.random() - 0.5) * 40, offsetY: -50 - i * 25,
+        size: 20 + i * 5, rotation: Math.random() * 0.4 - 0.2,
+        opacity: 1, bounce: 0, life: 2,
+      });
+    }
+    setAngerAnimations(prev => [...prev, { x: centerX, y: centerY, mapX: objMapX, mapY: objMapY, marks, startTime: Date.now(), targetObj: obj }]);
+  };
+
+  // 花びらアニメーション開始関数
+  const startPetalAnimation = (obj: Obj) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const viewW = rect.width;
+    const viewH = rect.height;
+    const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell;
+    const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell;
+    const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH);
+    
+    const petals: PetalAnimation['petals'] = [];
+    for (let i = 0; i < 20; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = Math.random() * 2 + 1;
+      petals.push({
+        offsetX: 0, offsetY: 0, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed - 2,
+        rotation: Math.random() * Math.PI * 2, rotationSpeed: (Math.random() - 0.5) * 0.1,
+        size: Math.random() * 8 + 6,
+        color: ['#ffb7c5', '#ff69b4', '#ff1493', '#ffc0cb', '#db7093'][Math.floor(Math.random() * 5)],
+        opacity: 1, life: Math.random() * 2 + 1.5,
+      });
+    }
+    setPetalAnimations(prev => [...prev, { x: centerX, y: centerY, mapX: objMapX, mapY: objMapY, petals, startTime: Date.now(), targetObj: obj }]);
+  };
+
+  // ひまわりアニメーション開始関数
+  const startSunflowerAnimation = (obj: Obj) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const viewW = rect.width;
+    const viewH = rect.height;
+    const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell;
+    const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell;
+    const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH);
+    
+    const flowers: SunflowerAnimation['flowers'] = [];
+    for (let i = 0; i < 3; i++) {
+      flowers.push({
+        offsetX: (i - 1) * 40, offsetY: 0, size: 0, rotation: 0,
+        growth: 0, opacity: 1, life: 5,
+      });
+    }
+    setSunflowerAnimations(prev => [...prev, { x: centerX, y: centerY, mapX: objMapX, mapY: objMapY, flowers, seeds: [], startTime: Date.now(), targetObj: obj }]);
+  };
+
+  // バラアニメーション開始関数
+  const startRoseAnimation = (obj: Obj) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const viewW = rect.width;
+    const viewH = rect.height;
+    const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell;
+    const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell;
+    const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH);
+    
+    const petals: RoseAnimation['petals'] = [];
+    for (let i = 0; i < 25; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = Math.random() * 2 + 1;
+      petals.push({
+        offsetX: 0, offsetY: 0, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed - 2,
+        rotation: Math.random() * Math.PI * 2, rotationSpeed: (Math.random() - 0.5) * 0.15,
+        size: Math.random() * 10 + 6, layer: Math.floor(Math.random() * 3),
+        opacity: 1, life: Math.random() * 2.5 + 1.5,
+      });
+    }
+    const sparkles: RoseAnimation['sparkles'] = [];
+    setRoseAnimations(prev => [...prev, { x: centerX, y: centerY, mapX: objMapX, mapY: objMapY, petals, sparkles, startTime: Date.now(), targetObj: obj }]);
+  };
+
   // 兵士アニメーション開始関数
   const startSoldierAnimation = (bearTrap: Obj) => {
     // アニメーション開始中または実行中の場合は何もしない
@@ -4934,7 +6281,7 @@ export default function Home() {
     return () => {
       if (balloonAnimationRef.current) cancelAnimationFrame(balloonAnimationRef.current);
     };
-  }, [balloonAnimations.length]);
+  }, [balloonAnimations, requestDraw]);
 
   // オーロラアニメーションループ
   useEffect(() => {
@@ -4967,7 +6314,7 @@ export default function Home() {
     return () => {
       if (auroraAnimationRef.current) cancelAnimationFrame(auroraAnimationRef.current);
     };
-  }, [auroraAnimations.length]);
+  }, [auroraAnimations, requestDraw]);
 
   // 蝶々アニメーションループ
   useEffect(() => {
@@ -5012,7 +6359,7 @@ export default function Home() {
     return () => {
       if (butterflyAnimationRef.current) cancelAnimationFrame(butterflyAnimationRef.current);
     };
-  }, [butterflyAnimations.length]);
+  }, [butterflyAnimations, requestDraw]);
 
   // 流れ星アニメーションループ
   useEffect(() => {
@@ -5046,7 +6393,7 @@ export default function Home() {
     return () => {
       if (shootingStarAnimationRef.current) cancelAnimationFrame(shootingStarAnimationRef.current);
     };
-  }, [shootingStarAnimations.length]);
+  }, [shootingStarAnimations, requestDraw]);
 
   // 紅葉アニメーションループ
   useEffect(() => {
@@ -5085,7 +6432,7 @@ export default function Home() {
     return () => {
       if (autumnLeavesAnimationRef.current) cancelAnimationFrame(autumnLeavesAnimationRef.current);
     };
-  }, [autumnLeavesAnimations.length]);
+  }, [autumnLeavesAnimations, requestDraw]);
 
   // 雪アニメーションループ
   useEffect(() => {
@@ -5143,7 +6490,7 @@ export default function Home() {
     return () => {
       if (snowAnimationRef.current) cancelAnimationFrame(snowAnimationRef.current);
     };
-  }, [snowAnimations.length]);
+  }, [snowAnimations, requestDraw]);
 
   // 紙吹雪アニメーションループ
   useEffect(() => {
@@ -5182,7 +6529,7 @@ export default function Home() {
     return () => {
       if (confettiAnimationRef.current) cancelAnimationFrame(confettiAnimationRef.current);
     };
-  }, [confettiAnimations.length]);
+  }, [confettiAnimations, requestDraw]);
 
   // 虹アニメーションループ
   useEffect(() => {
@@ -5211,7 +6558,7 @@ export default function Home() {
     return () => {
       if (rainbowAnimationRef.current) cancelAnimationFrame(rainbowAnimationRef.current);
     };
-  }, [rainbowAnimations.length]);
+  }, [rainbowAnimations, requestDraw]);
 
   // 雨アニメーションループ
   useEffect(() => {
@@ -5261,7 +6608,7 @@ export default function Home() {
     return () => {
       if (rainAnimationRef.current) cancelAnimationFrame(rainAnimationRef.current);
     };
-  }, [rainAnimations.length]);
+  }, [rainAnimations, requestDraw]);
 
   // 魔法陣アニメーションループ
   useEffect(() => {
@@ -5299,7 +6646,500 @@ export default function Home() {
     return () => {
       if (magicCircleAnimationRef.current) cancelAnimationFrame(magicCircleAnimationRef.current);
     };
-  }, [magicCircleAnimations.length]);
+  }, [magicCircleAnimations, requestDraw]);
+
+  // 炎アニメーションループ
+  useEffect(() => {
+    if (flameAnimations.length === 0) return;
+    const animate = () => {
+      const updated = flameAnimations.map(anim => {
+        const updatedFlames = anim.flames.map(flame => ({
+          ...flame,
+          offsetY: flame.offsetY + flame.vy,
+          offsetX: flame.offsetX + Math.sin(flame.flicker) * 2,
+          flicker: flame.flicker + 0.2,
+          opacity: flame.opacity * 0.98,
+          life: flame.life - 0.016,
+        })).filter(f => f.life > 0);
+        return { ...anim, flames: updatedFlames };
+      }).filter(a => a.flames.length > 0);
+      setFlameAnimations(updated);
+      requestDraw();
+      if (updated.length > 0) flameAnimationRef.current = requestAnimationFrame(animate);
+    };
+    flameAnimationRef.current = requestAnimationFrame(animate);
+    return () => { if (flameAnimationRef.current) cancelAnimationFrame(flameAnimationRef.current); };
+  }, [flameAnimations, requestDraw]);
+
+  // 雷アニメーションループ
+  useEffect(() => {
+    if (thunderAnimations.length === 0) return;
+    const animate = () => {
+      const updated = thunderAnimations.map(anim => ({
+        ...anim,
+        life: anim.life - 0.016,
+        segments: anim.segments.map(seg => ({ ...seg, alpha: seg.alpha * 0.9 })),
+      })).filter(a => a.life > 0);
+      setThunderAnimations(updated);
+      requestDraw();
+      if (updated.length > 0) thunderAnimationRef.current = requestAnimationFrame(animate);
+    };
+    thunderAnimationRef.current = requestAnimationFrame(animate);
+    return () => { if (thunderAnimationRef.current) cancelAnimationFrame(thunderAnimationRef.current); };
+  }, [thunderAnimations, requestDraw]);
+
+  // 波/水しぶきアニメーションループ
+  useEffect(() => {
+    if (waveAnimations.length === 0) return;
+    const animate = () => {
+      const updated = waveAnimations.map(anim => {
+        const updatedDrops = anim.drops.map(drop => ({
+          ...drop,
+          offsetX: drop.offsetX + drop.vx,
+          offsetY: drop.offsetY + drop.vy,
+          vy: drop.vy + 0.3,
+          opacity: drop.opacity * 0.97,
+          life: drop.life - 0.016,
+        })).filter(d => d.life > 0);
+        const updatedRings = anim.rings.map(ring => ({
+          ...ring,
+          radius: ring.radius + ring.speed,
+          alpha: ring.alpha * 0.95,
+        })).filter(r => r.alpha > 0.05);
+        return { ...anim, drops: updatedDrops, rings: updatedRings };
+      }).filter(a => a.drops.length > 0 || a.rings.length > 0);
+      setWaveAnimations(updated);
+      requestDraw();
+      if (updated.length > 0) waveAnimationRef.current = requestAnimationFrame(animate);
+    };
+    waveAnimationRef.current = requestAnimationFrame(animate);
+    return () => { if (waveAnimationRef.current) cancelAnimationFrame(waveAnimationRef.current); };
+  }, [waveAnimations, requestDraw]);
+
+  // 風/葉アニメーションループ
+  useEffect(() => {
+    if (windAnimations.length === 0) return;
+    const animate = () => {
+      const now = Date.now();
+      const updated = windAnimations.map(anim => {
+        const updatedLeaves = anim.leaves.map(leaf => ({
+          ...leaf,
+          x: leaf.x + leaf.vx,
+          y: leaf.y + leaf.vy,
+          rotation: leaf.rotation + leaf.rotationSpeed,
+          life: leaf.life - 0.016,
+        })).filter(l => l.life > 0 && l.x < 2000);
+        return { ...anim, leaves: updatedLeaves };
+      }).filter(a => (now - a.startTime) / 1000 < a.duration && a.leaves.length > 0);
+      setWindAnimations(updated);
+      requestDraw();
+      if (updated.length > 0) windAnimationRef.current = requestAnimationFrame(animate);
+    };
+    windAnimationRef.current = requestAnimationFrame(animate);
+    return () => { if (windAnimationRef.current) cancelAnimationFrame(windAnimationRef.current); };
+  }, [windAnimations, requestDraw]);
+
+  // 煙/霧アニメーションループ
+  useEffect(() => {
+    if (smokeAnimations.length === 0) return;
+    const animate = () => {
+      const updated = smokeAnimations.map(anim => {
+        const updatedClouds = anim.clouds.map(cloud => ({
+          ...cloud,
+          offsetY: cloud.offsetY + cloud.vy,
+          expansion: cloud.expansion + 0.02,
+          opacity: cloud.opacity * 0.98,
+          life: cloud.life - 0.016,
+        })).filter(c => c.life > 0);
+        return { ...anim, clouds: updatedClouds };
+      }).filter(a => a.clouds.length > 0);
+      setSmokeAnimations(updated);
+      requestDraw();
+      if (updated.length > 0) smokeAnimationRef.current = requestAnimationFrame(animate);
+    };
+    smokeAnimationRef.current = requestAnimationFrame(animate);
+    return () => { if (smokeAnimationRef.current) cancelAnimationFrame(smokeAnimationRef.current); };
+  }, [smokeAnimations, requestDraw]);
+
+  // 竜巻アニメーションループ
+  useEffect(() => {
+    if (tornadoAnimations.length === 0) return;
+    const animate = () => {
+      const updated = tornadoAnimations.map(anim => ({
+        ...anim,
+        rotation: anim.rotation + 0.1,
+        life: anim.life - 0.016,
+        particles: anim.particles.map(p => ({
+          ...p,
+          angle: p.angle + p.speed,
+          height: p.height + (Math.random() - 0.5) * 2,
+        })),
+      })).filter(a => a.life > 0);
+      setTornadoAnimations(updated);
+      requestDraw();
+      if (updated.length > 0) tornadoAnimationRef.current = requestAnimationFrame(animate);
+    };
+    tornadoAnimationRef.current = requestAnimationFrame(animate);
+    return () => { if (tornadoAnimationRef.current) cancelAnimationFrame(tornadoAnimationRef.current); };
+  }, [tornadoAnimations, requestDraw]);
+
+  // 宝石アニメーションループ
+  useEffect(() => {
+    if (gemAnimations.length === 0) return;
+    const animate = () => {
+      const updated = gemAnimations.map(anim => {
+        const updatedGems = anim.gems.map(gem => ({
+          ...gem,
+          offsetX: gem.offsetX + gem.vx,
+          offsetY: gem.offsetY + gem.vy,
+          vy: gem.vy + 0.3,
+          rotation: gem.rotation + gem.rotationSpeed,
+          sparkle: Math.sin(Date.now() * 0.01) * 0.5 + 0.5,
+          life: gem.life - 0.016,
+        })).filter(g => g.life > 0);
+        return { ...anim, gems: updatedGems };
+      }).filter(a => a.gems.length > 0);
+      setGemAnimations(updated);
+      requestDraw();
+      if (updated.length > 0) gemAnimationRef.current = requestAnimationFrame(animate);
+    };
+    gemAnimationRef.current = requestAnimationFrame(animate);
+    return () => { if (gemAnimationRef.current) cancelAnimationFrame(gemAnimationRef.current); };
+  }, [gemAnimations, requestDraw]);
+
+  // 星の軌跡アニメーションループ
+  useEffect(() => {
+    if (starTrailAnimations.length === 0) return;
+    const animate = () => {
+      const updated = starTrailAnimations.map(anim => {
+        const updatedStars = anim.stars.map(star => {
+          const newAngle = star.angle + star.speed;
+          const x = Math.cos(anim.rotation + newAngle) * star.radius;
+          const y = Math.sin(anim.rotation + newAngle) * star.radius;
+          const trail = [...star.trail, { x, y, alpha: 1 }].slice(-10).map((t, i) => ({ ...t, alpha: i / 10 }));
+          return { ...star, angle: newAngle, trail };
+        });
+        return { ...anim, stars: updatedStars, rotation: anim.rotation + 0.02, life: anim.life - 0.016 };
+      }).filter(a => a.life > 0);
+      setStarTrailAnimations(updated);
+      requestDraw();
+      if (updated.length > 0) starTrailAnimationRef.current = requestAnimationFrame(animate);
+    };
+    starTrailAnimationRef.current = requestAnimationFrame(animate);
+    return () => { if (starTrailAnimationRef.current) cancelAnimationFrame(starTrailAnimationRef.current); };
+  }, [starTrailAnimations, requestDraw]);
+
+  // 光の粒アニメーションループ
+  useEffect(() => {
+    if (lightParticleAnimations.length === 0) return;
+    const animate = () => {
+      const updated = lightParticleAnimations.map(anim => {
+        const updatedParticles = anim.particles.map(p => ({
+          ...p,
+          offsetX: p.offsetX + p.vx,
+          offsetY: p.offsetY + p.vy,
+          opacity: p.opacity * 0.98,
+          life: p.life - 0.016,
+        })).filter(p => p.life > 0);
+        return { ...anim, particles: updatedParticles };
+      }).filter(a => a.particles.length > 0);
+      setLightParticleAnimations(updated);
+      requestDraw();
+      if (updated.length > 0) lightParticleAnimationRef.current = requestAnimationFrame(animate);
+    };
+    lightParticleAnimationRef.current = requestAnimationFrame(animate);
+    return () => { if (lightParticleAnimationRef.current) cancelAnimationFrame(lightParticleAnimationRef.current); };
+  }, [lightParticleAnimations, requestDraw]);
+
+  // スパイラルアニメーションループ
+  useEffect(() => {
+    if (spiralAnimations.length === 0) return;
+    const animate = () => {
+      const updated = spiralAnimations.map(anim => ({
+        ...anim,
+        rotation: anim.rotation + 0.05,
+        expansion: anim.expansion + 0.02,
+        life: anim.life - 0.016,
+        particles: anim.particles.map(p => ({
+          ...p,
+          angle: p.angle + 0.05,
+          height: Math.sin(anim.rotation + p.angle) * 50,
+          radius: p.radius * anim.expansion,
+        })),
+      })).filter(a => a.life > 0);
+      setSpiralAnimations(updated);
+      requestDraw();
+      if (updated.length > 0) spiralAnimationRef.current = requestAnimationFrame(animate);
+    };
+    spiralAnimationRef.current = requestAnimationFrame(animate);
+    return () => { if (spiralAnimationRef.current) cancelAnimationFrame(spiralAnimationRef.current); };
+  }, [spiralAnimations, requestDraw]);
+
+  // 鳥/羽アニメーションループ
+  useEffect(() => {
+    if (birdAnimations.length === 0) return;
+    const animate = () => {
+      const now = Date.now();
+      const updated = birdAnimations.map(anim => {
+        const updatedBirds = anim.birds.map(bird => ({
+          ...bird,
+          x: bird.x + bird.vx,
+          y: bird.y + bird.vy,
+          wingPhase: bird.wingPhase + 0.3,
+          life: bird.life - 0.016,
+        })).filter(b => b.life > 0 && b.x < 2000);
+        const newFeathers = anim.feathers.map(f => ({
+          ...f,
+          x: f.x + f.vx,
+          y: f.y + f.vy,
+          vy: f.vy + 0.1,
+          rotation: f.rotation + f.rotationSpeed,
+          opacity: f.opacity * 0.99,
+          life: f.life - 0.016,
+        })).filter(f => f.life > 0);
+        return { ...anim, birds: updatedBirds, feathers: newFeathers };
+      }).filter(a => (now - a.startTime) / 1000 < a.duration);
+      setBirdAnimations(updated);
+      requestDraw();
+      if (updated.length > 0) birdAnimationRef.current = requestAnimationFrame(animate);
+    };
+    birdAnimationRef.current = requestAnimationFrame(animate);
+    return () => { if (birdAnimationRef.current) cancelAnimationFrame(birdAnimationRef.current); };
+  }, [birdAnimations, requestDraw]);
+
+  // ゴーストアニメーションループ
+  useEffect(() => {
+    if (ghostAnimations.length === 0) return;
+    const animate = () => {
+      const updated = ghostAnimations.map(anim => {
+        const updatedGhosts = anim.ghosts.map(ghost => ({
+          ...ghost,
+          offsetX: ghost.offsetX + ghost.vx,
+          offsetY: ghost.offsetY + ghost.vy,
+          vx: ghost.vx + (Math.random() - 0.5) * 0.1,
+          vy: ghost.vy - 0.01,
+          wavePhase: ghost.wavePhase + 0.1,
+          life: ghost.life - 0.016,
+        })).filter(g => g.life > 0);
+        return { ...anim, ghosts: updatedGhosts };
+      }).filter(a => a.ghosts.length > 0);
+      setGhostAnimations(updated);
+      requestDraw();
+      if (updated.length > 0) ghostAnimationRef.current = requestAnimationFrame(animate);
+    };
+    ghostAnimationRef.current = requestAnimationFrame(animate);
+    return () => { if (ghostAnimationRef.current) cancelAnimationFrame(ghostAnimationRef.current); };
+  }, [ghostAnimations, requestDraw]);
+
+  // 蜂アニメーションループ
+  useEffect(() => {
+    if (beeAnimations.length === 0) return;
+    const animate = () => {
+      const updated = beeAnimations.map(anim => {
+        const updatedBees = anim.bees.map(bee => ({
+          ...bee,
+          angle: bee.angle + bee.speed,
+          wingPhase: bee.wingPhase + 0.5,
+          life: bee.life - 0.016,
+        })).filter(b => b.life > 0);
+        return { ...anim, bees: updatedBees };
+      }).filter(a => a.bees.length > 0);
+      setBeeAnimations(updated);
+      requestDraw();
+      if (updated.length > 0) beeAnimationRef.current = requestAnimationFrame(animate);
+    };
+    beeAnimationRef.current = requestAnimationFrame(animate);
+    return () => { if (beeAnimationRef.current) cancelAnimationFrame(beeAnimationRef.current); };
+  }, [beeAnimations, requestDraw]);
+
+  // 蛍アニメーションループ
+  useEffect(() => {
+    if (fireflyAnimations.length === 0) return;
+    const animate = () => {
+      const updated = fireflyAnimations.map(anim => {
+        const updatedFireflies = anim.fireflies.map(ff => ({
+          ...ff,
+          offsetX: ff.offsetX + ff.vx,
+          offsetY: ff.offsetY + ff.vy,
+          vx: ff.vx + (Math.random() - 0.5) * 0.1,
+          vy: ff.vy + (Math.random() - 0.5) * 0.1,
+          glowPhase: ff.glowPhase + 0.05,
+          glow: Math.sin(ff.glowPhase) * 0.5 + 0.5,
+          life: ff.life - 0.016,
+        })).filter(f => f.life > 0);
+        return { ...anim, fireflies: updatedFireflies };
+      }).filter(a => a.fireflies.length > 0);
+      setFireflyAnimations(updated);
+      requestDraw();
+      if (updated.length > 0) fireflyAnimationRef.current = requestAnimationFrame(animate);
+    };
+    fireflyAnimationRef.current = requestAnimationFrame(animate);
+    return () => { if (fireflyAnimationRef.current) cancelAnimationFrame(fireflyAnimationRef.current); };
+  }, [fireflyAnimations, requestDraw]);
+
+  // 爆発アニメーションループ
+  useEffect(() => {
+    if (explosionAnimations.length === 0) return;
+    const animate = () => {
+      const updated = explosionAnimations.map(anim => {
+        const updatedParticles = anim.particles.map(p => ({
+          ...p,
+          offsetX: p.offsetX + p.vx,
+          offsetY: p.offsetY + p.vy,
+          vy: p.vy + 0.2,
+          opacity: p.opacity * 0.96,
+          life: p.life - 0.016,
+        })).filter(p => p.life > 0);
+        const updatedShockwave = { radius: anim.shockwave.radius + 15, alpha: anim.shockwave.alpha * 0.9 };
+        return { ...anim, particles: updatedParticles, shockwave: updatedShockwave, flash: anim.flash * 0.85 };
+      }).filter(a => a.particles.length > 0 || a.shockwave.alpha > 0.05);
+      setExplosionAnimations(updated);
+      requestDraw();
+      if (updated.length > 0) explosionAnimationRef.current = requestAnimationFrame(animate);
+    };
+    explosionAnimationRef.current = requestAnimationFrame(animate);
+    return () => { if (explosionAnimationRef.current) cancelAnimationFrame(explosionAnimationRef.current); };
+  }, [explosionAnimations, requestDraw]);
+
+  // ターゲットアニメーションループ
+  useEffect(() => {
+    if (targetAnimations.length === 0) return;
+    const animate = () => {
+      const updated = targetAnimations.map(anim => {
+        const updatedRings = anim.rings.map(ring => ({
+          ...ring,
+          radius: Math.max(0, ring.radius + ring.speed),
+          alpha: ring.radius + ring.speed <= 0 ? 1 : ring.alpha * 0.95,
+        })).filter(r => r.radius > 0 || r.alpha > 0.05);
+        return {
+          ...anim,
+          rings: updatedRings,
+          crosshair: { ...anim.crosshair, rotation: anim.crosshair.rotation + 0.05 },
+          life: anim.life - 0.016,
+        };
+      }).filter(a => a.life > 0);
+      setTargetAnimations(updated);
+      requestDraw();
+      if (updated.length > 0) targetAnimationRef.current = requestAnimationFrame(animate);
+    };
+    targetAnimationRef.current = requestAnimationFrame(animate);
+    return () => { if (targetAnimationRef.current) cancelAnimationFrame(targetAnimationRef.current); };
+  }, [targetAnimations, requestDraw]);
+
+  // 怒りマークアニメーションループ
+  useEffect(() => {
+    if (angerAnimations.length === 0) return;
+    const animate = () => {
+      const updated = angerAnimations.map(anim => {
+        const updatedMarks = anim.marks.map(mark => ({
+          ...mark,
+          bounce: mark.bounce + 0.3,
+          offsetY: mark.offsetY + Math.sin(mark.bounce) * 2,
+          opacity: mark.opacity * 0.98,
+          life: mark.life - 0.016,
+        })).filter(m => m.life > 0);
+        return { ...anim, marks: updatedMarks };
+      }).filter(a => a.marks.length > 0);
+      setAngerAnimations(updated);
+      requestDraw();
+      if (updated.length > 0) angerAnimationRef.current = requestAnimationFrame(animate);
+    };
+    angerAnimationRef.current = requestAnimationFrame(animate);
+    return () => { if (angerAnimationRef.current) cancelAnimationFrame(angerAnimationRef.current); };
+  }, [angerAnimations, requestDraw]);
+
+  // 花びらアニメーションループ
+  useEffect(() => {
+    if (petalAnimations.length === 0) return;
+    const animate = () => {
+      const updated = petalAnimations.map(anim => {
+        const updatedPetals = anim.petals.map(petal => ({
+          ...petal,
+          offsetX: petal.offsetX + petal.vx,
+          offsetY: petal.offsetY + petal.vy,
+          vy: petal.vy + 0.1,
+          rotation: petal.rotation + petal.rotationSpeed,
+          opacity: petal.opacity * 0.99,
+          life: petal.life - 0.016,
+        })).filter(p => p.life > 0);
+        return { ...anim, petals: updatedPetals };
+      }).filter(a => a.petals.length > 0);
+      setPetalAnimations(updated);
+      requestDraw();
+      if (updated.length > 0) petalAnimationRef.current = requestAnimationFrame(animate);
+    };
+    petalAnimationRef.current = requestAnimationFrame(animate);
+    return () => { if (petalAnimationRef.current) cancelAnimationFrame(petalAnimationRef.current); };
+  }, [petalAnimations, requestDraw]);
+
+  // ひまわりアニメーションループ
+  useEffect(() => {
+    if (sunflowerAnimations.length === 0) return;
+    const animate = () => {
+      const updated = sunflowerAnimations.map(anim => {
+        const updatedFlowers = anim.flowers.map(flower => ({
+          ...flower,
+          growth: Math.min(1, flower.growth + 0.02),
+          size: flower.growth * 50,
+          rotation: flower.rotation + 0.01,
+          life: flower.life - 0.016,
+        })).filter(f => f.life > 0);
+        const updatedSeeds = anim.seeds.map(seed => ({
+          ...seed,
+          offsetX: seed.offsetX + seed.vx,
+          offsetY: seed.offsetY + seed.vy,
+          vy: seed.vy + 0.2,
+          rotation: seed.rotation + 0.1,
+          life: seed.life - 0.016,
+        })).filter(s => s.life > 0);
+        return { ...anim, flowers: updatedFlowers, seeds: updatedSeeds };
+      }).filter(a => a.flowers.length > 0 || a.seeds.length > 0);
+      setSunflowerAnimations(updated);
+      requestDraw();
+      if (updated.length > 0) sunflowerAnimationRef.current = requestAnimationFrame(animate);
+    };
+    sunflowerAnimationRef.current = requestAnimationFrame(animate);
+    return () => { if (sunflowerAnimationRef.current) cancelAnimationFrame(sunflowerAnimationRef.current); };
+  }, [sunflowerAnimations, requestDraw]);
+
+  // バラアニメーションループ
+  useEffect(() => {
+    if (roseAnimations.length === 0) return;
+    const animate = () => {
+      const now = Date.now();
+      const updated = roseAnimations.map(anim => {
+        const updatedPetals = anim.petals.map(petal => ({
+          ...petal,
+          offsetX: petal.offsetX + petal.vx,
+          offsetY: petal.offsetY + petal.vy,
+          vy: petal.vy + 0.08,
+          rotation: petal.rotation + petal.rotationSpeed,
+          opacity: petal.opacity * 0.99,
+          life: petal.life - 0.016,
+        })).filter(p => p.life > 0);
+        const updatedSparkles = anim.sparkles.map(sp => ({
+          ...sp,
+          opacity: sp.opacity * 0.95,
+          life: sp.life - 0.016,
+        })).filter(s => s.life > 0);
+        if (Math.random() < 0.1 && updatedSparkles.length < 20) {
+          updatedSparkles.push({
+            offsetX: (Math.random() - 0.5) * 60,
+            offsetY: (Math.random() - 0.5) * 60,
+            size: Math.random() * 3 + 2,
+            opacity: 1,
+            life: 1,
+          });
+        }
+        return { ...anim, petals: updatedPetals, sparkles: updatedSparkles };
+      }).filter(a => a.petals.length > 0 || a.sparkles.length > 0);
+      setRoseAnimations(updated);
+      requestDraw();
+      if (updated.length > 0) roseAnimationRef.current = requestAnimationFrame(animate);
+    };
+    roseAnimationRef.current = requestAnimationFrame(animate);
+    return () => { if (roseAnimationRef.current) cancelAnimationFrame(roseAnimationRef.current); };
+  }, [roseAnimations, requestDraw]);
 
   // 花火アニメーションループ
   useEffect(() => {
@@ -6471,41 +8311,53 @@ export default function Home() {
         setMagicCircleAnimations([]);
       }
       
-      if (animationType === 'birthday') {
+      // ランダムアニメーションの場合は実際のアニメーションタイプを選択
+      let actualAnimationType = animationType;
+      if (animationType === 'random') {
+        const allAnimations = [
+          'fireworks', 'sparkle', 'beartrap', 'birthday', 'cherryblossom', 'meteor', 'coin', 'slot', 'cat',
+          'balloon', 'aurora', 'butterfly', 'shootingstar', 'autumnleaves', 'snow', 'confetti', 'rainbow', 'rain', 'magiccircle',
+          'flame', 'thunder', 'wave', 'wind', 'smoke', 'tornado', 'gem', 'startrail', 'lightparticle', 'spiral',
+          'bird', 'ghost', 'bee', 'firefly', 'explosion', 'target', 'anger', 'petal', 'sunflower', 'rose'
+        ];
+        actualAnimationType = allAnimations[Math.floor(Math.random() * allAnimations.length)];
+      }
+      
+      if (actualAnimationType === 'birthday') {
         // 誕生日アニメーション（紙吹雪）
         // 一度falseにしてからtrueにすることで、useEffectを確実に発火させる
         setShowBirthdayCelebration(false);
         setTimeout(() => setShowBirthdayCelebration(true), 0);
         setSelectedId(hit?.id ? String(hit.id) : null);
-      } else if (animationType === 'beartrap') {
+      } else if (actualAnimationType === 'beartrap') {
         // 熊罠アニメーション
         startSoldierAnimation(hit);
         setSelectedId(hit?.id ? String(hit.id) : null);
-      } else if (animationType === 'fireworks') {
+      } else if (actualAnimationType === 'fireworks') {
         // 花火アニメーション
         startFireworksAnimation(hit);
         setSelectedId(hit?.id ? String(hit.id) : null);
-      } else if (animationType === 'sparkle') {
+      } else if (actualAnimationType === 'sparkle') {
         // キラキラエフェクト
         startSparkleAnimation(hit);
         setSelectedId(hit?.id ? String(hit.id) : null);
-      } else if (animationType === 'cherryblossom') {
+      } else if (actualAnimationType === 'cherryblossom') {
         // 花吹雪アニメーション
         startCherryBlossomAnimation(hit);
         setSelectedId(hit?.id ? String(hit.id) : null);
-      } else if (animationType === 'meteor') {
+      } else if (actualAnimationType === 'meteor') {
         // 隕石アニメーション
         startMeteorAnimation(hit);
         setSelectedId(hit?.id ? String(hit.id) : null);
-      } else if (animationType === 'coin') {
+      } else if (actualAnimationType === 'coin') {
         // コインアニメーション
         startCoinAnimation(hit);
         setSelectedId(hit?.id ? String(hit.id) : null);
-      } else if (animationType === 'slot') {
+      } else if (actualAnimationType === 'slot') {
         // スロットアニメーション
         startSlotAnimation(hit);
         setSelectedId(hit?.id ? String(hit.id) : null);
-      } else if (animationType === 'cat') {
+      } else if (actualAnimationType === 'cat') {
         // 猫アニメーション：画面内に見えている都市をターゲットに
         
         const canvas = canvasRef.current;
@@ -6539,50 +8391,110 @@ export default function Home() {
           startCatAnimation(hit, randomTarget);
         }
         setSelectedId(hit?.id ? String(hit.id) : null);
-      } else if (animationType === 'balloon') {
+      } else if (actualAnimationType === 'balloon') {
         const canvas = canvasRef.current;
         if (!canvas) return;
         const rect = canvas.getBoundingClientRect();
         startBalloonAnimation(rect.width / 2, rect.height / 2);
         setSelectedId(hit?.id ? String(hit.id) : null);
-      } else if (animationType === 'aurora') {
+      } else if (actualAnimationType === 'aurora') {
         startAuroraAnimation();
         setSelectedId(hit?.id ? String(hit.id) : null);
-      } else if (animationType === 'butterfly') {
+      } else if (actualAnimationType === 'butterfly') {
         const canvas = canvasRef.current;
         if (!canvas) return;
         const rect = canvas.getBoundingClientRect();
         startButterflyAnimation(rect.width / 2, rect.height / 2);
         setSelectedId(hit?.id ? String(hit.id) : null);
-      } else if (animationType === 'shootingstar') {
+      } else if (actualAnimationType === 'shootingstar') {
         startShootingStarAnimation();
         setSelectedId(hit?.id ? String(hit.id) : null);
-      } else if (animationType === 'autumnleaves') {
+      } else if (actualAnimationType === 'autumnleaves') {
         const canvas = canvasRef.current;
         if (!canvas) return;
         const rect = canvas.getBoundingClientRect();
         startAutumnLeavesAnimation(rect.width / 2, rect.height * 0.2);
         setSelectedId(hit?.id ? String(hit.id) : null);
-      } else if (animationType === 'snow') {
+      } else if (actualAnimationType === 'snow') {
         startSnowAnimation(20);
         setSelectedId(hit?.id ? String(hit.id) : null);
-      } else if (animationType === 'confetti') {
+      } else if (actualAnimationType === 'confetti') {
         const canvas = canvasRef.current;
         if (!canvas) return;
         const rect = canvas.getBoundingClientRect();
         startConfettiAnimation(rect.width / 2, rect.height / 2);
         setSelectedId(hit?.id ? String(hit.id) : null);
-      } else if (animationType === 'rainbow') {
+      } else if (actualAnimationType === 'rainbow') {
         const canvas = canvasRef.current;
         if (!canvas) return;
         const rect = canvas.getBoundingClientRect();
         startRainbowAnimation(rect.width / 2, rect.height * 0.7);
         setSelectedId(hit?.id ? String(hit.id) : null);
-      } else if (animationType === 'rain') {
+      } else if (actualAnimationType === 'rain') {
         startRainAnimation(15);
         setSelectedId(hit?.id ? String(hit.id) : null);
-      } else if (animationType === 'magiccircle') {
+      } else if (actualAnimationType === 'magiccircle') {
         startMagicCircleAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'flame') {
+        startFlameAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'thunder') {
+        startThunderAnimation();
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'wave') {
+        startWaveAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'wind') {
+        startWindAnimation(25);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'smoke') {
+        startSmokeAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'tornado') {
+        startTornadoAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'gem') {
+        startGemAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'startrail') {
+        startStarTrailAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'lightparticle') {
+        startLightParticleAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'spiral') {
+        startSpiralAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'bird') {
+        startBirdAnimation(5);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'ghost') {
+        startGhostAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'bee') {
+        startBeeAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'firefly') {
+        startFireflyAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'explosion') {
+        startExplosionAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'target') {
+        startTargetAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'anger') {
+        startAngerAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'petal') {
+        startPetalAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'sunflower') {
+        startSunflowerAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'rose') {
+        startRoseAnimation(hit);
         setSelectedId(hit?.id ? String(hit.id) : null);
       } else {
         // アニメーションなし：通常の選択
@@ -6610,6 +8522,26 @@ export default function Home() {
       setRainbowAnimations([]);
       setRainAnimations([]);
       setMagicCircleAnimations([]);
+      setFlameAnimations([]);
+      setThunderAnimations([]);
+      setWaveAnimations([]);
+      setWindAnimations([]);
+      setSmokeAnimations([]);
+      setTornadoAnimations([]);
+      setGemAnimations([]);
+      setStarTrailAnimations([]);
+      setLightParticleAnimations([]);
+      setSpiralAnimations([]);
+      setBirdAnimations([]);
+      setGhostAnimations([]);
+      setBeeAnimations([]);
+      setFireflyAnimations([]);
+      setExplosionAnimations([]);
+      setTargetAnimations([]);
+      setAngerAnimations([]);
+      setPetalAnimations([]);
+      setSunflowerAnimations([]);
+      setRoseAnimations([]);
       setSelectedId(null);
       // requestDrawを呼び出して即座に反映
       requestDraw();
@@ -6635,6 +8567,36 @@ export default function Home() {
           setCoinDrops([]);
           setCatAnimations([]);
           catAnimationsDataRef.current = [];
+          setBalloonAnimations([]);
+          setAuroraAnimations([]);
+          setButterflyAnimations([]);
+          setShootingStarAnimations([]);
+          setAutumnLeavesAnimations([]);
+          setSnowAnimations([]);
+          setConfettiAnimations([]);
+          setRainbowAnimations([]);
+          setRainAnimations([]);
+          setMagicCircleAnimations([]);
+          setFlameAnimations([]);
+          setThunderAnimations([]);
+          setWaveAnimations([]);
+          setWindAnimations([]);
+          setSmokeAnimations([]);
+          setTornadoAnimations([]);
+          setGemAnimations([]);
+          setStarTrailAnimations([]);
+          setLightParticleAnimations([]);
+          setSpiralAnimations([]);
+          setBirdAnimations([]);
+          setGhostAnimations([]);
+          setBeeAnimations([]);
+          setFireflyAnimations([]);
+          setExplosionAnimations([]);
+          setTargetAnimations([]);
+          setAngerAnimations([]);
+          setPetalAnimations([]);
+          setSunflowerAnimations([]);
+          setRoseAnimations([]);
         }
       }
     } else {
@@ -6649,6 +8611,36 @@ export default function Home() {
         setCoinDrops([]);
         setCatAnimations([]);
         catAnimationsDataRef.current = [];
+        setBalloonAnimations([]);
+        setAuroraAnimations([]);
+        setButterflyAnimations([]);
+        setShootingStarAnimations([]);
+        setAutumnLeavesAnimations([]);
+        setSnowAnimations([]);
+        setConfettiAnimations([]);
+        setRainbowAnimations([]);
+        setRainAnimations([]);
+        setMagicCircleAnimations([]);
+        setFlameAnimations([]);
+        setThunderAnimations([]);
+        setWaveAnimations([]);
+        setWindAnimations([]);
+        setSmokeAnimations([]);
+        setTornadoAnimations([]);
+        setGemAnimations([]);
+        setStarTrailAnimations([]);
+        setLightParticleAnimations([]);
+        setSpiralAnimations([]);
+        setBirdAnimations([]);
+        setGhostAnimations([]);
+        setBeeAnimations([]);
+        setFireflyAnimations([]);
+        setExplosionAnimations([]);
+        setTargetAnimations([]);
+        setAngerAnimations([]);
+        setPetalAnimations([]);
+        setSunflowerAnimations([]);
+        setRoseAnimations([]);
       }
     }
   };
@@ -8975,15 +10967,16 @@ export default function Home() {
                       }}
                     >
                       <option value="">なし</option>
-                      <option value="fireworks">花火</option>
-                      <option value="sparkle">キラキラ</option>
-                      <option value="beartrap">熊罠</option>
-                      <option value="birthday">誕生日じゃないけど</option>
-                      <option value="cherryblossom">花吹雪</option>
-                      <option value="meteor">隕石</option>
-                      <option value="coin">コイン</option>
-                      <option value="slot">スロット</option>
-                      <option value="cat">猫</option>
+                      <option value="random">🎲 ランダム</option>
+                      <option value="fireworks">🎆 花火</option>
+                      <option value="sparkle">✨ キラキラ</option>
+                      <option value="beartrap">🐻 熊罠</option>
+                      <option value="birthday">🎂 誕生日じゃないけど</option>
+                      <option value="cherryblossom">🌸 花吹雪</option>
+                      <option value="meteor">☄️ 隕石</option>
+                      <option value="coin">💰 コイン</option>
+                      <option value="slot">🎰 スロット</option>
+                      <option value="cat">🐱 猫</option>
                       <option value="balloon">🎈 バルーン</option>
                       <option value="aurora">💫 オーロラ</option>
                       <option value="butterfly">🦋 蝶々</option>
@@ -8994,6 +10987,26 @@ export default function Home() {
                       <option value="rainbow">🌈 虹</option>
                       <option value="rain">💧 雨</option>
                       <option value="magiccircle">🎭 魔法陣</option>
+                      <option value="flame">🔥 炎</option>
+                      <option value="thunder">⚡ 雷</option>
+                      <option value="wave">🌊 波</option>
+                      <option value="wind">🍃 風</option>
+                      <option value="smoke">💨 煙</option>
+                      <option value="tornado">🌪️ 竜巻</option>
+                      <option value="gem">💎 宝石</option>
+                      <option value="startrail">⭐ 星の軌跡</option>
+                      <option value="lightparticle">✨ 光の粒</option>
+                      <option value="spiral">💫 スパイラル</option>
+                      <option value="bird">🦅 鳥</option>
+                      <option value="ghost">👻 ゴースト</option>
+                      <option value="bee">🐝 蜂</option>
+                      <option value="firefly">🦋 蛍</option>
+                      <option value="explosion">💥 爆発</option>
+                      <option value="target">🎯 ターゲット</option>
+                      <option value="anger">💢 怒り</option>
+                      <option value="petal">🌺 花びら</option>
+                      <option value="sunflower">🌻 ひまわり</option>
+                      <option value="rose">🌹 バラ</option>
                     </select>
                   </div>
                   
@@ -9443,261 +11456,6 @@ export default function Home() {
                   e.target.style.boxShadow = "none";
                 }}
               />
-            </div>
-
-            {/* エフェクト発動ボタン */}
-            <div style={{
-              marginBottom: 16,
-              padding: isMobile ? "12px" : "16px",
-              background: "linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)",
-              borderRadius: 12,
-              border: "2px solid #bae6fd",
-            }}>
-              <h3 style={{
-                margin: "0 0 12px 0",
-                fontSize: 14,
-                fontWeight: 600,
-                color: "#0369a1",
-                userSelect: "none",
-              }}>
-                ✨ エフェクト発動
-              </h3>
-              <div style={{
-                display: "grid",
-                gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(3, 1fr)",
-                gap: 8,
-              }}>
-                <button
-                  onClick={() => {
-                    const canvas = canvasRef.current;
-                    if (!canvas) return;
-                    const rect = canvas.getBoundingClientRect();
-                    const objMapX = (num(editingObject.x, 0) + num(editingObject.w, 1) / 2) * cfg.cell;
-                    const objMapY = (num(editingObject.y, 0) + num(editingObject.h, 1) / 2) * cfg.cell;
-                    const { sx, sy } = mapToScreen(objMapX, objMapY, rect.width, rect.height);
-                    startBalloonAnimation(sx, sy);
-                  }}
-                  style={{
-                    padding: "10px 8px",
-                    background: "white",
-                    border: "2px solid #e0f2fe",
-                    borderRadius: 8,
-                    cursor: "pointer",
-                    fontSize: 12,
-                    fontWeight: 600,
-                    color: "#0369a1",
-                    transition: "all 0.2s",
-                    userSelect: "none",
-                  }}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = "#f0f9ff"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.background = "white"; }}
-                >
-                  🎈 バルーン
-                </button>
-                <button
-                  onClick={() => startAuroraAnimation()}
-                  style={{
-                    padding: "10px 8px",
-                    background: "white",
-                    border: "2px solid #e0f2fe",
-                    borderRadius: 8,
-                    cursor: "pointer",
-                    fontSize: 12,
-                    fontWeight: 600,
-                    color: "#0369a1",
-                    transition: "all 0.2s",
-                    userSelect: "none",
-                  }}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = "#f0f9ff"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.background = "white"; }}
-                >
-                  💫 オーロラ
-                </button>
-                <button
-                  onClick={() => {
-                    const canvas = canvasRef.current;
-                    if (!canvas) return;
-                    const rect = canvas.getBoundingClientRect();
-                    const objMapX = (num(editingObject.x, 0) + num(editingObject.w, 1) / 2) * cfg.cell;
-                    const objMapY = (num(editingObject.y, 0) + num(editingObject.h, 1) / 2) * cfg.cell;
-                    const { sx, sy } = mapToScreen(objMapX, objMapY, rect.width, rect.height);
-                    startButterflyAnimation(sx, sy);
-                  }}
-                  style={{
-                    padding: "10px 8px",
-                    background: "white",
-                    border: "2px solid #e0f2fe",
-                    borderRadius: 8,
-                    cursor: "pointer",
-                    fontSize: 12,
-                    fontWeight: 600,
-                    color: "#0369a1",
-                    transition: "all 0.2s",
-                    userSelect: "none",
-                  }}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = "#f0f9ff"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.background = "white"; }}
-                >
-                  🦋 蝶々
-                </button>
-                <button
-                  onClick={() => startShootingStarAnimation()}
-                  style={{
-                    padding: "10px 8px",
-                    background: "white",
-                    border: "2px solid #e0f2fe",
-                    borderRadius: 8,
-                    cursor: "pointer",
-                    fontSize: 12,
-                    fontWeight: 600,
-                    color: "#0369a1",
-                    transition: "all 0.2s",
-                    userSelect: "none",
-                  }}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = "#f0f9ff"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.background = "white"; }}
-                >
-                  🌟 流れ星
-                </button>
-                <button
-                  onClick={() => {
-                    const canvas = canvasRef.current;
-                    if (!canvas) return;
-                    const rect = canvas.getBoundingClientRect();
-                    const objMapX = (num(editingObject.x, 0) + num(editingObject.w, 1) / 2) * cfg.cell;
-                    const objMapY = (num(editingObject.y, 0) + num(editingObject.h, 1) / 2) * cfg.cell;
-                    const { sx, sy } = mapToScreen(objMapX, objMapY, rect.width, rect.height);
-                    startAutumnLeavesAnimation(sx, sy);
-                  }}
-                  style={{
-                    padding: "10px 8px",
-                    background: "white",
-                    border: "2px solid #e0f2fe",
-                    borderRadius: 8,
-                    cursor: "pointer",
-                    fontSize: 12,
-                    fontWeight: 600,
-                    color: "#0369a1",
-                    transition: "all 0.2s",
-                    userSelect: "none",
-                  }}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = "#f0f9ff"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.background = "white"; }}
-                >
-                  🍂 紅葉
-                </button>
-                <button
-                  onClick={() => startSnowAnimation(20)}
-                  style={{
-                    padding: "10px 8px",
-                    background: "white",
-                    border: "2px solid #e0f2fe",
-                    borderRadius: 8,
-                    cursor: "pointer",
-                    fontSize: 12,
-                    fontWeight: 600,
-                    color: "#0369a1",
-                    transition: "all 0.2s",
-                    userSelect: "none",
-                  }}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = "#f0f9ff"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.background = "white"; }}
-                >
-                  ❄️ 雪
-                </button>
-                <button
-                  onClick={() => {
-                    const canvas = canvasRef.current;
-                    if (!canvas) return;
-                    const rect = canvas.getBoundingClientRect();
-                    const objMapX = (num(editingObject.x, 0) + num(editingObject.w, 1) / 2) * cfg.cell;
-                    const objMapY = (num(editingObject.y, 0) + num(editingObject.h, 1) / 2) * cfg.cell;
-                    const { sx, sy } = mapToScreen(objMapX, objMapY, rect.width, rect.height);
-                    startConfettiAnimation(sx, sy);
-                  }}
-                  style={{
-                    padding: "10px 8px",
-                    background: "white",
-                    border: "2px solid #e0f2fe",
-                    borderRadius: 8,
-                    cursor: "pointer",
-                    fontSize: 12,
-                    fontWeight: 600,
-                    color: "#0369a1",
-                    transition: "all 0.2s",
-                    userSelect: "none",
-                  }}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = "#f0f9ff"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.background = "white"; }}
-                >
-                  🎊 紙吹雪
-                </button>
-                <button
-                  onClick={() => {
-                    const canvas = canvasRef.current;
-                    if (!canvas) return;
-                    const rect = canvas.getBoundingClientRect();
-                    const objMapX = (num(editingObject.x, 0) + num(editingObject.w, 1) / 2) * cfg.cell;
-                    const objMapY = (num(editingObject.y, 0) + num(editingObject.h, 1) / 2) * cfg.cell;
-                    const { sx, sy } = mapToScreen(objMapX, objMapY, rect.width, rect.height);
-                    startRainbowAnimation(sx, sy + 100);
-                  }}
-                  style={{
-                    padding: "10px 8px",
-                    background: "white",
-                    border: "2px solid #e0f2fe",
-                    borderRadius: 8,
-                    cursor: "pointer",
-                    fontSize: 12,
-                    fontWeight: 600,
-                    color: "#0369a1",
-                    transition: "all 0.2s",
-                    userSelect: "none",
-                  }}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = "#f0f9ff"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.background = "white"; }}
-                >
-                  🌈 虹
-                </button>
-                <button
-                  onClick={() => startRainAnimation(15)}
-                  style={{
-                    padding: "10px 8px",
-                    background: "white",
-                    border: "2px solid #e0f2fe",
-                    borderRadius: 8,
-                    cursor: "pointer",
-                    fontSize: 12,
-                    fontWeight: 600,
-                    color: "#0369a1",
-                    transition: "all 0.2s",
-                    userSelect: "none",
-                  }}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = "#f0f9ff"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.background = "white"; }}
-                >
-                  💧 雨
-                </button>
-                <button
-                  onClick={() => startMagicCircleAnimation(editingObject)}
-                  style={{
-                    padding: "10px 8px",
-                    background: "white",
-                    border: "2px solid #e0f2fe",
-                    borderRadius: 8,
-                    cursor: "pointer",
-                    fontSize: 12,
-                    fontWeight: 600,
-                    color: "#0369a1",
-                    transition: "all 0.2s",
-                    userSelect: "none",
-                  }}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = "#f0f9ff"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.background = "white"; }}
-                >
-                  🎭 魔法陣
-                </button>
-              </div>
             </div>
 
             {/* メインアクションボタン */}
