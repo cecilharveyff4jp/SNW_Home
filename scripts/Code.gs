@@ -1,13 +1,88 @@
 const EDIT_PASSWORD = "snow1234";
 const SPREADSHEET_ID = "1E3snSo7vzpdcTLkRqJFDlgDK3GZ3IuJYehspN95AgvQ";
 
+// マップ設定のデフォルト
+const DEFAULT_MAPS = [
+  { id: 'object', name: 'メインマップ', sheetName: 'objects', isVisible: true, isBase: true, order: 1 },
+  { id: 'map2', name: 'サブマップ2', sheetName: 'objects_map2', isVisible: false, isBase: false, order: 2 },
+  { id: 'map3', name: 'サブマップ3', sheetName: 'objects_map3', isVisible: false, isBase: false, order: 3 },
+  { id: 'map4', name: 'サブマップ4', sheetName: 'objects_map4', isVisible: false, isBase: false, order: 4 },
+  { id: 'map5', name: 'サブマップ5', sheetName: 'objects_map5', isVisible: false, isBase: false, order: 5 }
+];
+
+// マップ設定を取得または初期化
+function getMapConfigs() {
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  let configSheet = ss.getSheetByName('map_config');
+  
+  // map_configシートが存在しない場合は作成
+  if (!configSheet) {
+    configSheet = ss.insertSheet('map_config');
+    configSheet.appendRow(['id', 'name', 'sheetName', 'isVisible', 'isBase', 'order']);
+    
+    // デフォルト設定を書き込み
+    const rows = DEFAULT_MAPS.map(m => [m.id, m.name, m.sheetName, m.isVisible, m.isBase, m.order]);
+    configSheet.getRange(2, 1, rows.length, 6).setValues(rows);
+  }
+  
+  const data = configSheet.getDataRange().getValues();
+  const configs = [];
+  
+  for (let i = 1; i < data.length; i++) {
+    if (data[i][0]) {
+      configs.push({
+        id: data[i][0],
+        name: data[i][1],
+        sheetName: data[i][2],
+        isVisible: data[i][3] === true || data[i][3] === 'TRUE',
+        isBase: data[i][4] === true || data[i][4] === 'TRUE',
+        order: data[i][5] || i
+      });
+    }
+  }
+  
+  return configs.sort((a, b) => a.order - b.order);
+}
+
 function doGet(e) {
   const action = e.parameter.action;
   
+  // マップ一覧を取得
+  if (action === 'getMaps') {
+    const configs = getMapConfigs();
+    return ContentService.createTextOutput(JSON.stringify({ 
+      ok: true, 
+      maps: configs 
+    }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+  
   if (action === 'getMap') {
+    const mapId = e.parameter.mapId || 'object';
     const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
     const metaSheet = ss.getSheetByName('meta');
-    const objectsSheet = ss.getSheetByName('objects');
+    
+    // マップ設定を取得
+    const configs = getMapConfigs();
+    const mapConfig = configs.find(m => m.id === mapId);
+    
+    if (!mapConfig) {
+      return ContentService.createTextOutput(JSON.stringify({ 
+        ok: false, 
+        error: 'Map not found' 
+      }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    const objectsSheet = ss.getSheetByName(mapConfig.sheetName);
+    
+    if (!objectsSheet) {
+      return ContentService.createTextOutput(JSON.stringify({ 
+        ok: false, 
+        error: 'Sheet not found' 
+      }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
     
     // メタデータを取得（key-value形式）
     const metaData = metaSheet.getDataRange().getValues();
@@ -22,6 +97,9 @@ function doGet(e) {
     
     const output = {
       ok: true,
+      mapId: mapId,
+      mapName: mapConfig.name,
+      isBase: mapConfig.isBase,
       meta: {
         cols: Number(meta.cols) || 60,
         rows: Number(meta.rows) || 40,
@@ -40,20 +118,26 @@ function doGet(e) {
     const objectsData = objectsSheet.getDataRange().getValues();
     for (let i = 1; i < objectsData.length; i++) {
       if (objectsData[i][0]) {
-        output.objects.push({
+        const obj = {
           id: objectsData[i][0],
           type: objectsData[i][1],
           label: objectsData[i][2],
           x: objectsData[i][3],
           y: objectsData[i][4],
           w: objectsData[i][5],
-          h: objectsData[i][6],
-          birthday: objectsData[i][7] || '',  // 8列目（birthday）
-          note: objectsData[i][8] || '',  // 9列目（note）を追加
-          isFavorite: objectsData[i][11] || false,  // 12列目（isFavorite）
-          Animation: objectsData[i][12] || '',  // 13列目（Animation）
-          Fire: objectsData[i][13] || ''  // 14列目（Fire）
-        });
+          h: objectsData[i][6]
+        };
+        
+        // ベースマップの場合のみ追加フィールド
+        if (mapConfig.isBase) {
+          obj.birthday = objectsData[i][7] || '';
+          obj.note = objectsData[i][8] || '';
+          obj.isFavorite = objectsData[i][11] || false;
+          obj.Animation = objectsData[i][12] || '';
+          obj.Fire = objectsData[i][13] || '';
+        }
+        
+        output.objects.push(obj);
       }
     }
     
@@ -106,7 +190,8 @@ function doGet(e) {
 function doPost(e) {
   const action = e.parameter.action;
   
-  if (action === 'saveMap') {
+  // マップ設定を更新
+  if (action === 'updateMapConfig') {
     const data = JSON.parse(e.postData.contents);
     
     // パスワード認証
@@ -119,8 +204,148 @@ function doPost(e) {
     }
     
     const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+    const configSheet = ss.getSheetByName('map_config');
+    
+    if (!configSheet) {
+      return ContentService.createTextOutput(JSON.stringify({ 
+        ok: false, 
+        error: 'Config sheet not found' 
+      }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    const configData = configSheet.getDataRange().getValues();
+    
+    // 該当するマップを見つけて更新
+    for (let i = 1; i < configData.length; i++) {
+      if (configData[i][0] === data.mapId) {
+        if (data.name !== undefined) {
+          configSheet.getRange(i + 1, 2).setValue(data.name);
+        }
+        if (data.isVisible !== undefined && !configData[i][4]) {  // ベースマップでない場合のみ
+          configSheet.getRange(i + 1, 4).setValue(data.isVisible);
+        }
+        
+        return ContentService.createTextOutput(JSON.stringify({ 
+          ok: true
+        }))
+          .setMimeType(ContentService.MimeType.JSON);
+      }
+    }
+    
+    return ContentService.createTextOutput(JSON.stringify({ 
+      ok: false, 
+      error: 'Map not found' 
+    }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+  
+  // マップをコピー
+  if (action === 'copyMap') {
+    const data = JSON.parse(e.postData.contents);
+    
+    // パスワード認証
+    if (data.password !== EDIT_PASSWORD) {
+      return ContentService.createTextOutput(JSON.stringify({ 
+        ok: false, 
+        error: 'Invalid password' 
+      }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+    const sourceSheet = ss.getSheetByName('objects');  // ベースマップ
+    const configs = getMapConfigs();
+    const targetConfig = configs.find(m => m.id === data.targetMapId);
+    
+    if (!targetConfig || targetConfig.isBase) {
+      return ContentService.createTextOutput(JSON.stringify({ 
+        ok: false, 
+        error: 'Invalid target map' 
+      }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    let targetSheet = ss.getSheetByName(targetConfig.sheetName);
+    
+    // ターゲットシートが存在しない場合は作成
+    if (!targetSheet) {
+      targetSheet = ss.insertSheet(targetConfig.sheetName);
+      targetSheet.appendRow(['id', 'type', 'label', 'x', 'y', 'w', 'h']);
+    }
+    
+    // データをコピー（基本フィールドのみ）
+    const sourceData = sourceSheet.getDataRange().getValues();
+    const lastRow = targetSheet.getLastRow();
+    if (lastRow >= 2) {
+      targetSheet.getRange(2, 1, lastRow - 1, 7).clearContent();
+    }
+    
+    const rows = [];
+    for (let i = 1; i < sourceData.length; i++) {
+      if (sourceData[i][0]) {
+        rows.push([
+          sourceData[i][0],  // id
+          sourceData[i][1],  // type
+          sourceData[i][2],  // label
+          sourceData[i][3],  // x
+          sourceData[i][4],  // y
+          sourceData[i][5],  // w
+          sourceData[i][6]   // h
+        ]);
+      }
+    }
+    
+    if (rows.length > 0) {
+      targetSheet.getRange(2, 1, rows.length, 7).setValues(rows);
+    }
+    
+    return ContentService.createTextOutput(JSON.stringify({ 
+      ok: true,
+      copied: rows.length
+    }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+  
+  if (action === 'saveMap') {
+    const data = JSON.parse(e.postData.contents);
+    
+    // パスワード認証
+    if (data.password !== EDIT_PASSWORD) {
+      return ContentService.createTextOutput(JSON.stringify({ 
+        ok: false, 
+        error: 'Invalid password' 
+      }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    const mapId = data.mapId || 'object';
+    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
     const metaSheet = ss.getSheetByName('meta');
-    const objectsSheet = ss.getSheetByName('objects');
+    
+    // マップ設定を取得
+    const configs = getMapConfigs();
+    const mapConfig = configs.find(m => m.id === mapId);
+    
+    if (!mapConfig) {
+      return ContentService.createTextOutput(JSON.stringify({ 
+        ok: false, 
+        error: 'Map not found' 
+      }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    let objectsSheet = ss.getSheetByName(mapConfig.sheetName);
+    
+    // シートが存在しない場合は作成
+    if (!objectsSheet) {
+      objectsSheet = ss.insertSheet(mapConfig.sheetName);
+      if (mapConfig.isBase) {
+        objectsSheet.appendRow(['id', 'type', 'label', 'x', 'y', 'w', 'h', 'birthday', 'note', 'updatedAt', 'updatedBy', 'isFavorite', 'Animation', 'Fire']);
+      } else {
+        objectsSheet.appendRow(['id', 'type', 'label', 'x', 'y', 'w', 'h']);
+      }
+    }
     
     // メタ情報を更新（もし送られてきた場合）
     if (data.meta) {
@@ -165,8 +390,9 @@ function doPost(e) {
     
     // 既存データをクリア（2行目以降、ヘッダーは残す）
     const lastRow = objectsSheet.getLastRow();
+    const columnCount = mapConfig.isBase ? 14 : 7;
     if (lastRow >= 2) {
-      objectsSheet.getRange(2, 1, lastRow - 1, 14).clearContent();  // 14列まで拡張
+      objectsSheet.getRange(2, 1, lastRow - 1, columnCount).clearContent();
     }
     
     // 新しいデータを書き込み
@@ -174,23 +400,37 @@ function doPost(e) {
       const timestamp = new Date().toISOString();
       const actor = data.actor || 'anonymous';
       
-      const rows = data.objects.map(obj => [
-        obj.id, 
-        obj.type, 
-        obj.label, 
-        obj.x, 
-        obj.y, 
-        obj.w, 
-        obj.h, 
-        obj.birthday || '',  // birthday列
-        obj.note || '',  // note列
-        timestamp,  // updatedAt
-        actor,  // updatedBy
-        obj.isFavorite || false,  // isFavorite
-        obj.Animation || '',  // Animation列
-        obj.Fire || ''  // Fire列
-      ]);
-      objectsSheet.getRange(2, 1, rows.length, 14).setValues(rows);  // 14列まで書き込み
+      let rows;
+      if (mapConfig.isBase) {
+        rows = data.objects.map(obj => [
+          obj.id, 
+          obj.type, 
+          obj.label, 
+          obj.x, 
+          obj.y, 
+          obj.w, 
+          obj.h, 
+          obj.birthday || '',
+          obj.note || '',
+          timestamp,
+          actor,
+          obj.isFavorite || false,
+          obj.Animation || '',
+          obj.Fire || ''
+        ]);
+      } else {
+        rows = data.objects.map(obj => [
+          obj.id, 
+          obj.type, 
+          obj.label, 
+          obj.x, 
+          obj.y, 
+          obj.w, 
+          obj.h
+        ]);
+      }
+      
+      objectsSheet.getRange(2, 1, rows.length, columnCount).setValues(rows);
     }
     
     return ContentService.createTextOutput(JSON.stringify({ 

@@ -11,6 +11,15 @@ export type Meta = {
   bgOpacity?: number;
 };
 
+export type MapConfig = {
+  id: string;           // 'object', 'map2', 'map3', 'map4', 'map5'
+  name: string;         // 表示名
+  sheetName: string;    // スプレッドシートのシート名
+  isVisible: boolean;   // 表示/非表示
+  isBase: boolean;      // ベースマップかどうか
+  order: number;        // 表示順序
+};
+
 export type BgConfig = {
   image: string;  // 画像ファイル名
   centerX: number;  // 中心点X (%)

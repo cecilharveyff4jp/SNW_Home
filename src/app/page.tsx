@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import type { Meta, BgConfig, Obj } from './types';
+import type { Meta, BgConfig, Obj, MapConfig } from './types';
 import { 
   basePath, 
   num, 
@@ -24,6 +24,13 @@ export default function Home() {
   const [objects, setObjects] = useState<Obj[]>([]);
   const [links, setLinks] = useState<Array<{ name: string; url: string; order: number; display: boolean }>>([]);
   const [err, setErr] = useState<string | null>(null);
+
+  // マップ切替機能
+  const [currentMapId, setCurrentMapId] = useState<string>('object');
+  const [mapConfigs, setMapConfigs] = useState<MapConfig[]>([]);
+  const [showMapSelector, setShowMapSelector] = useState(false);
+  const [showMapManagement, setShowMapManagement] = useState(false);
+  const [editingMapConfig, setEditingMapConfig] = useState<MapConfig | null>(null);
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
@@ -99,6 +106,10 @@ export default function Home() {
   const [tickerHidden, setTickerHidden] = useState(false);
   const [tickerKey, setTickerKey] = useState(0); // テロップリセット用キー（データ再読み込み時のみ更新）
   const tickerStateBeforeAnimation = useRef<boolean>(false); // アニメーション前のテロップ状態を保存
+
+  // サブマップではテロップを強制的に表示
+  const isSubMap = currentMapId !== 'object';
+  const effectiveTickerHidden = isSubMap ? false : tickerHidden;
 
   // スマホ画面判定（768px以下をモバイルとする）
   const [isMobile, setIsMobile] = useState(false);
@@ -1296,6 +1307,12 @@ export default function Home() {
     startDist: number;
   }>(null);
 
+  // 現在のマップがベースマップかどうか
+  const isBaseMap = useMemo(() => {
+    const current = mapConfigs.find(m => m.id === currentMapId);
+    return current?.isBase ?? true;
+  }, [mapConfigs, currentMapId]);
+  
   const cfg = useMemo(
     () => ({
       cols: num(meta.cols, FALLBACK.cols),
@@ -1305,6 +1322,19 @@ export default function Home() {
     }),
     [meta]
   );
+
+  // 現在のマップ設定を取得
+  const currentMap = useMemo(() => {
+    return mapConfigs.find(m => m.id === currentMapId);
+  }, [mapConfigs, currentMapId]);
+
+  // 表示可能なマップ一覧（参照モード時は表示中のもののみ）
+  const visibleMaps = useMemo(() => {
+    if (isEditMode) {
+      return mapConfigs;  // 編集モードでは全マップ表示
+    }
+    return mapConfigs.filter(m => m.isVisible);  // 参照モードでは表示設定のもののみ
+  }, [mapConfigs, isEditMode]);
 
   // 見た目（実機寄せ）
   const LOOK = useMemo(
@@ -1324,7 +1354,41 @@ export default function Home() {
     []
   );
 
-  async function loadMap() {
+  // マップ設定を取得
+  async function loadMapConfigs() {
+    try {
+      const base = process.env.NEXT_PUBLIC_GAS_URL;
+      if (!base) return;
+      
+      const res = await fetch(`${base}?action=getMaps`, { method: "GET" });
+      const json = await res.json();
+      if (json.ok && Array.isArray(json.maps)) {
+        setMapConfigs(json.maps);
+      }
+    } catch (e) {
+      console.error("マップ設定の取得に失敗:", e);
+    }
+  }
+
+  // マップを切り替える
+  async function switchMap(mapId: string) {
+    if (mapId === currentMapId) return;
+    
+    // 未保存の変更がある場合は警告
+    if (isEditMode && hasUnsavedChanges) {
+      if (!confirm('未保存の変更があります。マップを切り替えますか？')) {
+        return;
+      }
+    }
+    
+    setCurrentMapId(mapId);
+    await loadMap(mapId);
+    setShowMapSelector(false);
+    setShowHeaderMenu(false);
+  }
+
+  async function loadMap(mapId?: string) {
+    const targetMapId = mapId || currentMapId;
     setIsLoading(true);
     try {
       setErr(null);
@@ -1335,9 +1399,16 @@ export default function Home() {
         );
       }
 
-      const res = await fetch(`${base}?action=getMap`, { method: "GET" });
+      const res = await fetch(`${base}?action=getMap&mapId=${targetMapId}`, { method: "GET" });
       const json = await res.json();
       if (!json.ok) {
+        // マップが見つからない場合、ベースマップにフォールバック
+        if (json.error === 'Map not found' && targetMapId !== 'object') {
+          console.warn(`マップ ${targetMapId} が見つかりません。ベースマップにフォールバックします。`);
+          setCurrentMapId('object');
+          localStorage.setItem('currentMapId', 'object');
+          return loadMap('object');
+        }
         throw new Error(json.error || "マップデータの取得に失敗しました");
       }
 
@@ -1435,7 +1506,12 @@ export default function Home() {
   }
 
   useEffect(() => {
-    loadMap();
+    // 初回ロード時にマップ設定を取得してから最初のマップを読み込む
+    async function init() {
+      await loadMapConfigs();
+      await loadMap();
+    }
+    init();
   }, []);
 
   // キャンバスのホイールイベントでページスクロールを防止 & ズーム機能
@@ -1602,8 +1678,8 @@ export default function Home() {
     // 背景をクリア（透明に）
     ctx.clearRect(0, 0, viewW, viewH);
     
-    // 背景画像を描画（設定されている場合、ロード完了後のみ）
-    if (!isInitialLoading && bgConfig.image && bgImageRef.current) {
+    // 背景画像を描画（設定されている場合、ロード完了後のみ、ベースマップのみ）
+    if (!isInitialLoading && bgConfig.image && bgImageRef.current && currentMapId === 'object') {
       ctx.save();
       ctx.globalAlpha = bgConfig.opacity;
       
@@ -1665,6 +1741,54 @@ export default function Home() {
       ctx.stroke();
     }
 
+    // サブマップでの自陣範囲を描画（本部と旗）
+    if (isSubMap) {
+      ctx.save();
+      // 薄い青色（雪原本部の箱と同じ色）
+      ctx.fillStyle = "rgba(173, 216, 230, 0.3)"; // ライトブルー
+      
+      for (const obj of objects) {
+        const type = (obj.type || "").toUpperCase();
+        const objX = num(obj.x, 0);
+        const objY = num(obj.y, 0);
+        const objW = num(obj.w, 1);
+        const objH = num(obj.h, 1);
+        
+        // 本部: 3×3のオブジェクト中心に15×15の自陣
+        if (type === "HQ") {
+          const centerX = objX + objW / 2;
+          const centerY = objY + objH / 2;
+          const territorySize = 15;
+          const territoryX = Math.floor(centerX - territorySize / 2);
+          const territoryY = Math.floor(centerY - territorySize / 2);
+          
+          ctx.fillRect(
+            territoryX * cell,
+            territoryY * cell,
+            territorySize * cell,
+            territorySize * cell
+          );
+        }
+        
+        // 旗: 1×1のオブジェクト中心に7×7の自陣
+        if (type === "FLAG") {
+          const centerX = objX + objW / 2;
+          const centerY = objY + objH / 2;
+          const territorySize = 7;
+          const territoryX = Math.floor(centerX - territorySize / 2);
+          const territoryY = Math.floor(centerY - territorySize / 2);
+          
+          ctx.fillRect(
+            territoryX * cell,
+            territoryY * cell,
+            territorySize * cell,
+            territorySize * cell
+          );
+        }
+      }
+      
+      ctx.restore();
+    }
 
     // Draw order
     // 描画順：奥→手前（y→x）で自然に重なる
@@ -1721,7 +1845,13 @@ export default function Home() {
         ctx.translate(-2, -2);
       }
       
-      ctx.fillStyle = hasOverlap ? "rgba(239,68,68,0.25)" : th.top;
+      // サブマップでは都市とその他のみ背景を透明に
+      const type = (o.type || "").toUpperCase();
+      if (isSubMap && (type === "CITY" || !type || type === "")) {
+        ctx.fillStyle = "rgba(0,0,0,0)"; // 完全透明（都市とその他のみ）
+      } else {
+        ctx.fillStyle = hasOverlap ? "rgba(239,68,68,0.25)" : th.top;
+      }
       ctx.fillRect(gx, gy, gw, gh);
       ctx.strokeStyle = hasOverlap ? "#dc2626" : (th.stroke || "rgba(0,0,0,0.2)");
       ctx.lineWidth = hasOverlap ? 3 : (isDraggingThis ? 3 : 2);
@@ -1769,8 +1899,8 @@ export default function Home() {
         ctx.restore();
       }
 
-      // マイオブジェクトエフェクト（紫のふわふわ光る輝き）
-      const isMyObject = !isEditMode && myObjectId && id === myObjectId;
+      // マイオブジェクトエフェクト（紫のふわふわ光る輝き）- ベースマップのみ
+      const isMyObject = !isEditMode && !isSubMap && myObjectId && id === myObjectId;
       if (isMyObject) {
         ctx.save();
         
@@ -2237,8 +2367,8 @@ export default function Home() {
       }
     }
 
-    // 誕生日テロップ（参照モード時のみ表示）
-    if (!isEditMode) {
+    // 誕生日テロップ（参照モード時のみ表示、ベースマップのみ）
+    if (!isEditMode && currentMapId === 'object') {
       const now = new Date();
       const currentMonth = now.getMonth() + 1; // 1-12
       const nextMonth = currentMonth === 12 ? 1 : currentMonth + 1;
@@ -8278,8 +8408,8 @@ export default function Home() {
     // hit変数を取得（再利用）
     // const hit = hitTest(mx, my); // 既に上で定義済み
     
-    // 参照モード時にオブジェクトをタップした場合、アニメーション判定
-    if (!isEditMode && hit) {
+    // 参照モード時にオブジェクトをタップした場合、アニメーション判定（ベースマップのみ）
+    if (!isEditMode && hit && currentMapId === 'object') {
       // 参照モードではダブルクリック判定をスキップ
       lastClickRef.current = null;
       if (clickTimerRef.current) {
@@ -8801,6 +8931,7 @@ export default function Home() {
         body: JSON.stringify({
           password: "snow1234",
           actor: actorName,
+          mapId: currentMapId,
           objects,
           meta: {
             ...meta,
@@ -9359,6 +9490,110 @@ export default function Home() {
               }}
               onClick={(e) => e.stopPropagation()}
             >
+              {/* マップ切替（表示可能なマップが2つ以上の場合のみ） */}
+              {visibleMaps.length > 1 && (
+                <>
+                  <div 
+                    style={{
+                      padding: "12px 16px",
+                      borderBottom: isDarkMode ? "1px solid #374151" : "1px solid #e5e7eb",
+                      userSelect: "none",
+                      fontWeight: 600,
+                      color: isDarkMode ? "#9ca3af" : "#6b7280",
+                      fontSize: "13px",
+                      background: isDarkMode ? "#111827" : "#f9fafb",
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}
+                  >
+                    <span>🗺️ マップ切替</span>
+                    {isEditMode && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setShowMapManagement(true);
+                          setShowHeaderMenu(false);
+                        }}
+                        style={{
+                          padding: "4px 8px",
+                          fontSize: "11px",
+                          background: "#2563eb",
+                          color: "white",
+                          border: "none",
+                          borderRadius: 4,
+                          cursor: "pointer",
+                          userSelect: "none",
+                        }}
+                      >
+                        管理
+                      </button>
+                    )}
+                  </div>
+                  
+                  {/* マップ一覧 */}
+                  {visibleMaps.map((map, index) => {
+                    const isCurrent = map.id === currentMapId;
+                    
+                    return (
+                      <div 
+                        key={map.id}
+                        style={{
+                          padding: "10px 16px 10px 32px",
+                          cursor: isCurrent ? "default" : "pointer",
+                          borderBottom: index < visibleMaps.length - 1 ? (isDarkMode ? "1px solid #374151" : "1px solid #e5e7eb") : (isDarkMode ? "1px solid #374151" : "1px solid #e5e7eb"),
+                          transition: "background 0.2s",
+                          userSelect: "none",
+                          fontSize: "14px",
+                          background: isCurrent 
+                            ? (isDarkMode ? "#1e3a8a" : "#dbeafe") 
+                            : (isDarkMode ? "#1f2937" : "white"),
+                          color: isDarkMode ? "#e5e7eb" : "#1f2937",
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          opacity: map.isVisible ? 1 : 0.5,
+                        }}
+                        onClick={(e) => {
+                          if (!isCurrent) {
+                            e.stopPropagation();
+                            switchMap(map.id);
+                          }
+                        }}
+                      >
+                        <span style={{ flex: 1 }}>
+                          {isCurrent && "✓ "}
+                          {map.name}
+                          {!map.isVisible && " (非表示)"}
+                        </span>
+                        {isEditMode && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setEditingMapConfig(map);
+                              setShowMapManagement(true);
+                              setShowHeaderMenu(false);
+                            }}
+                            style={{
+                              padding: "2px 6px",
+                              fontSize: "11px",
+                              background: isDarkMode ? "#374151" : "#e5e7eb",
+                              color: isDarkMode ? "#e5e7eb" : "#1f2937",
+                              border: "none",
+                              borderRadius: 3,
+                              cursor: "pointer",
+                              userSelect: "none",
+                            }}
+                          >
+                            編集
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })}
+                </>
+              )}
+              
               {/* リンク集（見出し） */}
               <div 
                 style={{
@@ -9823,7 +10058,7 @@ export default function Home() {
             </div>
           )}
         </div>
-        <button onClick={loadMap} style={{ 
+        <button onClick={() => loadMap(currentMapId)} style={{ 
           padding: isMobile ? "8px 8px" : "6px 10px", 
           fontSize: isMobile ? "16px" : "13px", 
           whiteSpace: "nowrap", 
@@ -9871,14 +10106,14 @@ export default function Home() {
                 position: "relative",
                 width: "44px",
                 height: "22px",
-                background: tickerHidden ? "#d1d5db" : "#fbbf24",
+                background: effectiveTickerHidden ? "#d1d5db" : "#fbbf24",
                 borderRadius: "11px",
                 transition: "background 0.3s",
               }}>
                 <div style={{
                   position: "absolute",
                   top: "2px",
-                  left: tickerHidden ? "2px" : "22px",
+                  left: effectiveTickerHidden ? "2px" : "22px",
                   width: "18px",
                   height: "18px",
                   background: "white",
@@ -10179,6 +10414,313 @@ export default function Home() {
         </div>
       )}
 
+      {/* マップ管理モーダル */}
+      {showMapManagement && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: "rgba(0,0,0,0.5)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1000,
+            padding: isMobile ? "12px" : "16px",
+            overflowY: "auto",
+          }}
+          onClick={() => {
+            setShowMapManagement(false);
+            setEditingMapConfig(null);
+          }}
+        >
+          <div
+            style={{
+              background: "white",
+              borderRadius: 16,
+              width: "100%",
+              maxWidth: isMobile ? "min(calc(100vw - 32px), 460px)" : "520px",
+              maxHeight: isMobile ? "calc(100vh - 24px)" : "90vh",
+              boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
+              overflow: "hidden",
+              display: "flex",
+              flexDirection: "column",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{
+              background: "linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)",
+              padding: isMobile ? "12px 16px" : "18px 24px",
+              borderBottom: "1px solid rgba(255,255,255,0.1)",
+            }}>
+              <h2 style={{ margin: 0, color: "white", fontSize: isMobile ? 17 : 20, fontWeight: 600, userSelect: "none" }}>
+                🗺️ マップ管理
+              </h2>
+            </div>
+            <div style={{ padding: isMobile ? "14px" : "20px", overflowY: "auto", flex: 1 }}>
+              {mapConfigs.map((map) => (
+                <div 
+                  key={map.id}
+                  style={{
+                    marginBottom: 16,
+                    padding: 16,
+                    background: map.id === currentMapId ? "#eff6ff" : "#f9fafb",
+                    border: map.id === currentMapId ? "2px solid #2563eb" : "1px solid #e5e7eb",
+                    borderRadius: 8,
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+                    <input
+                      type="text"
+                      value={editingMapConfig?.id === map.id ? editingMapConfig.name : map.name}
+                      onChange={(e) => {
+                        if (editingMapConfig?.id === map.id) {
+                          setEditingMapConfig({ ...editingMapConfig, name: e.target.value });
+                        }
+                      }}
+                      disabled={editingMapConfig?.id !== map.id}
+                      style={{
+                        flex: 1,
+                        padding: "8px 12px",
+                        border: "2px solid #e5e7eb",
+                        borderRadius: 6,
+                        fontSize: 14,
+                        background: editingMapConfig?.id === map.id ? "white" : "#f3f4f6",
+                      }}
+                    />
+                    {map.id === currentMapId && (
+                      <span style={{ fontSize: 12, color: "#2563eb", fontWeight: 600 }}>✓ 表示中</span>
+                    )}
+                  </div>
+                  
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                    {editingMapConfig?.id === map.id ? (
+                      <>
+                        <button
+                          onClick={async () => {
+                            try {
+                              const base = process.env.NEXT_PUBLIC_GAS_URL;
+                              if (!base) return;
+                              
+                              const res = await fetch(`${base}?action=updateMapConfig`, {
+                                method: "POST",
+                                headers: { "Content-Type": "text/plain" },
+                                body: JSON.stringify({
+                                  password: "snow1234",
+                                  mapId: editingMapConfig.id,
+                                  name: editingMapConfig.name,
+                                }),
+                              });
+                              
+                              const json = await res.json();
+                              if (json.ok) {
+                                await loadMapConfigs();
+                                setEditingMapConfig(null);
+                                setToastMessage("✅ マップ名を更新しました");
+                              }
+                            } catch (e) {
+                              console.error(e);
+                              setToastMessage("❌ 更新に失敗しました");
+                            }
+                          }}
+                          style={{
+                            padding: "6px 12px",
+                            fontSize: 12,
+                            background: "#10b981",
+                            color: "white",
+                            border: "none",
+                            borderRadius: 4,
+                            cursor: "pointer",
+                          }}
+                        >
+                          保存
+                        </button>
+                        <button
+                          onClick={() => setEditingMapConfig(null)}
+                          style={{
+                            padding: "6px 12px",
+                            fontSize: 12,
+                            background: "#6b7280",
+                            color: "white",
+                            border: "none",
+                            borderRadius: 4,
+                            cursor: "pointer",
+                          }}
+                        >
+                          キャンセル
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <button
+                          onClick={() => setEditingMapConfig(map)}
+                          style={{
+                            padding: "6px 12px",
+                            fontSize: 12,
+                            background: "#2563eb",
+                            color: "white",
+                            border: "none",
+                            borderRadius: 4,
+                            cursor: "pointer",
+                          }}
+                        >
+                          名前変更
+                        </button>
+                        {!map.isBase && (
+                          <>
+                            <button
+                              onClick={async () => {
+                                try {
+                                  const base = process.env.NEXT_PUBLIC_GAS_URL;
+                                  if (!base) return;
+                                  
+                                  const res = await fetch(`${base}?action=updateMapConfig`, {
+                                    method: "POST",
+                                    headers: { "Content-Type": "text/plain" },
+                                    body: JSON.stringify({
+                                      password: "snow1234",
+                                      mapId: map.id,
+                                      isVisible: !map.isVisible,
+                                    }),
+                                  });
+                                  
+                                  const json = await res.json();
+                                  if (json.ok) {
+                                    await loadMapConfigs();
+                                    setToastMessage(`✅ ${!map.isVisible ? "表示" : "非表示"}に設定しました`);
+                                  }
+                                } catch (e) {
+                                  console.error(e);
+                                  setToastMessage("❌ 更新に失敗しました");
+                                }
+                              }}
+                              style={{
+                                padding: "6px 12px",
+                                fontSize: 12,
+                                background: map.isVisible ? "#f59e0b" : "#10b981",
+                                color: "white",
+                                border: "none",
+                                borderRadius: 4,
+                                cursor: "pointer",
+                              }}
+                            >
+                              {map.isVisible ? "非表示にする" : "表示する"}
+                            </button>
+                            <button
+                              onClick={async () => {
+                                if (!confirm(`ベースマップ（${mapConfigs.find(m => m.isBase)?.name}）の内容を「${map.name}」にコピーしますか？`)) {
+                                  return;
+                                }
+                                
+                                try {
+                                  const base = process.env.NEXT_PUBLIC_GAS_URL;
+                                  if (!base) return;
+                                  
+                                  setIsLoading(true);
+                                  const res = await fetch(`${base}?action=copyMap`, {
+                                    method: "POST",
+                                    headers: { "Content-Type": "text/plain" },
+                                    body: JSON.stringify({
+                                      password: "snow1234",
+                                      targetMapId: map.id,
+                                    }),
+                                  });
+                                  
+                                  const json = await res.json();
+                                  if (json.ok) {
+                                    setToastMessage(`✅ ${json.copied}件のオブジェクトをコピーしました`);
+                                    if (map.id === currentMapId) {
+                                      await loadMap();
+                                    }
+                                  }
+                                } catch (e) {
+                                  console.error(e);
+                                  setToastMessage("❌ コピーに失敗しました");
+                                } finally {
+                                  setIsLoading(false);
+                                }
+                              }}
+                              style={{
+                                padding: "6px 12px",
+                                fontSize: 12,
+                                background: "#8b5cf6",
+                                color: "white",
+                                border: "none",
+                                borderRadius: 4,
+                                cursor: "pointer",
+                              }}
+                            >
+                              ベースからコピー
+                            </button>
+                          </>
+                        )}
+                        {map.id !== currentMapId && (
+                          <button
+                            onClick={() => switchMap(map.id)}
+                            style={{
+                              padding: "6px 12px",
+                              fontSize: 12,
+                              background: "#059669",
+                              color: "white",
+                              border: "none",
+                              borderRadius: 4,
+                              cursor: "pointer",
+                            }}
+                          >
+                            このマップに切替
+                          </button>
+                        )}
+                      </>
+                    )}
+                  </div>
+                  
+                  {map.isBase && (
+                    <div style={{ 
+                      marginTop: 8, 
+                      fontSize: 11, 
+                      color: "#6b7280",
+                      padding: "6px 10px",
+                      background: "#fef3c7",
+                      borderRadius: 4,
+                      border: "1px solid #fcd34d",
+                    }}>
+                      ⭐ ベースマップ（非表示にできません）
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+            <div style={{
+              padding: isMobile ? "12px 16px" : "16px 24px",
+              borderTop: "1px solid #e5e7eb",
+              display: "flex",
+              justifyContent: "flex-end",
+            }}>
+              <button
+                onClick={() => {
+                  setShowMapManagement(false);
+                  setEditingMapConfig(null);
+                }}
+                style={{
+                  padding: "10px 20px",
+                  fontSize: 14,
+                  background: "#2563eb",
+                  color: "white",
+                  border: "none",
+                  borderRadius: 6,
+                  cursor: "pointer",
+                  fontWeight: 600,
+                }}
+              >
+                閉じる
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* 新規オブジェクト追加モーダル（スマホ対応） */}
       {showAddObjectModal && (
         <div
@@ -10370,7 +10912,7 @@ export default function Home() {
         />
         
         {/* 誕生日テロップ（CSS keyframes実装） */}
-        {!isEditMode && !tickerHidden && !showBirthdayCelebration && !isLoading && (
+        {!isEditMode && !effectiveTickerHidden && !showBirthdayCelebration && !isLoading && currentMapId === 'object' && (
           <div style={{
               position: "absolute",
               top: 28,
@@ -10408,6 +10950,52 @@ export default function Home() {
                   paddingRight: "100vw",
                 }}>
                   {tickerText}
+                </span>
+              </div>
+            </div>
+        )}
+
+        {/* サブマップのテロップ（マップ名表示） */}
+        {!effectiveTickerHidden && !showBirthdayCelebration && !isLoading && isSubMap && (
+          <div style={{
+              position: "absolute",
+              top: 28,
+              left: 0,
+              right: 0,
+              height: 22,
+              background: "linear-gradient(to bottom, rgba(200,220,255,0.5), rgba(200,220,255,0.7))",
+              backdropFilter: "blur(2px)",
+              overflow: "hidden",
+              zIndex: 10,
+              pointerEvents: "none",
+            }}>
+              <div 
+                key={`${tickerKey}-${currentMapId}`}
+                style={{
+                  position: "absolute",
+                  display: "flex",
+                  whiteSpace: "nowrap",
+                  animation: "tickerScroll 30s linear infinite",
+                }}>
+                <span style={{
+                  fontSize: 14,
+                  fontFamily: "system-ui",
+                  fontWeight: 600,
+                  color: "#1e40af",
+                  lineHeight: "22px",
+                  paddingRight: "100vw",
+                }}>
+                  {currentMap?.name || 'サブマップ'}（{isEditMode ? '編集中' : '参照中'}）
+                </span>
+                <span style={{
+                  fontSize: 14,
+                  fontFamily: "system-ui",
+                  fontWeight: 600,
+                  color: "#1e40af",
+                  lineHeight: "22px",
+                  paddingRight: "100vw",
+                }}>
+                  {currentMap?.name || 'サブマップ'}（{isEditMode ? '編集中' : '参照中'}）
                 </span>
               </div>
             </div>
@@ -10710,7 +11298,8 @@ export default function Home() {
               />
             </div>
 
-            {/* 誕生日入力フィールド */}
+            {/* 誕生日入力フィールド（ベースマップのみ） */}
+            {currentMap?.isBase && (
             <div style={{ 
               marginBottom: isMobile ? 8 : 12,
               display: isMobile ? "grid" : "block",
@@ -10812,7 +11401,9 @@ export default function Home() {
                 </select>
               </div>
             </div>
+            )}
 
+            {/* タイプ */}
             <div style={{ 
               marginBottom: isMobile ? 8 : 12,
               display: isMobile ? "grid" : "block",
@@ -10879,7 +11470,8 @@ export default function Home() {
               </select>
             </div>
 
-            {/* 位置・サイズセクション（アコーディオン） */}
+            {/* 位置・サイズセクション（アコーディオン）- ベースマップのみ */}
+            {currentMap?.isBase && (
             <div style={{ marginBottom: isMobile ? 8 : 12 }}>
               <button
                 onClick={() => setIsPositionSizeExpanded(!isPositionSizeExpanded)}
@@ -11380,7 +11972,10 @@ export default function Home() {
                 </div>
               )}
             </div>
+            )}
 
+            {/* お気に入り - ベースマップのみ */}
+            {currentMap?.isBase && (
             <div style={{ 
               marginBottom: isMobile ? 10 : 16, 
               padding: isMobile ? "10px" : "14px", 
@@ -11408,8 +12003,10 @@ export default function Home() {
                 チェックするとマップ上でピンク系の柔らかいぼかしで目立つように表示されます
               </p>
             </div>
+            )}
 
-            {/* メモ欄 */}
+            {/* メモ欄 - ベースマップのみ */}
+            {currentMap?.isBase && (
             <div style={{ 
               marginBottom: isMobile ? 10 : 16,
               display: isMobile ? "block" : "block",
@@ -11457,6 +12054,7 @@ export default function Home() {
                 }}
               />
             </div>
+            )}
 
             {/* メインアクションボタン */}
             <div style={{ 
