@@ -288,6 +288,196 @@ export default function Home() {
   const catImageRef = useRef<HTMLImageElement | null>(null);
   const pawImageRef = useRef<HTMLImageElement | null>(null);
 
+  // バルーンアニメーション用
+  type BalloonAnimation = {
+    x: number; // スクリーン座標X
+    y: number; // スクリーン座標Y
+    balloons: Array<{
+      offsetX: number;
+      offsetY: number;
+      vy: number; // 上昇速度
+      swayOffset: number; // 揺れのオフセット
+      swaySpeed: number; // 揺れの速度
+      size: number; // 大きさ
+      color: string; // 色
+      life: number; // 残り寿命
+      stringLength: number; // 紐の長さ
+    }>;
+    startTime: number;
+  };
+  const [balloonAnimations, setBalloonAnimations] = useState<BalloonAnimation[]>([]);
+  const balloonAnimationRef = useRef<number | null>(null);
+
+  // オーロラアニメーション用
+  type AuroraAnimation = {
+    waves: Array<{
+      offsetY: number; // Y方向のオフセット
+      amplitude: number; // 波の振幅
+      frequency: number; // 波の周波数
+      speed: number; // 波の速度
+      phase: number; // 波の位相
+      color: string; // グラデーション色
+      alpha: number; // 透明度
+    }>;
+    startTime: number;
+    life: number; // 残り寿命
+  };
+  const [auroraAnimations, setAuroraAnimations] = useState<AuroraAnimation[]>([]);
+  const auroraAnimationRef = useRef<number | null>(null);
+
+  // 蝶々アニメーション用
+  type ButterflyAnimation = {
+    butterflies: Array<{
+      x: number; // スクリーン座標X
+      y: number; // スクリーン座標Y
+      vx: number; // X方向速度
+      vy: number; // Y方向速度
+      angle: number; // 進行方向角度
+      flutterPhase: number; // 羽ばたき位相
+      flutterSpeed: number; // 羽ばたき速度
+      size: number; // 大きさ
+      color: string; // 色
+      life: number; // 残り寿命
+      pathType: 'figure8' | 'random'; // 動きのパターン
+      pathProgress: number; // パターンの進捗
+    }>;
+    startTime: number;
+  };
+  const [butterflyAnimations, setButterflyAnimations] = useState<ButterflyAnimation[]>([]);
+  const butterflyAnimationRef = useRef<number | null>(null);
+
+  // 流れ星アニメーション用
+  type ShootingStarAnimation = {
+    stars: Array<{
+      x: number; // スクリーン座標X（開始位置）
+      y: number; // スクリーン座標Y（開始位置）
+      vx: number; // X方向速度
+      vy: number; // Y方向速度
+      length: number; // 尾の長さ
+      brightness: number; // 明るさ
+      life: number; // 残り寿命
+      trailPoints: Array<{ x: number; y: number; alpha: number }>; // 尾の軌跡
+    }>;
+    startTime: number;
+  };
+  const [shootingStarAnimations, setShootingStarAnimations] = useState<ShootingStarAnimation[]>([]);
+  const shootingStarAnimationRef = useRef<number | null>(null);
+
+  // 紅葉アニメーション用
+  type AutumnLeavesAnimation = {
+    x: number; // スクリーン座標X
+    y: number; // スクリーン座標Y
+    leaves: Array<{
+      offsetX: number;
+      offsetY: number;
+      vx: number; // 横方向速度
+      vy: number; // 縦方向速度
+      rotation: number; // 回転角度
+      rotationSpeed: number; // 回転速度
+      swayOffset: number; // 揺れ
+      swaySpeed: number; // 揺れ速度
+      size: number; // 大きさ
+      color: string; // 色（赤、黄、橙）
+      leafType: 'maple' | 'ginkgo' | 'oak'; // 葉の種類
+      life: number;
+    }>;
+    startTime: number;
+  };
+  const [autumnLeavesAnimations, setAutumnLeavesAnimations] = useState<AutumnLeavesAnimation[]>([]);
+  const autumnLeavesAnimationRef = useRef<number | null>(null);
+
+  // 雪アニメーション用
+  type SnowAnimation = {
+    snowflakes: Array<{
+      x: number; // スクリーン座標X
+      y: number; // スクリーン座標Y
+      vx: number; // 横方向速度
+      vy: number; // 縦方向速度
+      size: number; // 大きさ
+      rotation: number; // 回転角度
+      rotationSpeed: number; // 回転速度
+      swayOffset: number; // 揺れ
+      swaySpeed: number; // 揺れ速度
+      opacity: number; // 透明度
+      life: number;
+    }>;
+    startTime: number;
+    duration: number; // 継続時間
+  };
+  const [snowAnimations, setSnowAnimations] = useState<SnowAnimation[]>([]);
+  const snowAnimationRef = useRef<number | null>(null);
+
+  // 紙吹雪アニメーション用（強化版）
+  type ConfettiAnimation = {
+    x: number; // スクリーン座標X
+    y: number; // スクリーン座標Y
+    confetti: Array<{
+      offsetX: number;
+      offsetY: number;
+      vx: number; // 横方向速度
+      vy: number; // 縦方向速度
+      rotation: number; // 回転角度
+      rotationSpeed: number; // 回転速度
+      width: number; // 幅
+      height: number; // 高さ
+      color: string; // 色
+      shape: 'rectangle' | 'circle' | 'star'; // 形状
+      life: number;
+    }>;
+    startTime: number;
+  };
+  const [confettiAnimations, setConfettiAnimations] = useState<ConfettiAnimation[]>([]);
+  const confettiAnimationRef = useRef<number | null>(null);
+
+  // 虹アニメーション用
+  type RainbowAnimation = {
+    x: number; // スクリーン座標X（中心）
+    y: number; // スクリーン座標Y（アーチの底）
+    radius: number; // 虹の半径
+    width: number; // 虹の幅
+    alpha: number; // 透明度
+    life: number; // 残り寿命
+    startTime: number;
+  };
+  const [rainbowAnimations, setRainbowAnimations] = useState<RainbowAnimation[]>([]);
+  const rainbowAnimationRef = useRef<number | null>(null);
+
+  // 雨アニメーション用
+  type RainAnimation = {
+    raindrops: Array<{
+      x: number; // スクリーン座標X
+      y: number; // スクリーン座標Y
+      vy: number; // 落下速度
+      length: number; // 雨粒の長さ
+      opacity: number; // 透明度
+      splash: boolean; // 地面に当たったか
+      splashProgress: number; // 跳ね返り進捗
+      life: number;
+    }>;
+    startTime: number;
+    duration: number; // 継続時間
+  };
+  const [rainAnimations, setRainAnimations] = useState<RainAnimation[]>([]);
+  const rainAnimationRef = useRef<number | null>(null);
+
+  // 魔法陣アニメーション用
+  type MagicCircleAnimation = {
+    x: number; // スクリーン座標X
+    y: number; // スクリーン座標Y
+    mapX: number; // マップ座標X
+    mapY: number; // マップ座標Y
+    radius: number; // 魔法陣の半径
+    rotation: number; // 回転角度
+    rotationSpeed: number; // 回転速度
+    alpha: number; // 透明度
+    life: number; // 残り寿命
+    glowIntensity: number; // 発光の強さ
+    startTime: number;
+    targetObj: Obj;
+  };
+  const [magicCircleAnimations, setMagicCircleAnimations] = useState<MagicCircleAnimation[]>([]);
+  const magicCircleAnimationRef = useRef<number | null>(null);
+
   // カメラ：パン(tx,ty)は「画面座標系」での移動量（ピクセル）、scaleは倍率
   // 初期ズーム: 統一して1.0でスタート（SSRハイドレーションエラー回避）
   const [cam, setCam] = useState({ 
@@ -2762,6 +2952,375 @@ export default function Home() {
       });
     }
 
+    // バルーンアニメーションの描画
+    if (balloonAnimations.length > 0) {
+      balloonAnimations.forEach((anim) => {
+        anim.balloons.forEach((balloon) => {
+          const x = anim.x + balloon.offsetX;
+          const y = anim.y + balloon.offsetY;
+          
+          ctx.save();
+          ctx.globalAlpha = Math.min(balloon.life / 2, 1);
+          
+          // バルーン本体
+          ctx.fillStyle = balloon.color;
+          ctx.beginPath();
+          ctx.ellipse(x, y, balloon.size, balloon.size * 1.2, 0, 0, Math.PI * 2);
+          ctx.fill();
+          
+          // ハイライト
+          ctx.fillStyle = 'rgba(255,255,255,0.4)';
+          ctx.beginPath();
+          ctx.ellipse(x - balloon.size * 0.3, y - balloon.size * 0.3, balloon.size * 0.3, balloon.size * 0.4, 0, 0, Math.PI * 2);
+          ctx.fill();
+          
+          // 紐
+          ctx.strokeStyle = balloon.color;
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(x, y + balloon.size * 1.2);
+          ctx.lineTo(x, y + balloon.size * 1.2 + balloon.stringLength);
+          ctx.stroke();
+          
+          ctx.restore();
+        });
+      });
+    }
+
+    // オーロラアニメーションの描画
+    if (auroraAnimations.length > 0) {
+      auroraAnimations.forEach((anim) => {
+        anim.waves.forEach((wave) => {
+          ctx.save();
+          ctx.globalAlpha = wave.alpha;
+          
+          const gradient = ctx.createLinearGradient(0, wave.offsetY, 0, wave.offsetY + 100);
+          gradient.addColorStop(0, wave.color);
+          gradient.addColorStop(0.5, 'rgba(0,255,200,0.3)');
+          gradient.addColorStop(1, 'rgba(100,0,255,0.1)');
+          
+          ctx.beginPath();
+          for (let x = 0; x < viewW + 50; x += 10) {
+            const y = wave.offsetY + Math.sin(x * wave.frequency + wave.phase) * wave.amplitude;
+            if (x === 0) {
+              ctx.moveTo(x, y);
+            } else {
+              ctx.lineTo(x, y);
+            }
+          }
+          ctx.lineTo(viewW, 0);
+          ctx.lineTo(0, 0);
+          ctx.closePath();
+          ctx.fillStyle = gradient;
+          ctx.fill();
+          
+          ctx.restore();
+        });
+      });
+    }
+
+    // 蝶々アニメーションの描画
+    if (butterflyAnimations.length > 0) {
+      butterflyAnimations.forEach((anim) => {
+        anim.butterflies.forEach((bf) => {
+          ctx.save();
+          ctx.globalAlpha = Math.min(bf.life / 2, 1);
+          ctx.translate(bf.x, bf.y);
+          ctx.rotate(bf.angle);
+          
+          // 羽ばたき（左右の羽の開閉）
+          const wingAngle = Math.sin(bf.flutterPhase) * 0.3;
+          
+          // 右の羽
+          ctx.save();
+          ctx.rotate(-wingAngle);
+          ctx.fillStyle = bf.color;
+          ctx.beginPath();
+          ctx.ellipse(0, 0, bf.size * 0.8, bf.size * 1.5, 0.3, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+          
+          // 左の羽
+          ctx.save();
+          ctx.rotate(wingAngle);
+          ctx.scale(-1, 1);
+          ctx.fillStyle = bf.color;
+          ctx.beginPath();
+          ctx.ellipse(0, 0, bf.size * 0.8, bf.size * 1.5, 0.3, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+          
+          // 胴体
+          ctx.fillStyle = '#333';
+          ctx.fillRect(-bf.size * 0.1, -bf.size * 0.6, bf.size * 0.2, bf.size * 1.2);
+          
+          ctx.restore();
+        });
+      });
+    }
+
+    // 流れ星アニメーションの描画
+    if (shootingStarAnimations.length > 0) {
+      shootingStarAnimations.forEach((anim) => {
+        anim.stars.forEach((star) => {
+          ctx.save();
+          
+          // 尾の軌跡
+          star.trailPoints.forEach((point, i) => {
+            ctx.globalAlpha = point.alpha;
+            ctx.fillStyle = `hsl(${200 + i * 2}, 100%, ${70 + i}%)`;
+            const size = (star.trailPoints.length - i) / star.trailPoints.length * 3;
+            ctx.beginPath();
+            ctx.arc(point.x, point.y, size, 0, Math.PI * 2);
+            ctx.fill();
+          });
+          
+          // 星本体
+          ctx.globalAlpha = Math.min(star.life / 2, 1);
+          ctx.fillStyle = '#fff';
+          ctx.shadowColor = '#fff';
+          ctx.shadowBlur = 15;
+          ctx.beginPath();
+          ctx.arc(star.x, star.y, 4, 0, Math.PI * 2);
+          ctx.fill();
+          
+          ctx.restore();
+        });
+      });
+    }
+
+    // 紅葉アニメーションの描画
+    if (autumnLeavesAnimations.length > 0) {
+      autumnLeavesAnimations.forEach((anim) => {
+        anim.leaves.forEach((leaf) => {
+          const x = anim.x + leaf.offsetX;
+          const y = anim.y + leaf.offsetY;
+          
+          ctx.save();
+          ctx.translate(x, y);
+          ctx.rotate(leaf.rotation);
+          ctx.globalAlpha = Math.min(leaf.life / 3, 1);
+          
+          // 葉の形状（簡易的な楓型）
+          ctx.fillStyle = leaf.color;
+          ctx.beginPath();
+          if (leaf.leafType === 'maple') {
+            // 楓の葉
+            for (let i = 0; i < 5; i++) {
+              const angle = (i / 5) * Math.PI * 2 - Math.PI / 2;
+              const radius = leaf.size * (i % 2 === 0 ? 1 : 0.6);
+              const px = Math.cos(angle) * radius;
+              const py = Math.sin(angle) * radius;
+              if (i === 0) ctx.moveTo(px, py);
+              else ctx.lineTo(px, py);
+            }
+          } else {
+            // 円形の葉
+            ctx.arc(0, 0, leaf.size, 0, Math.PI * 2);
+          }
+          ctx.fill();
+          
+          // 葉脈
+          ctx.strokeStyle = 'rgba(100,50,0,0.3)';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(0, -leaf.size);
+          ctx.lineTo(0, leaf.size);
+          ctx.stroke();
+          
+          ctx.restore();
+        });
+      });
+    }
+
+    // 雪アニメーションの描画
+    if (snowAnimations.length > 0) {
+      snowAnimations.forEach((anim) => {
+        anim.snowflakes.forEach((snow) => {
+          ctx.save();
+          ctx.translate(snow.x, snow.y);
+          ctx.rotate(snow.rotation);
+          ctx.globalAlpha = snow.opacity * Math.min(snow.life / 2, 1);
+          
+          // 雪の結晶
+          ctx.fillStyle = '#fff';
+          ctx.shadowColor = '#fff';
+          ctx.shadowBlur = 8;
+          ctx.beginPath();
+          ctx.arc(0, 0, snow.size / 2, 0, Math.PI * 2);
+          ctx.fill();
+          
+          // 六角形の結晶模様
+          ctx.strokeStyle = '#fff';
+          ctx.lineWidth = 1;
+          for (let i = 0; i < 6; i++) {
+            const angle = (i / 6) * Math.PI * 2;
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(Math.cos(angle) * snow.size / 2, Math.sin(angle) * snow.size / 2);
+            ctx.stroke();
+          }
+          
+          ctx.restore();
+        });
+      });
+    }
+
+    // 紙吹雪アニメーションの描画
+    if (confettiAnimations.length > 0) {
+      confettiAnimations.forEach((anim) => {
+        anim.confetti.forEach((conf) => {
+          const x = anim.x + conf.offsetX;
+          const y = anim.y + conf.offsetY;
+          
+          ctx.save();
+          ctx.translate(x, y);
+          ctx.rotate(conf.rotation);
+          ctx.globalAlpha = Math.min(conf.life / 3, 1);
+          ctx.fillStyle = conf.color;
+          
+          if (conf.shape === 'rectangle') {
+            ctx.fillRect(-conf.width / 2, -conf.height / 2, conf.width, conf.height);
+          } else if (conf.shape === 'circle') {
+            ctx.beginPath();
+            ctx.arc(0, 0, conf.width / 2, 0, Math.PI * 2);
+            ctx.fill();
+          } else if (conf.shape === 'star') {
+            // 星形
+            ctx.beginPath();
+            for (let i = 0; i < 5; i++) {
+              const angle = (i / 5) * Math.PI * 2 - Math.PI / 2;
+              const radius = i % 2 === 0 ? conf.width : conf.width / 2;
+              const px = Math.cos(angle) * radius;
+              const py = Math.sin(angle) * radius;
+              if (i === 0) ctx.moveTo(px, py);
+              else ctx.lineTo(px, py);
+            }
+            ctx.closePath();
+            ctx.fill();
+          }
+          
+          ctx.restore();
+        });
+      });
+    }
+
+    // 虹アニメーションの描画
+    if (rainbowAnimations.length > 0) {
+      rainbowAnimations.forEach((anim) => {
+        ctx.save();
+        ctx.globalAlpha = anim.alpha;
+        
+        const colors = [
+          '#FF0000', // 赤
+          '#FF7F00', // 橙
+          '#FFFF00', // 黄
+          '#00FF00', // 緑
+          '#0000FF', // 青
+          '#4B0082', // 藍
+          '#9400D3', // 紫
+        ];
+        
+        colors.forEach((color, i) => {
+          const radius = anim.radius - i * anim.width / colors.length;
+          ctx.strokeStyle = color;
+          ctx.lineWidth = anim.width / colors.length;
+          ctx.beginPath();
+          ctx.arc(anim.x, anim.y, radius, Math.PI, 0);
+          ctx.stroke();
+        });
+        
+        ctx.restore();
+      });
+    }
+
+    // 雨アニメーションの描画
+    if (rainAnimations.length > 0) {
+      rainAnimations.forEach((anim) => {
+        anim.raindrops.forEach((drop) => {
+          ctx.save();
+          
+          if (drop.splash) {
+            // 跳ね返りの波紋
+            ctx.globalAlpha = (1 - drop.splashProgress) * 0.5;
+            ctx.strokeStyle = '#4dd0e1';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(drop.x, drop.y, drop.splashProgress * 20, 0, Math.PI * 2);
+            ctx.stroke();
+          } else {
+            // 雨粒
+            ctx.globalAlpha = drop.opacity;
+            ctx.strokeStyle = '#4dd0e1';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(drop.x, drop.y);
+            ctx.lineTo(drop.x, drop.y + drop.length);
+            ctx.stroke();
+          }
+          
+          ctx.restore();
+        });
+      });
+    }
+
+    // 魔法陣アニメーションの描画（マップ座標をスクリーン座標に変換）
+    if (magicCircleAnimations.length > 0) {
+      magicCircleAnimations.forEach((anim) => {
+        const { sx: screenX, sy: screenY } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH);
+        
+        ctx.save();
+        ctx.translate(screenX, screenY);
+        ctx.rotate(anim.rotation);
+        ctx.globalAlpha = anim.alpha;
+        
+        // 外円
+        ctx.strokeStyle = `rgba(138, 43, 226, ${anim.glowIntensity})`;
+        ctx.lineWidth = 3;
+        ctx.shadowColor = '#8a2be2';
+        ctx.shadowBlur = 20 * anim.glowIntensity;
+        ctx.beginPath();
+        ctx.arc(0, 0, anim.radius, 0, Math.PI * 2);
+        ctx.stroke();
+        
+        // 内円
+        ctx.beginPath();
+        ctx.arc(0, 0, anim.radius * 0.7, 0, Math.PI * 2);
+        ctx.stroke();
+        
+        // 紋様（星形）
+        ctx.fillStyle = `rgba(138, 43, 226, ${anim.glowIntensity * 0.5})`;
+        ctx.beginPath();
+        for (let i = 0; i < 6; i++) {
+          const angle = (i / 6) * Math.PI * 2;
+          const radius = i % 2 === 0 ? anim.radius * 0.5 : anim.radius * 0.3;
+          const px = Math.cos(angle) * radius;
+          const py = Math.sin(angle) * radius;
+          if (i === 0) ctx.moveTo(px, py);
+          else ctx.lineTo(px, py);
+        }
+        ctx.closePath();
+        ctx.fill();
+        
+        // ルーン文字風の装飾
+        ctx.strokeStyle = `rgba(255, 215, 0, ${anim.glowIntensity})`;
+        ctx.lineWidth = 2;
+        for (let i = 0; i < 12; i++) {
+          const angle = (i / 12) * Math.PI * 2;
+          const x1 = Math.cos(angle) * anim.radius * 0.85;
+          const y1 = Math.sin(angle) * anim.radius * 0.85;
+          const x2 = Math.cos(angle) * anim.radius * 0.95;
+          const y2 = Math.sin(angle) * anim.radius * 0.95;
+          ctx.beginPath();
+          ctx.moveTo(x1, y1);
+          ctx.lineTo(x2, y2);
+          ctx.stroke();
+        }
+        
+        ctx.restore();
+      });
+    }
+
     // 花火アニメーションの描画（マップ座標をスクリーン座標に変換）
     if (fireworks.length > 0) {
       const now = Date.now();
@@ -3392,7 +3951,10 @@ export default function Home() {
     // 3. Animationフィールド
     if (obj.Animation && obj.Animation.trim()) {
       const anim = obj.Animation.toLowerCase();
-      if (['fireworks', 'sparkle', 'beartrap', 'birthday', 'cherryblossom', 'meteor', 'coin', 'slot', 'cat'].includes(anim)) {
+      if ([
+        'fireworks', 'sparkle', 'beartrap', 'birthday', 'cherryblossom', 'meteor', 'coin', 'slot', 'cat',
+        'balloon', 'aurora', 'butterfly', 'shootingstar', 'autumnleaves', 'snow', 'confetti', 'rainbow', 'rain', 'magiccircle'
+      ].includes(anim)) {
         return anim;
       }
     }
@@ -3783,6 +4345,219 @@ export default function Home() {
     }]);
   };
 
+  // バルーンアニメーション開始
+  const startBalloonAnimation = (x: number, y: number) => {
+    const balloons: BalloonAnimation['balloons'] = [];
+    const colors = ['#ff6b9d', '#ffd93d', '#6bcf7f', '#6eb5ff', '#c77dff'];
+    for (let i = 0; i < 10; i++) {
+      balloons.push({
+        offsetX: (Math.random() - 0.5) * 100,
+        offsetY: 0,
+        vy: 1 + Math.random() * 1,
+        swayOffset: Math.random() * Math.PI * 2,
+        swaySpeed: 0.03 + Math.random() * 0.02,
+        size: 15 + Math.random() * 10,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        life: 5 + Math.random() * 3,
+        stringLength: 30 + Math.random() * 20,
+      });
+    }
+    setBalloonAnimations(prev => [...prev, { x, y, balloons, startTime: Date.now() }]);
+  };
+
+  // オーロラアニメーション開始
+  const startAuroraAnimation = () => {
+    const waves: AuroraAnimation['waves'] = [];
+    const colors = ['rgba(0,255,150,0.5)', 'rgba(100,200,255,0.5)', 'rgba(200,100,255,0.5)'];
+    for (let i = 0; i < 3; i++) {
+      waves.push({
+        offsetY: 50 + i * 30,
+        amplitude: 30 + Math.random() * 20,
+        frequency: 0.005 + Math.random() * 0.005,
+        speed: 0.02 + Math.random() * 0.01,
+        phase: Math.random() * Math.PI * 2,
+        color: colors[i],
+        alpha: 0.7,
+      });
+    }
+    setAuroraAnimations(prev => [...prev, { waves, startTime: Date.now(), life: 10 }]);
+  };
+
+  // 蝶々アニメーション開始
+  const startButterflyAnimation = (x: number, y: number) => {
+    const butterflies: ButterflyAnimation['butterflies'] = [];
+    const colors = ['#ffeb3b', '#64b5f6', '#ffffff', '#f06292'];
+    for (let i = 0; i < 5; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      butterflies.push({
+        x: x + (Math.random() - 0.5) * 50,
+        y: y + (Math.random() - 0.5) * 50,
+        vx: Math.cos(angle) * 2,
+        vy: Math.sin(angle) * 2,
+        angle: angle,
+        flutterPhase: Math.random() * Math.PI * 2,
+        flutterSpeed: 0.2 + Math.random() * 0.1,
+        size: 8 + Math.random() * 4,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        life: 8 + Math.random() * 4,
+        pathType: Math.random() < 0.5 ? 'figure8' : 'random',
+        pathProgress: 0,
+      });
+    }
+    setButterflyAnimations(prev => [...prev, { butterflies, startTime: Date.now() }]);
+  };
+
+  // 流れ星アニメーション開始
+  const startShootingStarAnimation = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const stars: ShootingStarAnimation['stars'] = [];
+    for (let i = 0; i < 3; i++) {
+      const startX = rect.width * (0.7 + Math.random() * 0.3);
+      const startY = Math.random() * rect.height * 0.3;
+      stars.push({
+        x: startX,
+        y: startY,
+        vx: -(3 + Math.random() * 2),
+        vy: 2 + Math.random() * 1,
+        length: 50 + Math.random() * 30,
+        brightness: 0.8 + Math.random() * 0.2,
+        life: 3 + Math.random() * 2,
+        trailPoints: [],
+      });
+    }
+    setShootingStarAnimations(prev => [...prev, { stars, startTime: Date.now() }]);
+  };
+
+  // 紅葉アニメーション開始
+  const startAutumnLeavesAnimation = (x: number, y: number) => {
+    const leaves: AutumnLeavesAnimation['leaves'] = [];
+    const colors = ['#d32f2f', '#f57c00', '#fbc02d', '#c62828', '#ff6f00'];
+    const leafTypes: Array<'maple' | 'ginkgo' | 'oak'> = ['maple', 'ginkgo', 'oak'];
+    for (let i = 0; i < 30; i++) {
+      leaves.push({
+        offsetX: (Math.random() - 0.5) * 100,
+        offsetY: -Math.random() * 50,
+        vx: (Math.random() - 0.5) * 0.5,
+        vy: 0.5 + Math.random() * 0.5,
+        rotation: Math.random() * Math.PI * 2,
+        rotationSpeed: (Math.random() - 0.5) * 0.1,
+        swayOffset: Math.random() * Math.PI * 2,
+        swaySpeed: 0.03 + Math.random() * 0.02,
+        size: 8 + Math.random() * 6,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        leafType: leafTypes[Math.floor(Math.random() * leafTypes.length)],
+        life: 8 + Math.random() * 4,
+      });
+    }
+    setAutumnLeavesAnimations(prev => [...prev, { x, y, leaves, startTime: Date.now() }]);
+  };
+
+  // 雪アニメーション開始
+  const startSnowAnimation = (duration: number = 20) => {
+    const snowflakes: SnowAnimation['snowflakes'] = [];
+    for (let i = 0; i < 30; i++) {
+      snowflakes.push({
+        x: Math.random() * 2000 - 500,
+        y: Math.random() * -200,
+        vx: (Math.random() - 0.5) * 0.5,
+        vy: Math.random() * 0.5 + 0.5,
+        size: Math.random() * 8 + 4,
+        rotation: Math.random() * Math.PI * 2,
+        rotationSpeed: (Math.random() - 0.5) * 0.05,
+        swayOffset: Math.random() * Math.PI * 2,
+        swaySpeed: Math.random() * 0.05 + 0.02,
+        opacity: Math.random() * 0.5 + 0.5,
+        life: 10,
+      });
+    }
+    setSnowAnimations(prev => [...prev, { snowflakes, startTime: Date.now(), duration }]);
+  };
+
+  // 紙吹雪アニメーション開始
+  const startConfettiAnimation = (x: number, y: number) => {
+    const confetti: ConfettiAnimation['confetti'] = [];
+    const colors = ['#ff6b9d', '#ffd93d', '#6bcf7f', '#6eb5ff', '#c77dff', '#ff5252', '#ffeb3b'];
+    const shapes: Array<'rectangle' | 'circle' | 'star'> = ['rectangle', 'circle', 'star'];
+    for (let i = 0; i < 80; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = 2 + Math.random() * 4;
+      confetti.push({
+        offsetX: 0,
+        offsetY: 0,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed - 3,
+        rotation: Math.random() * Math.PI * 2,
+        rotationSpeed: (Math.random() - 0.5) * 0.2,
+        width: 5 + Math.random() * 5,
+        height: 8 + Math.random() * 8,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        shape: shapes[Math.floor(Math.random() * shapes.length)],
+        life: 5 + Math.random() * 3,
+      });
+    }
+    setConfettiAnimations(prev => [...prev, { x, y, confetti, startTime: Date.now() }]);
+  };
+
+  // 虹アニメーション開始
+  const startRainbowAnimation = (x: number, y: number) => {
+    setRainbowAnimations(prev => [...prev, {
+      x,
+      y,
+      radius: 200,
+      width: 40,
+      alpha: 0,
+      life: 8,
+      startTime: Date.now(),
+    }]);
+  };
+
+  // 雨アニメーション開始
+  const startRainAnimation = (duration: number = 15) => {
+    const raindrops: RainAnimation['raindrops'] = [];
+    for (let i = 0; i < 50; i++) {
+      raindrops.push({
+        x: Math.random() * 2000 - 500,
+        y: Math.random() * -200,
+        vy: Math.random() * 5 + 15,
+        length: Math.random() * 10 + 15,
+        opacity: Math.random() * 0.3 + 0.3,
+        splash: false,
+        splashProgress: 0,
+        life: 3,
+      });
+    }
+    setRainAnimations(prev => [...prev, { raindrops, startTime: Date.now(), duration }]);
+  };
+
+  // 魔法陣アニメーション開始
+  const startMagicCircleAnimation = (obj: Obj) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const viewW = rect.width;
+    const viewH = rect.height;
+    const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell;
+    const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell;
+    const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH);
+    
+    setMagicCircleAnimations(prev => [...prev, {
+      x: centerX,
+      y: centerY,
+      mapX: objMapX,
+      mapY: objMapY,
+      radius: 60,
+      rotation: 0,
+      rotationSpeed: 0.05,
+      alpha: 0,
+      life: 5,
+      glowIntensity: 1,
+      startTime: Date.now(),
+      targetObj: obj,
+    }]);
+  };
+
   // 兵士アニメーション開始関数
   const startSoldierAnimation = (bearTrap: Obj) => {
     // アニメーション開始中または実行中の場合は何もしない
@@ -4122,6 +4897,409 @@ export default function Home() {
       }
     };
   }, [catAnimations.length > 0 ? catAnimations[0]?.startTime : 0, bearTrapMaxDamage]);
+
+  // バルーンアニメーションループ
+  useEffect(() => {
+    if (balloonAnimations.length === 0) return;
+
+    const animate = () => {
+      const now = Date.now();
+      const updated = balloonAnimations.map(anim => {
+        const elapsed = (now - anim.startTime) / 1000;
+        const updatedBalloons = anim.balloons.map(balloon => {
+          const newOffsetY = balloon.offsetY - balloon.vy;
+          const newSwayOffset = balloon.swayOffset + balloon.swaySpeed;
+          const swayX = Math.sin(newSwayOffset) * 20;
+          const newLife = balloon.life - 0.016;
+          return {
+            ...balloon,
+            offsetX: swayX,
+            offsetY: newOffsetY,
+            swayOffset: newSwayOffset,
+            life: newLife,
+          };
+        }).filter(b => b.life > 0);
+        return { ...anim, balloons: updatedBalloons };
+      }).filter(a => a.balloons.length > 0);
+
+      setBalloonAnimations(updated);
+      requestDraw();
+
+      if (updated.length > 0) {
+        balloonAnimationRef.current = requestAnimationFrame(animate);
+      }
+    };
+
+    balloonAnimationRef.current = requestAnimationFrame(animate);
+    return () => {
+      if (balloonAnimationRef.current) cancelAnimationFrame(balloonAnimationRef.current);
+    };
+  }, [balloonAnimations.length]);
+
+  // オーロラアニメーションループ
+  useEffect(() => {
+    if (auroraAnimations.length === 0) return;
+
+    const animate = () => {
+      const now = Date.now();
+      const updated = auroraAnimations.map(anim => {
+        const elapsed = (now - anim.startTime) / 1000;
+        const newLife = anim.life - 0.016;
+        const updatedWaves = anim.waves.map(wave => {
+          const newPhase = wave.phase + wave.speed;
+          const fadeIn = Math.min(elapsed * 0.5, 1);
+          const fadeOut = newLife < 2 ? newLife / 2 : 1;
+          const newAlpha = wave.alpha * fadeIn * fadeOut;
+          return { ...wave, phase: newPhase, alpha: newAlpha };
+        });
+        return { ...anim, waves: updatedWaves, life: newLife };
+      }).filter(a => a.life > 0);
+
+      setAuroraAnimations(updated);
+      requestDraw();
+
+      if (updated.length > 0) {
+        auroraAnimationRef.current = requestAnimationFrame(animate);
+      }
+    };
+
+    auroraAnimationRef.current = requestAnimationFrame(animate);
+    return () => {
+      if (auroraAnimationRef.current) cancelAnimationFrame(auroraAnimationRef.current);
+    };
+  }, [auroraAnimations.length]);
+
+  // 蝶々アニメーションループ
+  useEffect(() => {
+    if (butterflyAnimations.length === 0) return;
+
+    const animate = () => {
+      const now = Date.now();
+      const updated = butterflyAnimations.map(anim => {
+        const elapsed = (now - anim.startTime) / 1000;
+        const updatedButterflies = anim.butterflies.map(bf => {
+          let newX = bf.x;
+          let newY = bf.y;
+          let newAngle = bf.angle;
+
+          if (bf.pathType === 'figure8') {
+            const newPathProgress = bf.pathProgress + 0.02;
+            const radius = 50;
+            newX += Math.sin(newPathProgress) * radius * 0.1;
+            newY += Math.sin(newPathProgress * 2) * radius * 0.05;
+            return { ...bf, x: newX, y: newY, pathProgress: newPathProgress, flutterPhase: bf.flutterPhase + bf.flutterSpeed, life: bf.life - 0.016 };
+          } else {
+            newX += bf.vx;
+            newY += bf.vy;
+            if (Math.random() < 0.05) {
+              newAngle += (Math.random() - 0.5) * 0.5;
+            }
+            return { ...bf, x: newX, y: newY, angle: newAngle, flutterPhase: bf.flutterPhase + bf.flutterSpeed, life: bf.life - 0.016 };
+          }
+        }).filter(bf => bf.life > 0);
+        return { ...anim, butterflies: updatedButterflies };
+      }).filter(a => a.butterflies.length > 0);
+
+      setButterflyAnimations(updated);
+      requestDraw();
+
+      if (updated.length > 0) {
+        butterflyAnimationRef.current = requestAnimationFrame(animate);
+      }
+    };
+
+    butterflyAnimationRef.current = requestAnimationFrame(animate);
+    return () => {
+      if (butterflyAnimationRef.current) cancelAnimationFrame(butterflyAnimationRef.current);
+    };
+  }, [butterflyAnimations.length]);
+
+  // 流れ星アニメーションループ
+  useEffect(() => {
+    if (shootingStarAnimations.length === 0) return;
+
+    const animate = () => {
+      const now = Date.now();
+      const updated = shootingStarAnimations.map(anim => {
+        const updatedStars = anim.stars.map(star => {
+          const newX = star.x + star.vx;
+          const newY = star.y + star.vy;
+          const newLife = star.life - 0.016;
+          const newTrailPoints = [...star.trailPoints, { x: newX, y: newY, alpha: 1 }].slice(-20).map((p, i, arr) => ({
+            ...p,
+            alpha: (i / arr.length) * (newLife / 3),
+          }));
+          return { ...star, x: newX, y: newY, life: newLife, trailPoints: newTrailPoints };
+        }).filter(s => s.life > 0);
+        return { ...anim, stars: updatedStars };
+      }).filter(a => a.stars.length > 0);
+
+      setShootingStarAnimations(updated);
+      requestDraw();
+
+      if (updated.length > 0) {
+        shootingStarAnimationRef.current = requestAnimationFrame(animate);
+      }
+    };
+
+    shootingStarAnimationRef.current = requestAnimationFrame(animate);
+    return () => {
+      if (shootingStarAnimationRef.current) cancelAnimationFrame(shootingStarAnimationRef.current);
+    };
+  }, [shootingStarAnimations.length]);
+
+  // 紅葉アニメーションループ
+  useEffect(() => {
+    if (autumnLeavesAnimations.length === 0) return;
+
+    const animate = () => {
+      const now = Date.now();
+      const updated = autumnLeavesAnimations.map(anim => {
+        const updatedLeaves = anim.leaves.map(leaf => {
+          const newOffsetX = leaf.offsetX + leaf.vx + Math.sin(leaf.swayOffset) * 0.5;
+          const newOffsetY = leaf.offsetY + leaf.vy;
+          const newRotation = leaf.rotation + leaf.rotationSpeed;
+          const newSwayOffset = leaf.swayOffset + leaf.swaySpeed;
+          const newLife = leaf.life - 0.016;
+          return {
+            ...leaf,
+            offsetX: newOffsetX,
+            offsetY: newOffsetY,
+            rotation: newRotation,
+            swayOffset: newSwayOffset,
+            life: newLife,
+          };
+        }).filter(l => l.life > 0);
+        return { ...anim, leaves: updatedLeaves };
+      }).filter(a => a.leaves.length > 0);
+
+      setAutumnLeavesAnimations(updated);
+      requestDraw();
+
+      if (updated.length > 0) {
+        autumnLeavesAnimationRef.current = requestAnimationFrame(animate);
+      }
+    };
+
+    autumnLeavesAnimationRef.current = requestAnimationFrame(animate);
+    return () => {
+      if (autumnLeavesAnimationRef.current) cancelAnimationFrame(autumnLeavesAnimationRef.current);
+    };
+  }, [autumnLeavesAnimations.length]);
+
+  // 雪アニメーションループ
+  useEffect(() => {
+    if (snowAnimations.length === 0) return;
+
+    const animate = () => {
+      const now = Date.now();
+      const updated = snowAnimations.map(anim => {
+        const elapsed = (now - anim.startTime) / 1000;
+        const updatedSnowflakes = anim.snowflakes.map(snow => {
+          const newX = snow.x + snow.vx + Math.sin(snow.swayOffset) * 0.3;
+          const newY = snow.y + snow.vy;
+          const newRotation = snow.rotation + snow.rotationSpeed;
+          const newSwayOffset = snow.swayOffset + snow.swaySpeed;
+          const newLife = snow.life - 0.016;
+          return {
+            ...snow,
+            x: newX,
+            y: newY,
+            rotation: newRotation,
+            swayOffset: newSwayOffset,
+            life: newLife,
+          };
+        }).filter(s => s.life > 0);
+        
+        const newLife = anim.duration - elapsed;
+        if (newLife > 0 && Math.random() < 0.1 && updatedSnowflakes.length < 100) {
+          updatedSnowflakes.push({
+            x: Math.random() * 2000 - 500,
+            y: -20,
+            vx: (Math.random() - 0.5) * 0.5,
+            vy: Math.random() * 0.5 + 0.5,
+            size: Math.random() * 8 + 4,
+            rotation: Math.random() * Math.PI * 2,
+            rotationSpeed: (Math.random() - 0.5) * 0.05,
+            swayOffset: Math.random() * Math.PI * 2,
+            swaySpeed: Math.random() * 0.05 + 0.02,
+            opacity: Math.random() * 0.5 + 0.5,
+            life: 10,
+          });
+        }
+
+        return { ...anim, snowflakes: updatedSnowflakes, duration: anim.duration };
+      }).filter(a => (Date.now() - a.startTime) / 1000 < a.duration || a.snowflakes.length > 0);
+
+      setSnowAnimations(updated);
+      requestDraw();
+
+      if (updated.length > 0) {
+        snowAnimationRef.current = requestAnimationFrame(animate);
+      }
+    };
+
+    snowAnimationRef.current = requestAnimationFrame(animate);
+    return () => {
+      if (snowAnimationRef.current) cancelAnimationFrame(snowAnimationRef.current);
+    };
+  }, [snowAnimations.length]);
+
+  // 紙吹雪アニメーションループ
+  useEffect(() => {
+    if (confettiAnimations.length === 0) return;
+
+    const animate = () => {
+      const now = Date.now();
+      const updated = confettiAnimations.map(anim => {
+        const updatedConfetti = anim.confetti.map(conf => {
+          const newOffsetX = conf.offsetX + conf.vx;
+          const newOffsetY = conf.offsetY + conf.vy;
+          const newVy = conf.vy + 0.05; // 重力
+          const newRotation = conf.rotation + conf.rotationSpeed;
+          const newLife = conf.life - 0.016;
+          return {
+            ...conf,
+            offsetX: newOffsetX,
+            offsetY: newOffsetY,
+            vy: newVy,
+            rotation: newRotation,
+            life: newLife,
+          };
+        }).filter(c => c.life > 0);
+        return { ...anim, confetti: updatedConfetti };
+      }).filter(a => a.confetti.length > 0);
+
+      setConfettiAnimations(updated);
+      requestDraw();
+
+      if (updated.length > 0) {
+        confettiAnimationRef.current = requestAnimationFrame(animate);
+      }
+    };
+
+    confettiAnimationRef.current = requestAnimationFrame(animate);
+    return () => {
+      if (confettiAnimationRef.current) cancelAnimationFrame(confettiAnimationRef.current);
+    };
+  }, [confettiAnimations.length]);
+
+  // 虹アニメーションループ
+  useEffect(() => {
+    if (rainbowAnimations.length === 0) return;
+
+    const animate = () => {
+      const now = Date.now();
+      const updated = rainbowAnimations.map(anim => {
+        const elapsed = (now - anim.startTime) / 1000;
+        const newLife = anim.life - 0.016;
+        const fadeIn = Math.min(elapsed * 0.5, 1);
+        const fadeOut = newLife < 2 ? newLife / 2 : 1;
+        const newAlpha = fadeIn * fadeOut * 0.7;
+        return { ...anim, alpha: newAlpha, life: newLife };
+      }).filter(a => a.life > 0);
+
+      setRainbowAnimations(updated);
+      requestDraw();
+
+      if (updated.length > 0) {
+        rainbowAnimationRef.current = requestAnimationFrame(animate);
+      }
+    };
+
+    rainbowAnimationRef.current = requestAnimationFrame(animate);
+    return () => {
+      if (rainbowAnimationRef.current) cancelAnimationFrame(rainbowAnimationRef.current);
+    };
+  }, [rainbowAnimations.length]);
+
+  // 雨アニメーションループ
+  useEffect(() => {
+    if (rainAnimations.length === 0) return;
+
+    const animate = () => {
+      const now = Date.now();
+      const updated = rainAnimations.map(anim => {
+        const elapsed = (now - anim.startTime) / 1000;
+        const updatedRaindrops = anim.raindrops.map(drop => {
+          if (drop.splash) {
+            const newSplashProgress = drop.splashProgress + 0.05;
+            const newLife = drop.life - 0.016;
+            return { ...drop, splashProgress: newSplashProgress, life: newLife };
+          } else {
+            const newY = drop.y + drop.vy;
+            const newSplash = newY > 800;
+            return { ...drop, y: newY, splash: newSplash, splashProgress: 0 };
+          }
+        }).filter(d => d.life > 0 && !d.splash || d.splash && d.splashProgress < 1);
+
+        if (elapsed < anim.duration && Math.random() < 0.3 && updatedRaindrops.length < 200) {
+          updatedRaindrops.push({
+            x: Math.random() * 2000 - 500,
+            y: -20,
+            vy: Math.random() * 5 + 15,
+            length: Math.random() * 10 + 15,
+            opacity: Math.random() * 0.3 + 0.3,
+            splash: false,
+            splashProgress: 0,
+            life: 3,
+          });
+        }
+
+        return { ...anim, raindrops: updatedRaindrops };
+      }).filter(a => (Date.now() - a.startTime) / 1000 < a.duration || a.raindrops.length > 0);
+
+      setRainAnimations(updated);
+      requestDraw();
+
+      if (updated.length > 0) {
+        rainAnimationRef.current = requestAnimationFrame(animate);
+      }
+    };
+
+    rainAnimationRef.current = requestAnimationFrame(animate);
+    return () => {
+      if (rainAnimationRef.current) cancelAnimationFrame(rainAnimationRef.current);
+    };
+  }, [rainAnimations.length]);
+
+  // 魔法陣アニメーションループ
+  useEffect(() => {
+    if (magicCircleAnimations.length === 0) return;
+
+    const animate = () => {
+      const now = Date.now();
+      const updated = magicCircleAnimations.map(anim => {
+        const elapsed = (now - anim.startTime) / 1000;
+        const newRotation = anim.rotation + anim.rotationSpeed;
+        const newLife = anim.life - 0.016;
+        const fadeIn = Math.min(elapsed * 2, 1);
+        const fadeOut = newLife < 1 ? newLife : 1;
+        const newAlpha = fadeIn * fadeOut;
+        const pulse = Math.sin(elapsed * 3) * 0.3 + 0.7;
+        const newGlowIntensity = pulse;
+        return {
+          ...anim,
+          rotation: newRotation,
+          life: newLife,
+          alpha: newAlpha,
+          glowIntensity: newGlowIntensity,
+        };
+      }).filter(a => a.life > 0);
+
+      setMagicCircleAnimations(updated);
+      requestDraw();
+
+      if (updated.length > 0) {
+        magicCircleAnimationRef.current = requestAnimationFrame(animate);
+      }
+    };
+
+    magicCircleAnimationRef.current = requestAnimationFrame(animate);
+    return () => {
+      if (magicCircleAnimationRef.current) cancelAnimationFrame(magicCircleAnimationRef.current);
+    };
+  }, [magicCircleAnimations.length]);
 
   // 花火アニメーションループ
   useEffect(() => {
@@ -5281,6 +6459,16 @@ export default function Home() {
         setCoinDrops([]);
         setCatAnimations([]);
         catAnimationsDataRef.current = []; // refもクリア
+        setBalloonAnimations([]);
+        setAuroraAnimations([]);
+        setButterflyAnimations([]);
+        setShootingStarAnimations([]);
+        setAutumnLeavesAnimations([]);
+        setSnowAnimations([]);
+        setConfettiAnimations([]);
+        setRainbowAnimations([]);
+        setRainAnimations([]);
+        setMagicCircleAnimations([]);
       }
       
       if (animationType === 'birthday') {
@@ -5351,6 +6539,51 @@ export default function Home() {
           startCatAnimation(hit, randomTarget);
         }
         setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (animationType === 'balloon') {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const rect = canvas.getBoundingClientRect();
+        startBalloonAnimation(rect.width / 2, rect.height / 2);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (animationType === 'aurora') {
+        startAuroraAnimation();
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (animationType === 'butterfly') {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const rect = canvas.getBoundingClientRect();
+        startButterflyAnimation(rect.width / 2, rect.height / 2);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (animationType === 'shootingstar') {
+        startShootingStarAnimation();
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (animationType === 'autumnleaves') {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const rect = canvas.getBoundingClientRect();
+        startAutumnLeavesAnimation(rect.width / 2, rect.height * 0.2);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (animationType === 'snow') {
+        startSnowAnimation(20);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (animationType === 'confetti') {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const rect = canvas.getBoundingClientRect();
+        startConfettiAnimation(rect.width / 2, rect.height / 2);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (animationType === 'rainbow') {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const rect = canvas.getBoundingClientRect();
+        startRainbowAnimation(rect.width / 2, rect.height * 0.7);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (animationType === 'rain') {
+        startRainAnimation(15);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (animationType === 'magiccircle') {
+        startMagicCircleAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
       } else {
         // アニメーションなし：通常の選択
         setSelectedId(hit?.id ? String(hit.id) : null);
@@ -5367,6 +6600,16 @@ export default function Home() {
       setCoinDrops([]);
       setCatAnimations([]);
       catAnimationsDataRef.current = [];
+      setBalloonAnimations([]);
+      setAuroraAnimations([]);
+      setButterflyAnimations([]);
+      setShootingStarAnimations([]);
+      setAutumnLeavesAnimations([]);
+      setSnowAnimations([]);
+      setConfettiAnimations([]);
+      setRainbowAnimations([]);
+      setRainAnimations([]);
+      setMagicCircleAnimations([]);
       setSelectedId(null);
       // requestDrawを呼び出して即座に反映
       requestDraw();
@@ -7741,6 +8984,16 @@ export default function Home() {
                       <option value="coin">コイン</option>
                       <option value="slot">スロット</option>
                       <option value="cat">猫</option>
+                      <option value="balloon">🎈 バルーン</option>
+                      <option value="aurora">💫 オーロラ</option>
+                      <option value="butterfly">🦋 蝶々</option>
+                      <option value="shootingstar">🌟 流れ星</option>
+                      <option value="autumnleaves">🍂 紅葉</option>
+                      <option value="snow">❄️ 雪</option>
+                      <option value="confetti">🎊 紙吹雪</option>
+                      <option value="rainbow">🌈 虹</option>
+                      <option value="rain">💧 雨</option>
+                      <option value="magiccircle">🎭 魔法陣</option>
                     </select>
                   </div>
                   
@@ -8192,6 +9445,261 @@ export default function Home() {
               />
             </div>
 
+            {/* エフェクト発動ボタン */}
+            <div style={{
+              marginBottom: 16,
+              padding: isMobile ? "12px" : "16px",
+              background: "linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)",
+              borderRadius: 12,
+              border: "2px solid #bae6fd",
+            }}>
+              <h3 style={{
+                margin: "0 0 12px 0",
+                fontSize: 14,
+                fontWeight: 600,
+                color: "#0369a1",
+                userSelect: "none",
+              }}>
+                ✨ エフェクト発動
+              </h3>
+              <div style={{
+                display: "grid",
+                gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(3, 1fr)",
+                gap: 8,
+              }}>
+                <button
+                  onClick={() => {
+                    const canvas = canvasRef.current;
+                    if (!canvas) return;
+                    const rect = canvas.getBoundingClientRect();
+                    const objMapX = (num(editingObject.x, 0) + num(editingObject.w, 1) / 2) * cfg.cell;
+                    const objMapY = (num(editingObject.y, 0) + num(editingObject.h, 1) / 2) * cfg.cell;
+                    const { sx, sy } = mapToScreen(objMapX, objMapY, rect.width, rect.height);
+                    startBalloonAnimation(sx, sy);
+                  }}
+                  style={{
+                    padding: "10px 8px",
+                    background: "white",
+                    border: "2px solid #e0f2fe",
+                    borderRadius: 8,
+                    cursor: "pointer",
+                    fontSize: 12,
+                    fontWeight: 600,
+                    color: "#0369a1",
+                    transition: "all 0.2s",
+                    userSelect: "none",
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = "#f0f9ff"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = "white"; }}
+                >
+                  🎈 バルーン
+                </button>
+                <button
+                  onClick={() => startAuroraAnimation()}
+                  style={{
+                    padding: "10px 8px",
+                    background: "white",
+                    border: "2px solid #e0f2fe",
+                    borderRadius: 8,
+                    cursor: "pointer",
+                    fontSize: 12,
+                    fontWeight: 600,
+                    color: "#0369a1",
+                    transition: "all 0.2s",
+                    userSelect: "none",
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = "#f0f9ff"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = "white"; }}
+                >
+                  💫 オーロラ
+                </button>
+                <button
+                  onClick={() => {
+                    const canvas = canvasRef.current;
+                    if (!canvas) return;
+                    const rect = canvas.getBoundingClientRect();
+                    const objMapX = (num(editingObject.x, 0) + num(editingObject.w, 1) / 2) * cfg.cell;
+                    const objMapY = (num(editingObject.y, 0) + num(editingObject.h, 1) / 2) * cfg.cell;
+                    const { sx, sy } = mapToScreen(objMapX, objMapY, rect.width, rect.height);
+                    startButterflyAnimation(sx, sy);
+                  }}
+                  style={{
+                    padding: "10px 8px",
+                    background: "white",
+                    border: "2px solid #e0f2fe",
+                    borderRadius: 8,
+                    cursor: "pointer",
+                    fontSize: 12,
+                    fontWeight: 600,
+                    color: "#0369a1",
+                    transition: "all 0.2s",
+                    userSelect: "none",
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = "#f0f9ff"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = "white"; }}
+                >
+                  🦋 蝶々
+                </button>
+                <button
+                  onClick={() => startShootingStarAnimation()}
+                  style={{
+                    padding: "10px 8px",
+                    background: "white",
+                    border: "2px solid #e0f2fe",
+                    borderRadius: 8,
+                    cursor: "pointer",
+                    fontSize: 12,
+                    fontWeight: 600,
+                    color: "#0369a1",
+                    transition: "all 0.2s",
+                    userSelect: "none",
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = "#f0f9ff"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = "white"; }}
+                >
+                  🌟 流れ星
+                </button>
+                <button
+                  onClick={() => {
+                    const canvas = canvasRef.current;
+                    if (!canvas) return;
+                    const rect = canvas.getBoundingClientRect();
+                    const objMapX = (num(editingObject.x, 0) + num(editingObject.w, 1) / 2) * cfg.cell;
+                    const objMapY = (num(editingObject.y, 0) + num(editingObject.h, 1) / 2) * cfg.cell;
+                    const { sx, sy } = mapToScreen(objMapX, objMapY, rect.width, rect.height);
+                    startAutumnLeavesAnimation(sx, sy);
+                  }}
+                  style={{
+                    padding: "10px 8px",
+                    background: "white",
+                    border: "2px solid #e0f2fe",
+                    borderRadius: 8,
+                    cursor: "pointer",
+                    fontSize: 12,
+                    fontWeight: 600,
+                    color: "#0369a1",
+                    transition: "all 0.2s",
+                    userSelect: "none",
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = "#f0f9ff"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = "white"; }}
+                >
+                  🍂 紅葉
+                </button>
+                <button
+                  onClick={() => startSnowAnimation(20)}
+                  style={{
+                    padding: "10px 8px",
+                    background: "white",
+                    border: "2px solid #e0f2fe",
+                    borderRadius: 8,
+                    cursor: "pointer",
+                    fontSize: 12,
+                    fontWeight: 600,
+                    color: "#0369a1",
+                    transition: "all 0.2s",
+                    userSelect: "none",
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = "#f0f9ff"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = "white"; }}
+                >
+                  ❄️ 雪
+                </button>
+                <button
+                  onClick={() => {
+                    const canvas = canvasRef.current;
+                    if (!canvas) return;
+                    const rect = canvas.getBoundingClientRect();
+                    const objMapX = (num(editingObject.x, 0) + num(editingObject.w, 1) / 2) * cfg.cell;
+                    const objMapY = (num(editingObject.y, 0) + num(editingObject.h, 1) / 2) * cfg.cell;
+                    const { sx, sy } = mapToScreen(objMapX, objMapY, rect.width, rect.height);
+                    startConfettiAnimation(sx, sy);
+                  }}
+                  style={{
+                    padding: "10px 8px",
+                    background: "white",
+                    border: "2px solid #e0f2fe",
+                    borderRadius: 8,
+                    cursor: "pointer",
+                    fontSize: 12,
+                    fontWeight: 600,
+                    color: "#0369a1",
+                    transition: "all 0.2s",
+                    userSelect: "none",
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = "#f0f9ff"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = "white"; }}
+                >
+                  🎊 紙吹雪
+                </button>
+                <button
+                  onClick={() => {
+                    const canvas = canvasRef.current;
+                    if (!canvas) return;
+                    const rect = canvas.getBoundingClientRect();
+                    const objMapX = (num(editingObject.x, 0) + num(editingObject.w, 1) / 2) * cfg.cell;
+                    const objMapY = (num(editingObject.y, 0) + num(editingObject.h, 1) / 2) * cfg.cell;
+                    const { sx, sy } = mapToScreen(objMapX, objMapY, rect.width, rect.height);
+                    startRainbowAnimation(sx, sy + 100);
+                  }}
+                  style={{
+                    padding: "10px 8px",
+                    background: "white",
+                    border: "2px solid #e0f2fe",
+                    borderRadius: 8,
+                    cursor: "pointer",
+                    fontSize: 12,
+                    fontWeight: 600,
+                    color: "#0369a1",
+                    transition: "all 0.2s",
+                    userSelect: "none",
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = "#f0f9ff"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = "white"; }}
+                >
+                  🌈 虹
+                </button>
+                <button
+                  onClick={() => startRainAnimation(15)}
+                  style={{
+                    padding: "10px 8px",
+                    background: "white",
+                    border: "2px solid #e0f2fe",
+                    borderRadius: 8,
+                    cursor: "pointer",
+                    fontSize: 12,
+                    fontWeight: 600,
+                    color: "#0369a1",
+                    transition: "all 0.2s",
+                    userSelect: "none",
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = "#f0f9ff"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = "white"; }}
+                >
+                  💧 雨
+                </button>
+                <button
+                  onClick={() => startMagicCircleAnimation(editingObject)}
+                  style={{
+                    padding: "10px 8px",
+                    background: "white",
+                    border: "2px solid #e0f2fe",
+                    borderRadius: 8,
+                    cursor: "pointer",
+                    fontSize: 12,
+                    fontWeight: 600,
+                    color: "#0369a1",
+                    transition: "all 0.2s",
+                    userSelect: "none",
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = "#f0f9ff"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = "white"; }}
+                >
+                  🎭 魔法陣
+                </button>
+              </div>
+            </div>
+
             {/* メインアクションボタン */}
             <div style={{ 
               display: "flex", 
@@ -8388,6 +9896,7 @@ export default function Home() {
                 >
                   🗑️ このオブジェクトを削除
                 </button>
+                
               </div>
             )}
             </div>
