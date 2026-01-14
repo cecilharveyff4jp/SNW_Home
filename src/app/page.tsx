@@ -11470,6 +11470,235 @@ export default function Home() {
               </select>
             </div>
 
+            {/* サイズセクション（サブマップ用） */}
+            {!currentMap?.isBase && (
+            <div style={{ marginBottom: isMobile ? 8 : 12 }}>
+              {/* 幅 */}
+              <div style={{ 
+                marginBottom: isMobile ? 8 : 10,
+                display: isMobile ? "grid" : "block",
+                gridTemplateColumns: isMobile ? "70px 1fr" : "auto",
+                gap: isMobile ? "8px" : "0",
+                alignItems: isMobile ? "center" : "flex-start",
+                background: isMobile ? "linear-gradient(to right, rgba(34, 197, 94, 0.03), rgba(134, 239, 172, 0.03))" : "transparent",
+                padding: isMobile ? "10px" : "0",
+                borderRadius: isMobile ? 8 : 0,
+                border: isMobile ? "1px solid rgba(34, 197, 94, 0.1)" : "none",
+              }}>
+                <label style={{ 
+                  display: "flex",
+                  alignItems: "center",
+                  gap: isMobile ? 4 : 0,
+                  marginBottom: isMobile ? 0 : 6, 
+                  fontSize: 13, 
+                  fontWeight: 600, 
+                  color: "#374151",
+                  userSelect: "none",
+                }}>
+                  {isMobile && "↔️"}
+                  <span>幅</span>
+                </label>
+                <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                  <button
+                    onClick={() => setEditingObject({ ...editingObject, w: Math.max(1, (editingObject.w || 1) - 1) })}
+                    style={{
+                      width: 40,
+                      height: 46,
+                      border: "2px solid #e5e7eb",
+                      borderRadius: 8,
+                      background: "white",
+                      cursor: "pointer",
+                      fontSize: 20,
+                      fontWeight: "bold",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: "#6b7280",
+                      flexShrink: 0,
+                      userSelect: "none",
+                      transition: "all 0.15s",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = "#f3f4f6";
+                      e.currentTarget.style.borderColor = "#d1d5db";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = "white";
+                      e.currentTarget.style.borderColor = "#e5e7eb";
+                    }}
+                  >
+                    −
+                  </button>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    value={editingObject.w || 1}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/[^0-9]/g, '');
+                      setEditingObject({ ...editingObject, w: Math.max(1, val === '' ? 1 : Number(val)) });
+                    }}
+                    style={{
+                      flex: 1,
+                      padding: "12px 8px",
+                      border: "2px solid #e5e7eb",
+                      borderRadius: 8,
+                      fontSize: 16,
+                      boxSizing: "border-box",
+                      backgroundColor: "white",
+                      color: "#1f2937",
+                      outline: "none",
+                      textAlign: "center",
+                      fontWeight: 600,
+                    }}
+                  />
+                  <button
+                    onClick={() => setEditingObject({ ...editingObject, w: (editingObject.w || 1) + 1 })}
+                    style={{
+                      width: 40,
+                      height: 46,
+                      border: "2px solid #e5e7eb",
+                      borderRadius: 8,
+                      background: "white",
+                      cursor: "pointer",
+                      fontSize: 20,
+                      fontWeight: "bold",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: "#6b7280",
+                      flexShrink: 0,
+                      userSelect: "none",
+                      transition: "all 0.15s",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = "#f3f4f6";
+                      e.currentTarget.style.borderColor = "#d1d5db";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = "white";
+                      e.currentTarget.style.borderColor = "#e5e7eb";
+                    }}
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+
+              {/* 高さ */}
+              <div style={{ 
+                marginBottom: 0,
+                display: isMobile ? "grid" : "block",
+                gridTemplateColumns: isMobile ? "70px 1fr" : "auto",
+                gap: isMobile ? "8px" : "0",
+                alignItems: isMobile ? "center" : "flex-start",
+                background: isMobile ? "linear-gradient(to right, rgba(34, 197, 94, 0.03), rgba(134, 239, 172, 0.03))" : "transparent",
+                padding: isMobile ? "10px" : "0",
+                borderRadius: isMobile ? 8 : 0,
+                border: isMobile ? "1px solid rgba(34, 197, 94, 0.1)" : "none",
+              }}>
+                <label style={{ 
+                  display: "flex",
+                  alignItems: "center",
+                  gap: isMobile ? 4 : 0,
+                  marginBottom: isMobile ? 0 : 6, 
+                  fontSize: 13, 
+                  fontWeight: 600, 
+                  color: "#374151",
+                  userSelect: "none",
+                }}>
+                  {isMobile && "↕️"}
+                  <span>高さ</span>
+                </label>
+                <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                  <button
+                    onClick={() => setEditingObject({ ...editingObject, h: Math.max(1, (editingObject.h || 1) - 1) })}
+                    style={{
+                      width: 40,
+                      height: 46,
+                      border: "2px solid #e5e7eb",
+                      borderRadius: 8,
+                      background: "white",
+                      cursor: "pointer",
+                      fontSize: 20,
+                      fontWeight: "bold",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: "#6b7280",
+                      flexShrink: 0,
+                      userSelect: "none",
+                      transition: "all 0.15s",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = "#f3f4f6";
+                      e.currentTarget.style.borderColor = "#d1d5db";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = "white";
+                      e.currentTarget.style.borderColor = "#e5e7eb";
+                    }}
+                  >
+                    −
+                  </button>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    value={editingObject.h || 1}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/[^0-9]/g, '');
+                      setEditingObject({ ...editingObject, h: Math.max(1, val === '' ? 1 : Number(val)) });
+                    }}
+                    style={{
+                      flex: 1,
+                      padding: "12px 8px",
+                      border: "2px solid #e5e7eb",
+                      borderRadius: 8,
+                      fontSize: 16,
+                      boxSizing: "border-box",
+                      backgroundColor: "white",
+                      color: "#1f2937",
+                      outline: "none",
+                      textAlign: "center",
+                      fontWeight: 600,
+                    }}
+                  />
+                  <button
+                    onClick={() => setEditingObject({ ...editingObject, h: (editingObject.h || 1) + 1 })}
+                    style={{
+                      width: 40,
+                      height: 46,
+                      border: "2px solid #e5e7eb",
+                      borderRadius: 8,
+                      background: "white",
+                      cursor: "pointer",
+                      fontSize: 20,
+                      fontWeight: "bold",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: "#6b7280",
+                      flexShrink: 0,
+                      userSelect: "none",
+                      transition: "all 0.15s",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = "#f3f4f6";
+                      e.currentTarget.style.borderColor = "#d1d5db";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = "white";
+                      e.currentTarget.style.borderColor = "#e5e7eb";
+                    }}
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+            </div>
+            )}
+
             {/* 位置・サイズセクション（アコーディオン）- ベースマップのみ */}
             {currentMap?.isBase && (
             <div style={{ marginBottom: isMobile ? 8 : 12 }}>
