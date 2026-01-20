@@ -14,6 +14,47 @@ import {
   FALLBACK 
 } from './utils';
 
+// 魚クイズ用の問題データ（30問に絞った版）
+type FishQuestion = {
+  kanji: string;
+  correct: string;
+  wrong1: string;
+  wrong2: string;
+};
+
+const FISH_QUESTIONS: FishQuestion[] = [
+  { kanji: "鯖", correct: "さば", wrong1: "たい", wrong2: "ふぐ" },
+  { kanji: "鯛", correct: "たい", wrong1: "さば", wrong2: "かつお" },
+  { kanji: "鰯", correct: "いわし", wrong1: "あじ", wrong2: "さんま" },
+  { kanji: "鮪", correct: "まぐろ", wrong1: "かつお", wrong2: "ぶり" },
+  { kanji: "鰹", correct: "かつお", wrong1: "まぐろ", wrong2: "さば" },
+  { kanji: "鮭", correct: "さけ", wrong1: "ます", wrong2: "あゆ" },
+  { kanji: "鱒", correct: "ます", wrong1: "さけ", wrong2: "にじます" },
+  { kanji: "鮎", correct: "あゆ", wrong1: "さけ", wrong2: "わかさぎ" },
+  { kanji: "鰻", correct: "うなぎ", wrong1: "あなご", wrong2: "どじょう" },
+  { kanji: "鰈", correct: "かれい", wrong1: "ひらめ", wrong2: "したびらめ" },
+  { kanji: "鮃", correct: "ひらめ", wrong1: "かれい", wrong2: "したびらめ" },
+  { kanji: "鰆", correct: "さわら", wrong1: "かます", wrong2: "すずき" },
+  { kanji: "鯵", correct: "あじ", wrong1: "いわし", wrong2: "さんま" },
+  { kanji: "鯉", correct: "こい", wrong1: "ふな", wrong2: "きんぎょ" },
+  { kanji: "鱈", correct: "たら", wrong1: "ほっけ", wrong2: "すけとうだら" },
+  { kanji: "鰤", correct: "ぶり", wrong1: "かんぱち", wrong2: "ひらまさ" },
+  { kanji: "鰊", correct: "にしん", wrong1: "しゃけ", wrong2: "ほっけ" },
+  { kanji: "鯨", correct: "くじら", wrong1: "いるか", wrong2: "しゃち" },
+  { kanji: "蛸", correct: "たこ", wrong1: "いか", wrong2: "えび" },
+  { kanji: "烏賊", correct: "いか", wrong1: "たこ", wrong2: "くらげ" },
+  { kanji: "海老", correct: "えび", wrong1: "かに", wrong2: "しゃこ" },
+  { kanji: "蟹", correct: "かに", wrong1: "えび", wrong2: "しゃこ" },
+  { kanji: "蛤", correct: "はまぐり", wrong1: "あさり", wrong2: "しじみ" },
+  { kanji: "蜆", correct: "しじみ", wrong1: "あさり", wrong2: "はまぐり" },
+  { kanji: "浅蜊", correct: "あさり", wrong1: "しじみ", wrong2: "はまぐり" },
+  { kanji: "牡蠣", correct: "かき", wrong1: "ほたて", wrong2: "あわび" },
+  { kanji: "鮑", correct: "あわび", wrong1: "さざえ", wrong2: "とこぶし" },
+  { kanji: "海月", correct: "くらげ", wrong1: "いそぎんちゃく", wrong2: "ひとで" },
+  { kanji: "海星", correct: "ひとで", wrong1: "くらげ", wrong2: "うに" },
+  { kanji: "海胆", correct: "うに", wrong1: "くり", wrong2: "ひとで" },
+];
+
 export default function Home() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const tickerCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -255,6 +296,7 @@ export default function Home() {
   const coinDropsAnimationRef = useRef<number | null>(null);
   const coinImageRef = useRef<HTMLImageElement | null>(null);
   const [totalCoins, setTotalCoins] = useState<number>(0);
+  const [fishQuizConsecutiveCorrect, setFishQuizConsecutiveCorrect] = useState<number>(0);
 
   // スロットアニメーション用
   type SlotAnimation = {
@@ -276,6 +318,20 @@ export default function Home() {
   };
   const [slotAnimations, setSlotAnimations] = useState<SlotAnimation[]>([]);
   const slotAnimationsRef = useRef<number | null>(null);
+
+  // 魚クイズアニメーション用
+  type FishQuizState = {
+    x: number; // スクリーン座標X
+    y: number; // スクリーン座標Y
+    question: FishQuestion;
+    choices: string[];
+    state: 'showing' | 'answering' | 'correct' | 'wrong' | 'insufficient_coins';
+    selectedAnswer: string | null;
+    startTime: number;
+    reward: number;
+    consecutiveCount: number; // 連続正解数
+  };
+  const [fishQuiz, setFishQuiz] = useState<FishQuizState | null>(null);
 
   // 猫アニメーション用
   type CatAnimation = {
@@ -4530,9 +4586,11 @@ export default function Home() {
           ctx.shadowOffsetX = 3;
           ctx.shadowOffsetY = 3;
           
-          // 縁取り（白）
+          // 縁取り（白、丸み付き）
           ctx.strokeStyle = 'white';
           ctx.lineWidth = 6;
+          ctx.lineJoin = 'round';
+          ctx.lineCap = 'round';
           ctx.strokeText(totalText, 0, 0);
           
           // 本体（濃い金色）
@@ -4563,7 +4621,7 @@ export default function Home() {
               : `+${drop.totalCoins}枚`;
             
             // フォントサイズ（大当たりは大きく）
-            const fontSize = drop.totalCoins >= 100 ? 32 : 24;
+            const fontSize = drop.totalCoins >= 100 ? 40 : 32;
             ctx.font = `bold ${fontSize}px Arial`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
@@ -4574,9 +4632,11 @@ export default function Home() {
             ctx.shadowOffsetX = 3;
             ctx.shadowOffsetY = 3;
             
-            // テキストの縁取り（白）
+            // テキストの縁取り（白、丸み付き）
             ctx.strokeStyle = 'white';
-            ctx.lineWidth = 8;
+            ctx.lineWidth = 10;
+            ctx.lineJoin = 'round';
+            ctx.lineCap = 'round';
             ctx.strokeText(displayText, 0, 0);
             
             // テキスト本体（金色または虹色）
@@ -4972,7 +5032,7 @@ export default function Home() {
     if (obj.Animation && obj.Animation.trim()) {
       const anim = obj.Animation.toLowerCase();
       if ([
-        'fireworks', 'sparkle', 'beartrap', 'birthday', 'cherryblossom', 'meteor', 'coin', 'slot', 'cat',
+        'fireworks', 'sparkle', 'beartrap', 'birthday', 'cherryblossom', 'meteor', 'coin', 'slot', 'fishquiz', 'cat',
         'balloon', 'aurora', 'butterfly', 'shootingstar', 'autumnleaves', 'snow', 'confetti', 'rainbow', 'rain', 'magiccircle',
         'flame', 'thunder', 'wave', 'wind', 'smoke', 'tornado', 'gem', 'startrail', 'lightparticle', 'spiral',
         'bird', 'ghost', 'bee', 'firefly', 'explosion', 'target', 'anger', 'petal', 'sunflower', 'rose',
@@ -5366,6 +5426,89 @@ export default function Home() {
       payout: payout,
       isWin: isWin,
     }]);
+  };
+
+  // 魚クイズアニメーション開始
+  const startFishQuizAnimation = (objOrX: Obj | number, y?: number) => {
+    // コインチェック（10コイン必要）
+    if (totalCoins < 10) {
+      // コイン不足の場合は専用の状態を表示
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+
+      let startX: number, startY: number;
+      if (typeof objOrX === 'number' && y !== undefined) {
+        startX = objOrX;
+        startY = y;
+      } else if (typeof objOrX === 'object') {
+        const rect = canvas.getBoundingClientRect();
+        const gridX = (objOrX.x || 0) + Math.floor((objOrX.w || 1) / 2);
+        const gridY = (objOrX.y || 0) + Math.floor((objOrX.h || 1) / 2);
+        startX = (gridX - cam.x) * cam.scale + rect.width / 2;
+        startY = (gridY - cam.y) * cam.scale + rect.height / 2;
+      } else {
+        return;
+      }
+
+      setFishQuiz({
+        x: startX,
+        y: startY,
+        question: FISH_QUESTIONS[0], // ダミー
+        choices: [],
+        state: 'insufficient_coins',
+        selectedAnswer: null,
+        startTime: Date.now(),
+        reward: 0,
+        consecutiveCount: fishQuizConsecutiveCorrect,
+      });
+      return;
+    }
+
+    // コインを10枚消費
+    const newTotal = totalCoins - 10;
+    setTotalCoins(newTotal);
+    localStorage.setItem('totalCoins', newTotal.toString());
+
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    let startX: number, startY: number;
+    if (typeof objOrX === 'number' && y !== undefined) {
+      startX = objOrX;
+      startY = y;
+    } else if (typeof objOrX === 'object') {
+      const rect = canvas.getBoundingClientRect();
+      const gridX = (objOrX.x || 0) + Math.floor((objOrX.w || 1) / 2);
+      const gridY = (objOrX.y || 0) + Math.floor((objOrX.h || 1) / 2);
+      startX = (gridX - cam.x) * cam.scale + rect.width / 2;
+      startY = (gridY - cam.y) * cam.scale + rect.height / 2;
+    } else {
+      return;
+    }
+
+    // ランダムに問題を選択
+    const randomQuestion = FISH_QUESTIONS[Math.floor(Math.random() * FISH_QUESTIONS.length)];
+    
+    // 選択肢をシャッフル
+    const shuffledChoices = [randomQuestion.correct, randomQuestion.wrong1, randomQuestion.wrong2]
+      .sort(() => Math.random() - 0.5);
+
+    setFishQuiz({
+      x: startX,
+      y: startY,
+      question: randomQuestion,
+      choices: shuffledChoices,
+      state: 'showing',
+      selectedAnswer: null,
+      startTime: Date.now(),
+      reward: 0,
+      consecutiveCount: fishQuizConsecutiveCorrect,
+    });
+
+    // 0.8秒後に回答モードに
+    setTimeout(() => {
+      setFishQuiz(prev => prev ? { ...prev, state: 'answering' } : null);
+    }, 800);
   };
 
   // バルーンアニメーション開始
@@ -8445,7 +8588,7 @@ export default function Home() {
       let actualAnimationType = animationType;
       if (animationType === 'random') {
         const allAnimations = [
-          'fireworks', 'sparkle', 'beartrap', 'birthday', 'cherryblossom', 'meteor', 'coin', 'slot', 'cat',
+          'fireworks', 'sparkle', 'beartrap', 'birthday', 'cherryblossom', 'meteor', 'coin', 'slot', 'fishquiz', 'cat',
           'balloon', 'aurora', 'butterfly', 'shootingstar', 'autumnleaves', 'snow', 'confetti', 'rainbow', 'rain', 'magiccircle',
           'flame', 'thunder', 'wave', 'wind', 'smoke', 'tornado', 'gem', 'startrail', 'lightparticle', 'spiral',
           'bird', 'ghost', 'bee', 'firefly', 'explosion', 'target', 'anger', 'petal', 'sunflower', 'rose'
@@ -8486,6 +8629,10 @@ export default function Home() {
       } else if (actualAnimationType === 'slot') {
         // スロットアニメーション
         startSlotAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'fishquiz') {
+        // 魚クイズアニメーション
+        startFishQuizAnimation(hit);
         setSelectedId(hit?.id ? String(hit.id) : null);
       } else if (actualAnimationType === 'cat') {
         // 猫アニメーション：画面内に見えている都市をターゲットに
@@ -11797,6 +11944,7 @@ export default function Home() {
                       <option value="meteor">☄️ 隕石</option>
                       <option value="coin">💰 コイン</option>
                       <option value="slot">🎰 スロット</option>
+                      <option value="fishquiz">🐟 魚クイズ</option>
                       <option value="cat">🐱 猫</option>
                       <option value="balloon">🎈 バルーン</option>
                       <option value="aurora">💫 オーロラ</option>
@@ -13646,6 +13794,374 @@ export default function Home() {
             >
               閉じる
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* 魚クイズモーダル */}
+      {fishQuiz && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: "rgba(0,0,0,0.7)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 2000,
+            padding: "20px",
+          }}
+          onClick={() => {
+            if (fishQuiz.state === 'correct' || fishQuiz.state === 'wrong') {
+              setFishQuiz(null);
+            }
+          }}
+        >
+          <div
+            style={{
+              background: "white",
+              borderRadius: "20px",
+              padding: "40px",
+              maxWidth: "600px",
+              width: "100%",
+              boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {fishQuiz.state === 'showing' && (
+              <div style={{ textAlign: "center" }}>
+                <button
+                  onClick={() => {
+                    // 問題に答える前に閉じた場合は掛け金を返金
+                    const refundTotal = totalCoins + 10;
+                    setTotalCoins(refundTotal);
+                    localStorage.setItem('totalCoins', refundTotal.toString());
+                    setFishQuiz(null);
+                  }}
+                  style={{
+                    position: "absolute",
+                    top: "10px",
+                    right: "10px",
+                    background: "transparent",
+                    border: "none",
+                    fontSize: "40px",
+                    cursor: "pointer",
+                    color: "#999",
+                    lineHeight: "1",
+                    padding: "5px",
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.color = "#333"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.color = "#999"; }}
+                >
+                  ×
+                </button>
+                <div style={{
+                  fontSize: "100px",
+                  marginBottom: "20px",
+                  animation: "pulse 0.8s ease-in-out",
+                }}>
+                  🐟
+                </div>
+                <h2 style={{ fontSize: "24px", color: "#333" }}>
+                  問題を準備中...
+                </h2>
+              </div>
+            )}
+
+            {fishQuiz.state === 'answering' && (
+              <div>
+                <button
+                  onClick={() => {
+                    // 問題に答える前に閉じた場合は掛け金を返金
+                    const refundTotal = totalCoins + 10;
+                    setTotalCoins(refundTotal);
+                    localStorage.setItem('totalCoins', refundTotal.toString());
+                    setFishQuiz(null);
+                  }}
+                  style={{
+                    position: "absolute",
+                    top: "10px",
+                    right: "10px",
+                    background: "transparent",
+                    border: "none",
+                    fontSize: "40px",
+                    cursor: "pointer",
+                    color: "#999",
+                    lineHeight: "1",
+                    padding: "5px",
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.color = "#333"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.color = "#999"; }}
+                >
+                  ×
+                </button>
+                <div style={{ textAlign: "center", marginBottom: "30px" }}>
+                  <div style={{
+                    fontSize: "120px",
+                    fontWeight: "bold",
+                    color: "#333",
+                    marginBottom: "15px",
+                  }}>
+                    {fishQuiz.question.kanji}
+                  </div>
+                  <p style={{ fontSize: "20px", color: "#666", marginBottom: "10px" }}>
+                    この漢字の読み方は？
+                  </p>
+                  {fishQuizConsecutiveCorrect > 0 && (
+                    <div style={{
+                      background: "#f0fdf4",
+                      padding: "10px",
+                      borderRadius: "8px",
+                      marginTop: "10px",
+                    }}>
+                      <div style={{ fontSize: "14px", color: "#37b24d", fontWeight: "bold" }}>
+                        🔥 連続正解中: {fishQuizConsecutiveCorrect}回
+                      </div>
+                      <div style={{ fontSize: "13px", color: "#666", marginTop: "3px" }}>
+                        次回ボーナス: ×{Math.min(fishQuizConsecutiveCorrect + 1, 1000)}倍 ({Math.min(fishQuizConsecutiveCorrect + 1, 1000) * 10}コイン)
+                      </div>
+                    </div>
+                  )}
+                  {fishQuizConsecutiveCorrect === 0 && (
+                    <div style={{ fontSize: "14px", color: "#999", marginTop: "5px" }}>
+                      正解で ×1倍 (10コイン)！
+                    </div>
+                  )}
+                </div>
+
+                <div style={{ display: "grid", gap: "12px" }}>
+                  {fishQuiz.choices.map((choice, index) => (
+                    <button
+                      key={index}
+                      onClick={() => {
+                        const isCorrect = choice === fishQuiz.question.correct;
+                        
+                        if (isCorrect) {
+                          // 正解：掛け金×倍率（上限1000倍）
+                          const newConsecutive = fishQuizConsecutiveCorrect + 1;
+                          const multiplier = Math.min(newConsecutive, 1000);
+                          const reward = 10 * multiplier;
+                          setFishQuizConsecutiveCorrect(newConsecutive);
+                          
+                          const newTotal = totalCoins + reward;
+                          setTotalCoins(newTotal);
+                          localStorage.setItem('totalCoins', newTotal.toString());
+                          
+                          setFishQuiz({
+                            ...fishQuiz,
+                            selectedAnswer: choice,
+                            state: 'correct',
+                            reward: reward,
+                            consecutiveCount: newConsecutive,
+                          });
+                        } else {
+                          // 不正解：連続正解数をリセット
+                          setFishQuizConsecutiveCorrect(0);
+                          setFishQuiz({
+                            ...fishQuiz,
+                            selectedAnswer: choice,
+                            state: 'wrong',
+                            reward: 0,
+                            consecutiveCount: 0,
+                          });
+                        }
+                      }}
+                      style={{
+                        padding: "20px",
+                        fontSize: "28px",
+                        fontWeight: "bold",
+                        background: "#f8f9fa",
+                        border: "3px solid #ddd",
+                        borderRadius: "12px",
+                        cursor: "pointer",
+                        transition: "all 0.2s",
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = "scale(1.02)";
+                        e.currentTarget.style.boxShadow = "0 4px 15px rgba(0,0,0,0.15)";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = "scale(1)";
+                        e.currentTarget.style.boxShadow = "none";
+                      }}
+                    >
+                      {choice}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {fishQuiz.state === 'correct' && (
+              <div style={{ textAlign: "center" }}>
+                <button
+                  onClick={() => setFishQuiz(null)}
+                  style={{
+                    position: "absolute",
+                    top: "10px",
+                    right: "10px",
+                    background: "transparent",
+                    border: "none",
+                    fontSize: "40px",
+                    cursor: "pointer",
+                    color: "#999",
+                    lineHeight: "1",
+                    padding: "5px",
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.color = "#333"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.color = "#999"; }}
+                >
+                  ×
+                </button>
+                <div style={{
+                  fontSize: "32px",
+                  fontWeight: "bold",
+                  color: "#37b24d",
+                  marginBottom: "20px",
+                  animation: "bounce 0.5s",
+                }}>
+                  🎉 正解！ 🎉
+                </div>
+                <p style={{ fontSize: "18px", color: "#666", marginBottom: "10px" }}>
+                  「{fishQuiz.question.kanji}」は「{fishQuiz.question.correct}」です
+                </p>
+                <div style={{
+                  background: "linear-gradient(135deg, #ffd700 0%, #ffed4e 100%)",
+                  padding: "15px",
+                  borderRadius: "12px",
+                  marginBottom: "20px",
+                }}>
+                  <div style={{ fontSize: "20px", fontWeight: "bold", color: "#37b24d", marginBottom: "5px" }}>
+                    💰 +{fishQuiz.reward} コイン獲得！
+                  </div>
+                  {fishQuiz.consecutiveCount > 0 && (
+                    <div style={{ fontSize: "16px", color: "#666" }}>
+                      連続正解 {fishQuiz.consecutiveCount} 回！
+                    </div>
+                  )}
+                </div>
+                <button
+                  onClick={() => {
+                    setFishQuiz(null);
+                    setTimeout(() => {
+                      const canvas = canvasRef.current;
+                      if (canvas) {
+                        const rect = canvas.getBoundingClientRect();
+                        startFishQuizAnimation(rect.width / 2, rect.height / 2);
+                      }
+                    }, 100);
+                  }}
+                  style={{
+                    padding: "12px 40px",
+                    fontSize: "18px",
+                    fontWeight: "bold",
+                    background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "50px",
+                    cursor: "pointer",
+                  }}
+                >
+                  次の問題
+                </button>
+              </div>
+            )}
+
+            {fishQuiz.state === 'wrong' && (
+              <div style={{ textAlign: "center" }}>
+                <button
+                  onClick={() => setFishQuiz(null)}
+                  style={{
+                    position: "absolute",
+                    top: "10px",
+                    right: "10px",
+                    background: "transparent",
+                    border: "none",
+                    fontSize: "40px",
+                    cursor: "pointer",
+                    color: "#999",
+                    lineHeight: "1",
+                    padding: "5px",
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.color = "#333"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.color = "#999"; }}
+                >
+                  ×
+                </button>
+                <div style={{
+                  fontSize: "32px",
+                  fontWeight: "bold",
+                  color: "#fa5252",
+                  marginBottom: "20px",
+                  animation: "shake 0.5s",
+                }}>
+                  😢 残念！
+                </div>
+                <p style={{ fontSize: "18px", color: "#666", marginBottom: "10px" }}>
+                  正解は「{fishQuiz.question.correct}」でした
+                </p>
+                {fishQuizConsecutiveCorrect > 0 && (
+                  <p style={{ fontSize: "16px", color: "#fa5252", marginBottom: "15px" }}>
+                    連続正解がリセットされました
+                  </p>
+                )}
+                <button
+                  onClick={() => setFishQuiz(null)}
+                  style={{
+                    padding: "12px 40px",
+                    fontSize: "18px",
+                    fontWeight: "bold",
+                    background: "#6b7280",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "50px",
+                    cursor: "pointer",
+                  }}
+                >
+                  閉じる
+                </button>
+              </div>
+            )}
+
+            {fishQuiz.state === 'insufficient_coins' && (
+              <div style={{ textAlign: "center" }}>
+                <div style={{
+                  fontSize: "80px",
+                  marginBottom: "20px",
+                }}>
+                  💸
+                </div>
+                <div style={{
+                  fontSize: "28px",
+                  fontWeight: "bold",
+                  color: "#fa5252",
+                  marginBottom: "15px",
+                }}>
+                  コイン不足
+                </div>
+                <p style={{ fontSize: "18px", color: "#666", marginBottom: "25px" }}>
+                  魚クイズには10コインが必要です
+                </p>
+                <button
+                  onClick={() => setFishQuiz(null)}
+                  style={{
+                    padding: "12px 40px",
+                    fontSize: "18px",
+                    fontWeight: "bold",
+                    background: "#6b7280",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "50px",
+                    cursor: "pointer",
+                  }}
+                >
+                  閉じる
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}
