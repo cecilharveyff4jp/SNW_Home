@@ -5444,8 +5444,8 @@ export default function Home() {
         const rect = canvas.getBoundingClientRect();
         const gridX = (objOrX.x || 0) + Math.floor((objOrX.w || 1) / 2);
         const gridY = (objOrX.y || 0) + Math.floor((objOrX.h || 1) / 2);
-        startX = (gridX - cam.x) * cam.scale + rect.width / 2;
-        startY = (gridY - cam.y) * cam.scale + rect.height / 2;
+        startX = (gridX - cam.tx) * cam.scale + rect.width / 2;
+        startY = (gridY - cam.ty) * cam.scale + rect.height / 2;
       } else {
         return;
       }
@@ -5480,8 +5480,8 @@ export default function Home() {
       const rect = canvas.getBoundingClientRect();
       const gridX = (objOrX.x || 0) + Math.floor((objOrX.w || 1) / 2);
       const gridY = (objOrX.y || 0) + Math.floor((objOrX.h || 1) / 2);
-      startX = (gridX - cam.x) * cam.scale + rect.width / 2;
-      startY = (gridY - cam.y) * cam.scale + rect.height / 2;
+      startX = (gridX - cam.tx) * cam.scale + rect.width / 2;
+      startY = (gridY - cam.ty) * cam.scale + rect.height / 2;
     } else {
       return;
     }
