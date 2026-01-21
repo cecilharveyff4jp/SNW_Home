@@ -8636,6 +8636,7 @@ export default function Home() {
             setOmikujiAnimations(prev => prev.map(o => 
               o === omikuji ? { ...o, phase: 'detail', progress: 0, startTime: Date.now() } : o
             ));
+            return; // 処理完了
           } else if (omikuji.phase === 'detail') {
             // 閉じるボタンの範囲チェック（右上の×ボタン）
             // 描画コードと完全に一致させる
@@ -8648,21 +8649,22 @@ export default function Home() {
             if (distToCloseButton <= closeButtonSize / 2) {
               // 閉じるボタンをクリック → おみくじを閉じる
               setOmikujiAnimations(prev => prev.filter(o => o !== omikuji));
+              return; // 閉じる処理完了
             }
             // ×ボタン以外の部分をクリック → 何もしない（閉じない）
+            return; // 範囲内の他のクリックは無視
           }
           // roulette フェーズ中はクリックを無視
-          
-          // おみくじ内のクリックは以降の処理をスキップ
-          if (longPressTimerRef.current) {
-            clearTimeout(longPressTimerRef.current);
-            longPressTimerRef.current = null;
+          return; // rouletteフェーズのクリックは無視
+        } else {
+          // おみくじ範囲外をクリック → おみくじを閉じる
+          if (omikuji.phase === 'detail' || omikuji.phase === 'result') {
+            setOmikujiAnimations(prev => prev.filter(o => o !== omikuji));
+            return;
           }
-          pointerStartRef.current = null;
-          pointersRef.current.delete(e.pointerId);
-          return;
         }
       }
+      return; // おみくじアニメーション表示中は他の処理をスキップ
     }
     
     // スロットマシン表示中はオブジェクト選択を完全にブロック
