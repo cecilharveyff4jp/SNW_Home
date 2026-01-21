@@ -405,6 +405,150 @@ const ENGLISH_QUESTIONS: EnglishQuestion[] = [
   { id: 290, word: "降りる", correct: "descend", wrong1: "ascend", wrong2: "stay", type: "japanese_to_english" },
 ];
 
+// 筋肉クイズ用の型定義
+type MuscleQuestion = {
+  id: number;
+  question: string;
+  correct: string;
+  wrong1: string;
+  wrong2: string;
+};
+
+// 筋肉クイズのデータ（100問）
+const MUSCLE_QUESTIONS: MuscleQuestion[] = [
+  { id: 1, question: "大腿四頭筋", correct: "だいたいしとうきん", wrong1: "だいたいよんとうきん", wrong2: "おおももしとうきん" },
+  { id: 2, question: "僧帽筋の主な機能は？", correct: "肩甲骨を動かす", wrong1: "肘を曲げる", wrong2: "股関節を伸ばす" },
+  { id: 3, question: "腓腹筋はどこにある？", correct: "ふくらはぎ", wrong1: "太もも", wrong2: "上腕" },
+  { id: 4, question: "上腕二頭筋の主な働きは？", correct: "肘を曲げる", wrong1: "肘を伸ばす", wrong2: "肩を回す" },
+  { id: 5, question: "広背筋", correct: "こうはいきん", wrong1: "ひろせきん", wrong2: "こうせいきん" },
+  { id: 6, question: "大胸筋の主な機能は？", correct: "腕を前に押し出す", wrong1: "腕を後ろに引く", wrong2: "腕を上に上げる" },
+  { id: 7, question: "ハムストリングスはどこの筋肉群？", correct: "太もも裏側", wrong1: "太もも前側", wrong2: "ふくらはぎ" },
+  { id: 8, question: "三角筋", correct: "さんかくきん", wrong1: "みかくきん", wrong2: "さんかどきん" },
+  { id: 9, question: "腹直筋の別名は？", correct: "シックスパック", wrong1: "ツーパック", wrong2: "エイトパック" },
+  { id: 10, question: "大臀筋はどこにある？", correct: "お尻", wrong1: "背中", wrong2: "胸" },
+  { id: 11, question: "上腕三頭筋", correct: "じょうわんさんとうきん", wrong1: "うわうでさんとうきん", wrong2: "じょうわんみつとうきん" },
+  { id: 12, question: "前脛骨筋はどこにある？", correct: "すねの前側", wrong1: "太ももの前側", wrong2: "ふくらはぎ" },
+  { id: 13, question: "大円筋", correct: "だいえんきん", wrong1: "おおまるきん", wrong2: "たいえんきん" },
+  { id: 14, question: "腸腰筋の主な機能は？", correct: "股関節を曲げる", wrong1: "股関節を伸ばす", wrong2: "股関節を開く" },
+  { id: 15, question: "小胸筋はどこにある？", correct: "大胸筋の下", wrong1: "広背筋の下", wrong2: "僧帽筋の下" },
+  { id: 16, question: "菱形筋", correct: "りょうけいきん", wrong1: "ひしがたきん", wrong2: "りょうかくきん" },
+  { id: 17, question: "腓骨筋群はどこにある？", correct: "すねの外側", wrong1: "すねの内側", wrong2: "ふくらはぎの中央" },
+  { id: 18, question: "棘下筋", correct: "きょくかきん", wrong1: "きょっかきん", wrong2: "とげしたきん" },
+  { id: 19, question: "ローテーターカフに含まれない筋肉は？", correct: "三角筋", wrong1: "棘上筋", wrong2: "棘下筋" },
+  { id: 20, question: "内転筋群はどこにある？", correct: "太もも内側", wrong1: "太もも外側", wrong2: "太もも前側" },
+  { id: 21, question: "前鋸筋", correct: "ぜんきょきん", wrong1: "まえのこきん", wrong2: "ぜんきゅうきん" },
+  { id: 22, question: "ヒラメ筋はどこにある？", correct: "ふくらはぎ深層", wrong1: "ふくらはぎ表層", wrong2: "太もも裏側" },
+  { id: 23, question: "外腹斜筋", correct: "がいふくしゃきん", wrong1: "そとはらななめきん", wrong2: "がいはらしゃきん" },
+  { id: 24, question: "大腿筋膜張筋の主な機能は？", correct: "股関節を外転させる", wrong1: "股関節を内転させる", wrong2: "膝を曲げる" },
+  { id: 25, question: "肩甲挙筋", correct: "けんこうきょきん", wrong1: "かたこうあげきん", wrong2: "けんこうきゃくきん" },
+  { id: 26, question: "中臀筋はどこにある？", correct: "お尻の側面", wrong1: "お尻の中央", wrong2: "太ももの側面" },
+  { id: 27, question: "烏口腕筋", correct: "うこうわんきん", wrong1: "からすぐちうできん", wrong2: "うこううできん" },
+  { id: 28, question: "下腿三頭筋に含まれない筋肉は？", correct: "前脛骨筋", wrong1: "腓腹筋", wrong2: "ヒラメ筋" },
+  { id: 29, question: "腹横筋", correct: "ふくおうきん", wrong1: "はらよこきん", wrong2: "ふくよこきん" },
+  { id: 30, question: "大腿二頭筋はどこにある？", correct: "太もも裏側外側", wrong1: "太もも裏側内側", wrong2: "太もも前側" },
+  { id: 31, question: "棘上筋", correct: "きょくじょうきん", wrong1: "とげうえきん", wrong2: "きょくかみきん" },
+  { id: 32, question: "短腓骨筋の主な機能は？", correct: "足を外側に返す", wrong1: "足を内側に返す", wrong2: "足首を曲げる" },
+  { id: 33, question: "梨状筋", correct: "りじょうきん", wrong1: "なしがたきん", wrong2: "りかたきん" },
+  { id: 34, question: "半腱様筋はどこにある？", correct: "太もも裏側内側", wrong1: "太もも裏側外側", wrong2: "太もも前側内側" },
+  { id: 35, question: "小円筋", correct: "しょうえんきん", wrong1: "こまるきん", wrong2: "しょうまるきん" },
+  { id: 36, question: "長掌筋の主な機能は？", correct: "手首を曲げる", wrong1: "手首を伸ばす", wrong2: "指を曲げる" },
+  { id: 37, question: "肩甲下筋", correct: "けんこうかきん", wrong1: "かたこうしたきん", wrong2: "けんこうげきん" },
+  { id: 38, question: "縫工筋の形は？", correct: "人体最長の筋肉", wrong1: "人体最短の筋肉", wrong2: "人体最太の筋肉" },
+  { id: 39, question: "内腹斜筋", correct: "ないふくしゃきん", wrong1: "うちはらななめきん", wrong2: "ないはらしゃきん" },
+  { id: 40, question: "腸骨筋はどこにある？", correct: "骨盤の内側", wrong1: "骨盤の外側", wrong2: "腰の後ろ" },
+  { id: 41, question: "多裂筋", correct: "たれつきん", wrong1: "たさくきん", wrong2: "おおさけきん" },
+  { id: 42, question: "半膜様筋の主な機能は？", correct: "膝を曲げる", wrong1: "膝を伸ばす", wrong2: "股関節を曲げる" },
+  { id: 43, question: "回旋筋腱板に含まれる筋肉の数は？", correct: "4つ", wrong1: "3つ", wrong2: "5つ" },
+  { id: 44, question: "大腰筋", correct: "だいようきん", wrong1: "おおこしきん", wrong2: "たいようきん" },
+  { id: 45, question: "腓腹筋の起始は？", correct: "大腿骨内側顆と外側顆", wrong1: "脛骨", wrong2: "腓骨" },
+  { id: 46, question: "長橈側手根伸筋", correct: "ちょうとうそくしゅこんしんきん", wrong1: "ながとうがわてこんのばしきん", wrong2: "ちょうきょうそくしゅこんしんきん" },
+  { id: 47, question: "深指屈筋はどの指を曲げる？", correct: "2-5指のDIP関節", wrong1: "1-5指のMP関節", wrong2: "2-5指のPIP関節" },
+  { id: 48, question: "上後鋸筋", correct: "じょうこうきょきん", wrong1: "うえうしろのこきん", wrong2: "じょうごきょきん" },
+  { id: 49, question: "恥骨筋の主な機能は？", correct: "股関節を内転させる", wrong1: "股関節を外転させる", wrong2: "股関節を伸ばす" },
+  { id: 50, question: "浅指屈筋", correct: "せんしくっきん", wrong1: "あさゆびまげきん", wrong2: "せんゆびくっきん" },
+  { id: 51, question: "外側広筋はどこにある？", correct: "太もも前側外側", wrong1: "太もも前側内側", wrong2: "太もも裏側外側" },
+  { id: 52, question: "小菱形筋", correct: "しょうりょうけいきん", wrong1: "こひしがたきん", wrong2: "しょうりょうかくきん" },
+  { id: 53, question: "長母指外転筋の主な機能は？", correct: "母指を外転させる", wrong1: "母指を内転させる", wrong2: "母指を伸ばす" },
+  { id: 54, question: "方形回内筋", correct: "ほうけいかいないきん", wrong1: "しかくまわしうちきん", wrong2: "ほうかくかいないきん" },
+  { id: 55, question: "長腓骨筋の停止は？", correct: "第1中足骨", wrong1: "踵骨", wrong2: "第5中足骨" },
+  { id: 56, question: "尺側手根屈筋", correct: "しゃくそくしゅこんくっきん", wrong1: "しゃくがわてこんまげきん", wrong2: "ちょくそくしゅこんくっきん" },
+  { id: 57, question: "内側広筋はどこにある？", correct: "太もも前側内側", wrong1: "太もも前側外側", wrong2: "太もも裏側内側" },
+  { id: 58, question: "回外筋", correct: "かいがいきん", wrong1: "まわしそときん", wrong2: "かいそときん" },
+  { id: 59, question: "後脛骨筋の主な機能は？", correct: "足首を底屈させる", wrong1: "足首を背屈させる", wrong2: "足を外がえしする" },
+  { id: 60, question: "円回内筋", correct: "えんかいないきん", wrong1: "まるまわしうちきん", wrong2: "えんまわしないきん" },
+  { id: 61, question: "中間広筋はどこにある？", correct: "太もも前側深層", wrong1: "太もも前側表層", wrong2: "太もも後側深層" },
+  { id: 62, question: "短橈側手根伸筋", correct: "たんとうそくしゅこんしんきん", wrong1: "みじかとうがわてこんのばしきん", wrong2: "たんきょうそくしゅこんしんきん" },
+  { id: 63, question: "長母指屈筋の支配神経は？", correct: "正中神経", wrong1: "尺骨神経", wrong2: "橈骨神経" },
+  { id: 64, question: "大内転筋", correct: "だいないてんきん", wrong1: "おおうちよせきん", wrong2: "たいないてんきん" },
+  { id: 65, question: "第3腓骨筋の主な機能は？", correct: "足首を背屈させる", wrong1: "足首を底屈させる", wrong2: "足を内がえしする" },
+  { id: 66, question: "回内方形筋", correct: "かいないほうけいきん", wrong1: "まわしうちしかくきん", wrong2: "かいうちほうかくきん" },
+  { id: 67, question: "大腿方形筋はどこにある？", correct: "お尻深層", wrong1: "太もも前側", wrong2: "太もも外側" },
+  { id: 68, question: "掌側骨間筋", correct: "しょうそくこっかんきん", wrong1: "てのひらがわほねあいだきん", wrong2: "しょうがわこつかんきん" },
+  { id: 69, question: "長趾屈筋の主な機能は？", correct: "足趾を底屈させる", wrong1: "足趾を背屈させる", wrong2: "足を外がえしする" },
+  { id: 70, question: "背側骨間筋", correct: "はいそくこっかんきん", wrong1: "せながわほねあいだきん", wrong2: "はいがわこつかんきん" },
+  { id: 71, question: "短母指屈筋はどこにある？", correct: "母指球", wrong1: "小指球", wrong2: "手のひら中央" },
+  { id: 72, question: "虫様筋", correct: "ちゅうようきん", wrong1: "むしがたきん", wrong2: "ちゅうるいきん" },
+  { id: 73, question: "短趾屈筋の主な機能は？", correct: "足趾を曲げる", wrong1: "足趾を伸ばす", wrong2: "足趾を開く" },
+  { id: 74, question: "小指対立筋", correct: "しょうしたいりつきん", wrong1: "こゆびむかいあいきん", wrong2: "しょうゆびたいりつきん" },
+  { id: 75, question: "長趾伸筋の支配神経は？", correct: "深腓骨神経", wrong1: "浅腓骨神経", wrong2: "脛骨神経" },
+  { id: 76, question: "母指内転筋", correct: "ぼしないてんきん", wrong1: "おやゆびうちよせきん", wrong2: "ぼゆびないてんきん" },
+  { id: 77, question: "短母指伸筋はどこにある？", correct: "前腕背側", wrong1: "前腕掌側", wrong2: "手背" },
+  { id: 78, question: "短小指屈筋", correct: "たんしょうしくっきん", wrong1: "みじかこゆびまげきん", wrong2: "たんこゆびくっきん" },
+  { id: 79, question: "足底方形筋の主な機能は？", correct: "長趾屈筋を補助", wrong1: "足のアーチを保つ", wrong2: "足趾を伸ばす" },
+  { id: 80, question: "小指外転筋", correct: "しょうしがいてんきん", wrong1: "こゆびそとひらききん", wrong2: "しょうゆびがいてんきん" },
+  { id: 81, question: "長母指伸筋の停止は？", correct: "母指末節骨", wrong1: "母指基節骨", wrong2: "第1中手骨" },
+  { id: 82, question: "母指対立筋", correct: "ぼしたいりつきん", wrong1: "おやゆびむかいあいきん", wrong2: "ぼゆびたいりつきん" },
+  { id: 83, question: "短趾伸筋はどこにある？", correct: "足背", wrong1: "足底", wrong2: "下腿前面" },
+  { id: 84, question: "短母指外転筋", correct: "たんぼしがいてんきん", wrong1: "みじかおやゆびそとひらききん", wrong2: "たんおやゆびがいてんきん" },
+  { id: 85, question: "足底の筋肉は何層構造？", correct: "4層", wrong1: "3層", wrong2: "5層" },
+  { id: 86, question: "母指球筋の数は？", correct: "4つ", wrong1: "3つ", wrong2: "5つ" },
+  { id: 87, question: "長母趾屈筋の支配神経は？", correct: "脛骨神経", wrong1: "深腓骨神経", wrong2: "浅腓骨神経" },
+  { id: 88, question: "小指球筋", correct: "しょうしきゅうきん", wrong1: "こゆびたまきん", wrong2: "しょうゆびきゅうきん" },
+  { id: 89, question: "長母趾伸筋の主な機能は？", correct: "母趾を背屈させる", wrong1: "母趾を底屈させる", wrong2: "母趾を外転させる" },
+  { id: 90, question: "底側骨間筋", correct: "ていそくこっかんきん", wrong1: "そこがわほねあいだきん", wrong2: "ていがわこつかんきん" },
+  { id: 91, question: "短母趾屈筋はどこにある？", correct: "足底第1層", wrong1: "足底第2層", wrong2: "足底第3層" },
+  { id: 92, question: "背側骨間筋（足）の数は？", correct: "4つ", wrong1: "3つ", wrong2: "5つ" },
+  { id: 93, question: "短母趾伸筋の主な機能は？", correct: "母趾を伸ばす", wrong1: "母趾を曲げる", wrong2: "母趾を外転させる" },
+  { id: 94, question: "虫様筋（足）", correct: "ちゅうようきん", wrong1: "むしがたきん", wrong2: "ちゅうるいきん" },
+  { id: 95, question: "母趾内転筋の起始は？", correct: "中足骨底", wrong1: "踵骨", wrong2: "距骨" },
+  { id: 96, question: "短母趾外転筋", correct: "たんぼしがいてんきん", wrong1: "みじかおやゆびそとひらききん", wrong2: "たんおやゆびがいてんきん" },
+  { id: 97, question: "小趾外転筋はどこにある？", correct: "足底外側", wrong1: "足底内側", wrong2: "足背" },
+  { id: 98, question: "足底筋膜の別名は？", correct: "足底腱膜", wrong1: "足底靭帯", wrong2: "足底板" },
+  { id: 99, question: "底側骨間筋（足）の数は？", correct: "3つ", wrong1: "4つ", wrong2: "2つ" },
+  { id: 100, question: "筋肉の収縮様式でないものは？", correct: "動的収縮", wrong1: "等尺性収縮", wrong2: "等張性収縮" },
+  // ボディビルダー向け問題（101-130）
+  { id: 101, question: "ベンチプレスで主に鍛えられる筋肉は？", correct: "大胸筋", wrong1: "広背筋", wrong2: "大腿四頭筋" },
+  { id: 102, question: "デッドリフトで最も重要な筋肉は？", correct: "脊柱起立筋", wrong1: "大胸筋", wrong2: "三角筋" },
+  { id: 103, question: "スクワットのBIG3での別名は？", correct: "キングオブエクササイズ", wrong1: "クイーンオブエクササイズ", wrong2: "プリンスオブエクササイズ" },
+  { id: 104, question: "プロテインの主成分は？", correct: "タンパク質", wrong1: "炭水化物", wrong2: "脂質" },
+  { id: 105, question: "筋肥大に最適な回数は？", correct: "8-12回", wrong1: "1-5回", wrong2: "20-30回" },
+  { id: 106, question: "ラットプルダウンで鍛える部位は？", correct: "広背筋", wrong1: "大胸筋", wrong2: "僧帽筋上部" },
+  { id: 107, question: "バルクアップに必要なカロリー状態は？", correct: "カロリー余剰", wrong1: "カロリー不足", wrong2: "カロリー均衡" },
+  { id: 108, question: "レッグエクステンションで鍛える筋肉は？", correct: "大腿四頭筋", wrong1: "ハムストリングス", wrong2: "大臀筋" },
+  { id: 109, question: "アーノルド・シュワルツェネッガーが7回優勝した大会は？", correct: "ミスターオリンピア", wrong1: "ミスターユニバース", wrong2: "アーノルドクラシック" },
+  { id: 110, question: "カーフレイズで鍛える筋肉は？", correct: "腓腹筋・ヒラメ筋", wrong1: "前脛骨筋", wrong2: "大腿四頭筋" },
+  { id: 111, question: "筋トレ後のゴールデンタイムは？", correct: "30分以内", wrong1: "2時間以内", wrong2: "6時間以内" },
+  { id: 112, question: "ダンベルフライで効く胸の部位は？", correct: "大胸筋外側", wrong1: "大胸筋内側", wrong2: "大胸筋上部" },
+  { id: 113, question: "クレアチンの主な効果は？", correct: "筋力向上", wrong1: "脂肪燃焼", wrong2: "疲労回復" },
+  { id: 114, question: "ショルダープレスで鍛える筋肉は？", correct: "三角筋", wrong1: "僧帽筋", wrong2: "大胸筋" },
+  { id: 115, question: "筋肉痛の正式名称は？", correct: "遅発性筋肉痛", wrong1: "即発性筋肉痛", wrong2: "慢性筋肉痛" },
+  { id: 116, question: "ケーブルクロスオーバーで効く部位は？", correct: "大胸筋内側", wrong1: "大胸筋外側", wrong2: "大胸筋上部" },
+  { id: 117, question: "BCAA に含まれないアミノ酸は？", correct: "グルタミン", wrong1: "バリン", wrong2: "ロイシン" },
+  { id: 118, question: "ハンマーカールで鍛える筋肉は？", correct: "上腕筋", wrong1: "上腕二頭筋短頭", wrong2: "上腕三頭筋" },
+  { id: 119, question: "減量期に重視すべき栄養素は？", correct: "タンパク質", wrong1: "炭水化物", wrong2: "脂質" },
+  { id: 120, question: "レッグカールで鍛える筋肉は？", correct: "ハムストリングス", wrong1: "大腿四頭筋", wrong2: "内転筋群" },
+  { id: 121, question: "コンパウンド種目の特徴は？", correct: "複数関節を使う", wrong1: "単一関節を使う", wrong2: "関節を使わない" },
+  { id: 122, question: "サイドレイズで鍛える三角筋の部位は？", correct: "中部", wrong1: "前部", wrong2: "後部" },
+  { id: 123, question: "筋グリコーゲンの主な貯蔵元は？", correct: "炭水化物", wrong1: "タンパク質", wrong2: "ビタミン" },
+  { id: 124, question: "ケーブルプレスダウンで鍛える筋肉は？", correct: "上腕三頭筋", wrong1: "上腕二頭筋", wrong2: "前腕筋群" },
+  { id: 125, question: "オーバートレーニング症候群の主な症状は？", correct: "慢性疲労", wrong1: "筋肥大", wrong2: "食欲増進" },
+  { id: 126, question: "インクラインベンチプレスで効く胸の部位は？", correct: "大胸筋上部", wrong1: "大胸筋下部", wrong2: "大胸筋中部" },
+  { id: 127, question: "パワーリフティングのBIG3に含まれないのは？", correct: "ショルダープレス", wrong1: "ベンチプレス", wrong2: "デッドリフト" },
+  { id: 128, question: "リバースグリップで鍛えやすい上腕二頭筋の部位は？", correct: "短頭", wrong1: "長頭", wrong2: "上腕筋" },
+  { id: 129, question: "カーボローディングの目的は？", correct: "筋グリコーゲン貯蔵", wrong1: "脂肪燃焼", wrong2: "タンパク質合成" },
+  { id: 130, question: "フレンチプレスで主に鍛える三頭筋の部位は？", correct: "長頭", wrong1: "内側頭", wrong2: "外側頭" },
+];
+
 export default function Home() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const tickerCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -455,6 +599,7 @@ export default function Home() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const nameInputRef = useRef<HTMLInputElement>(null);
   const [showHeaderMenu, setShowHeaderMenu] = useState(false);
+  const [isTestingAnimation, setIsTestingAnimation] = useState(false);
   const [hoveredLinkIndex, setHoveredLinkIndex] = useState<number | null>(null);
   const [highlightedLinkIndex, setHighlightedLinkIndex] = useState<number | null>(null);
   const [showBirthdayCelebration, setShowBirthdayCelebration] = useState(false);
@@ -649,6 +794,7 @@ export default function Home() {
   const [fishQuizConsecutiveCorrect, setFishQuizConsecutiveCorrect] = useState<number>(0);
   const [yojijukugoQuizConsecutiveCorrect, setYojijukugoQuizConsecutiveCorrect] = useState<number>(0);
   const [englishQuizConsecutiveCorrect, setEnglishQuizConsecutiveCorrect] = useState<number>(0);
+  const [muscleQuizConsecutiveCorrect, setMuscleQuizConsecutiveCorrect] = useState<number>(0);
 
   // スロットアニメーション用
   type SlotAnimation = {
@@ -712,6 +858,20 @@ export default function Home() {
     consecutiveCount: number; // 連続正解数
   };
   const [englishQuiz, setEnglishQuiz] = useState<EnglishQuizState | null>(null);
+
+  // 筋肉クイズアニメーション用
+  type MuscleQuizState = {
+    x: number; // スクリーン座標X
+    y: number; // スクリーン座標Y
+    question: MuscleQuestion;
+    choices: string[];
+    state: 'showing' | 'answering' | 'correct' | 'wrong' | 'insufficient_coins';
+    selectedAnswer: string | null;
+    startTime: number;
+    reward: number;
+    consecutiveCount: number; // 連続正解数
+  };
+  const [muscleQuiz, setMuscleQuiz] = useState<MuscleQuizState | null>(null);
 
   // 猫アニメーション用
   type CatAnimation = {
@@ -4029,10 +4189,14 @@ export default function Home() {
           ctx.save();
           ctx.globalAlpha = wave.alpha;
           
-          const gradient = ctx.createLinearGradient(0, wave.offsetY, 0, wave.offsetY + 100);
+          const gradient = ctx.createLinearGradient(0, wave.offsetY, 0, wave.offsetY + 150);
           gradient.addColorStop(0, wave.color);
-          gradient.addColorStop(0.5, 'rgba(0,255,200,0.3)');
-          gradient.addColorStop(1, 'rgba(100,0,255,0.1)');
+          gradient.addColorStop(0.5, 'rgba(100,255,220,0.6)');
+          gradient.addColorStop(1, 'rgba(150,100,255,0.3)');
+          
+          // 発光効果を追加
+          ctx.shadowColor = wave.color;
+          ctx.shadowBlur = 25;
           
           ctx.beginPath();
           for (let x = 0; x < viewW + 50; x += 10) {
@@ -4533,16 +4697,34 @@ export default function Home() {
       anim.birds.forEach(bird => {
         ctx.save();
         ctx.translate(bird.x, bird.y);
-        ctx.fillStyle = '#8b4513';
-        const wing = Math.sin(bird.wingPhase) * 10;
+        
+        // 羽ばたきの動き（滑らかに）
+        const wingFlap = Math.sin(bird.wingPhase) * 8;
+        
+        // 鳥のシルエット（V字型）を描画
+        ctx.strokeStyle = '#2c3e50';
+        ctx.lineWidth = 3;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        
+        // 左の翼
         ctx.beginPath();
         ctx.moveTo(0, 0);
-        ctx.lineTo(-bird.size/2, wing);
-        ctx.lineTo(-bird.size, 0);
-        ctx.moveTo(0, 0);
-        ctx.lineTo(bird.size/2, -wing);
-        ctx.lineTo(bird.size, 0);
+        ctx.quadraticCurveTo(
+          -bird.size * 0.4, -bird.size * 0.3 + wingFlap,
+          -bird.size * 0.8, -bird.size * 0.15 + wingFlap * 0.7
+        );
         ctx.stroke();
+        
+        // 右の翼
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.quadraticCurveTo(
+          bird.size * 0.4, -bird.size * 0.3 - wingFlap,
+          bird.size * 0.8, -bird.size * 0.15 - wingFlap * 0.7
+        );
+        ctx.stroke();
+        
         ctx.restore();
       });
       anim.feathers.forEach(f => {
@@ -4550,8 +4732,10 @@ export default function Home() {
         ctx.translate(f.x, f.y);
         ctx.rotate(f.rotation);
         ctx.globalAlpha = f.opacity;
-        ctx.fillStyle = '#d2691e';
-        ctx.fillRect(-f.size/2, -f.size, f.size, f.size * 2);
+        ctx.fillStyle = '#34495e';
+        ctx.beginPath();
+        ctx.ellipse(0, 0, f.size, f.size * 2, 0, 0, Math.PI * 2);
+        ctx.fill();
         ctx.restore();
       });
     });
@@ -5412,7 +5596,7 @@ export default function Home() {
     if (obj.Animation && obj.Animation.trim()) {
       const anim = obj.Animation.toLowerCase();
       if ([
-        'fireworks', 'sparkle', 'beartrap', 'birthday', 'cherryblossom', 'meteor', 'coin', 'slot', 'fishquiz', 'yojijukugo', 'englishquiz', 'cat',
+        'fireworks', 'sparkle', 'beartrap', 'birthday', 'cherryblossom', 'meteor', 'coin', 'slot', 'fishquiz', 'yojijukugo', 'englishquiz', 'musclequiz', 'cat',
         'balloon', 'aurora', 'butterfly', 'shootingstar', 'autumnleaves', 'snow', 'confetti', 'rainbow', 'rain', 'magiccircle',
         'flame', 'thunder', 'wave', 'wind', 'smoke', 'tornado', 'gem', 'startrail', 'lightparticle', 'spiral',
         'bird', 'ghost', 'bee', 'firefly', 'explosion', 'target', 'anger', 'petal', 'sunflower', 'rose',
@@ -6129,6 +6313,113 @@ export default function Home() {
     }, 800);
   };
 
+  // 筋肉クイズアニメーション開始
+  const startMuscleQuizAnimation = (objOrX: Obj | number, y?: number) => {
+    // コインチェック(10コイン必要)
+    if (totalCoins < 10) {
+      // コイン不足の場合は専用の状態を表示
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+
+      let startX: number, startY: number;
+      if (typeof objOrX === 'number' && y !== undefined) {
+        startX = objOrX;
+        startY = y;
+      } else if (typeof objOrX === 'object') {
+        const rect = canvas.getBoundingClientRect();
+        const gridX = (objOrX.x || 0) + Math.floor((objOrX.w || 1) / 2);
+        const gridY = (objOrX.y || 0) + Math.floor((objOrX.h || 1) / 2);
+        startX = (gridX - cam.tx) * cam.scale + rect.width / 2;
+        startY = (gridY - cam.ty) * cam.scale + rect.height / 2;
+      } else {
+        return;
+      }
+
+      setMuscleQuiz({
+        x: startX,
+        y: startY,
+        question: MUSCLE_QUESTIONS[0], // ダミー
+        choices: [],
+        state: 'insufficient_coins',
+        selectedAnswer: null,
+        startTime: Date.now(),
+        reward: 0,
+        consecutiveCount: muscleQuizConsecutiveCorrect,
+      });
+      return;
+    }
+
+    // コインを10枚消費
+    const newTotal = totalCoins - 10;
+    setTotalCoins(newTotal);
+    localStorage.setItem('totalCoins', newTotal.toString());
+
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    let startX: number, startY: number;
+    if (typeof objOrX === 'number' && y !== undefined) {
+      startX = objOrX;
+      startY = y;
+    } else if (typeof objOrX === 'object') {
+      const rect = canvas.getBoundingClientRect();
+      const gridX = (objOrX.x || 0) + Math.floor((objOrX.w || 1) / 2);
+      const gridY = (objOrX.y || 0) + Math.floor((objOrX.h || 1) / 2);
+      startX = (gridX - cam.tx) * cam.scale + rect.width / 2;
+      startY = (gridY - cam.ty) * cam.scale + rect.height / 2;
+    } else {
+      return;
+    }
+
+    // localStorage から履歴を取得
+    const asked = new Set(
+      JSON.parse(localStorage.getItem("muscleQuizAsked") || "[]")
+    );
+    const wrong = new Set(
+      JSON.parse(localStorage.getItem("muscleQuizWrong") || "[]")
+    );
+
+    // 未出題の問題を優先、なければ間違えた問題、全て正解していたらリセット
+    const unasked = MUSCLE_QUESTIONS.filter((q) => !asked.has(q.id));
+    const wrongQuestions = MUSCLE_QUESTIONS.filter((q) => wrong.has(q.id));
+
+    let pool: typeof MUSCLE_QUESTIONS = [];
+    if (unasked.length > 0) {
+      pool = unasked;
+    } else if (wrongQuestions.length > 0) {
+      pool = wrongQuestions;
+    } else {
+      // 全問正解したのでリセット
+      localStorage.removeItem("muscleQuizAsked");
+      localStorage.removeItem("muscleQuizWrong");
+      pool = MUSCLE_QUESTIONS;
+    }
+
+    // ランダムに問題を選択
+    const randomQuestion = pool[Math.floor(Math.random() * pool.length)];
+    
+    // 選択肢をシャッフル
+    const shuffledChoices = [randomQuestion.correct, randomQuestion.wrong1, randomQuestion.wrong2]
+      .sort(() => Math.random() - 0.5);
+
+    setMuscleQuiz({
+      x: startX,
+      y: startY,
+      question: randomQuestion,
+      choices: shuffledChoices,
+      state: 'showing',
+      selectedAnswer: null,
+      startTime: Date.now(),
+      reward: 0,
+      consecutiveCount: muscleQuizConsecutiveCorrect,
+    });
+
+    // 0.8秒後に回答モードに
+    setTimeout(() => {
+      setMuscleQuiz(prev => prev ? { ...prev, state: 'answering' } : null);
+    }, 800);
+  };
+
   // バルーンアニメーション開始
   const startBalloonAnimation = (x: number, y: number) => {
     const balloons: BalloonAnimation['balloons'] = [];
@@ -6152,7 +6443,7 @@ export default function Home() {
   // オーロラアニメーション開始
   const startAuroraAnimation = () => {
     const waves: AuroraAnimation['waves'] = [];
-    const colors = ['rgba(0,255,150,0.5)', 'rgba(100,200,255,0.5)', 'rgba(200,100,255,0.5)'];
+    const colors = ['rgba(0,255,180,0.8)', 'rgba(80,180,255,0.8)', 'rgba(200,100,255,0.8)'];
     for (let i = 0; i < 3; i++) {
       waves.push({
         offsetY: 50 + i * 30,
@@ -6161,10 +6452,10 @@ export default function Home() {
         speed: 0.02 + Math.random() * 0.01,
         phase: Math.random() * Math.PI * 2,
         color: colors[i],
-        alpha: 0.7,
+        alpha: 0.85,
       });
     }
-    setAuroraAnimations(prev => [...prev, { waves, startTime: Date.now(), life: 10 }]);
+    setAuroraAnimations(prev => [...prev, { waves, startTime: Date.now(), life: 30 }]);
   };
 
   // 蝶々アニメーション開始
@@ -6575,9 +6866,9 @@ export default function Home() {
     const birds: BirdAnimation['birds'] = [];
     for (let i = 0; i < count; i++) {
       birds.push({
-        x: -50, y: Math.random() * rect.height * 0.5,
-        vx: Math.random() * 2 + 2, vy: (Math.random() - 0.5) * 0.5,
-        size: Math.random() * 15 + 10, wingPhase: Math.random() * Math.PI * 2,
+        x: -50, y: 100 + Math.random() * (rect.height * 0.3),
+        vx: 3 + Math.random() * 1.5, vy: (Math.random() - 0.5) * 0.3,
+        size: 20 + Math.random() * 10, wingPhase: Math.random() * Math.PI * 2,
         rotation: 0, life: 10,
       });
     }
@@ -9206,7 +9497,7 @@ export default function Home() {
       let actualAnimationType = animationType;
       if (animationType === 'random') {
         const allAnimations = [
-          'fireworks', 'sparkle', 'beartrap', 'birthday', 'cherryblossom', 'meteor', 'coin', 'slot', 'fishquiz', 'yojijukugo', 'englishquiz', 'cat',
+          'fireworks', 'sparkle', 'beartrap', 'birthday', 'cherryblossom', 'meteor', 'coin', 'slot', 'fishquiz', 'yojijukugo', 'englishquiz', 'musclequiz', 'cat',
           'balloon', 'aurora', 'butterfly', 'shootingstar', 'autumnleaves', 'snow', 'confetti', 'rainbow', 'rain', 'magiccircle',
           'flame', 'thunder', 'wave', 'wind', 'smoke', 'tornado', 'gem', 'startrail', 'lightparticle', 'spiral',
           'bird', 'ghost', 'bee', 'firefly', 'explosion', 'target', 'anger', 'petal', 'sunflower', 'rose'
@@ -9259,6 +9550,10 @@ export default function Home() {
       } else if (actualAnimationType === 'englishquiz') {
         // 英単語クイズアニメーション
         startEnglishQuizAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'musclequiz') {
+        // 筋肉クイズアニメーション
+        startMuscleQuizAnimation(hit);
         setSelectedId(hit?.id ? String(hit.id) : null);
       } else if (actualAnimationType === 'cat') {
         // 猫アニメーション：画面内に見えている都市をターゲットに
@@ -11891,7 +12186,7 @@ export default function Home() {
       </div>
 
       {/* 編集ダイアログ */}
-      {editingObject && (
+      {editingObject && !isTestingAnimation && (
         <div
           style={{
             position: "fixed",
@@ -12545,22 +12840,23 @@ export default function Home() {
                     <label style={{ display: "block", marginBottom: 6, fontSize: 13, fontWeight: 600, color: "#374151", userSelect: "none" }}>
                       アニメーション
                     </label>
-                    <select
-                      value={editingObject.Animation || ""}
-                      onChange={(e) => setEditingObject({ ...editingObject, Animation: e.target.value })}
-                      style={{
-                        width: "100%",
-                        padding: "10px 12px",
-                        border: "2px solid #e5e7eb",
-                        borderRadius: 8,
-                        fontSize: 14,
-                        boxSizing: "border-box",
-                        backgroundColor: "white",
-                        color: "#1f2937",
-                        outline: "none",
-                        cursor: "pointer",
-                      }}
-                    >
+                    <div style={{ display: "flex", gap: "8px" }}>
+                      <select
+                        value={editingObject.Animation || ""}
+                        onChange={(e) => setEditingObject({ ...editingObject, Animation: e.target.value })}
+                        style={{
+                          flex: 1,
+                          padding: "10px 12px",
+                          border: "2px solid #e5e7eb",
+                          borderRadius: 8,
+                          fontSize: 14,
+                          boxSizing: "border-box",
+                          backgroundColor: "white",
+                          color: "#1f2937",
+                          outline: "none",
+                          cursor: "pointer",
+                        }}
+                      >
                       <option value="">なし</option>
                       <option value="random">🎲 ランダム</option>
                       <option value="fireworks">🎆 花火</option>
@@ -12574,6 +12870,7 @@ export default function Home() {
                       <option value="fishquiz">🐟 魚クイズ</option>
                       <option value="yojijukugo">🔤 四字熟語クイズ</option>
                       <option value="englishquiz">📖 英単語クイズ</option>
+                      <option value="musclequiz">💪 筋肉クイズ</option>
                       <option value="cat">🐱 猫</option>
                       <option value="balloon">🎈 バルーン</option>
                       <option value="aurora">💫 オーロラ</option>
@@ -12606,6 +12903,138 @@ export default function Home() {
                       <option value="sunflower">🌻 ひまわり</option>
                       <option value="rose">🌹 バラ</option>
                     </select>
+                    <button
+                      onClick={() => {
+                        if (!editingObject.Animation || editingObject.Animation === '') {
+                          alert('アニメーションを選択してください');
+                          return;
+                        }
+                        
+                        // モーダルを一時的に隠す
+                        setIsTestingAnimation(true);
+                        
+                        const canvas = canvasRef.current;
+                        if (!canvas) {
+                          setIsTestingAnimation(false);
+                          return;
+                        }
+                        const rect = canvas.getBoundingClientRect();
+                        const centerX = rect.width / 2;
+                        const centerY = rect.height / 2;
+                        const animType = editingObject.Animation.toLowerCase();
+                        
+                        // クイズ系とスロットはマップ中央で起動
+                        if (['fishquiz', 'yojijukugo', 'englishquiz', 'musclequiz', 'slot'].includes(animType)) {
+                          if (animType === 'fishquiz') startFishQuizAnimation(centerX, centerY);
+                          else if (animType === 'yojijukugo') startYojijukugoAnimation(centerX, centerY);
+                          else if (animType === 'englishquiz') startEnglishQuizAnimation(centerX, centerY);
+                          else if (animType === 'musclequiz') startMuscleQuizAnimation(centerX, centerY);
+                          else if (animType === 'slot') startSlotAnimation(centerX, centerY);
+                          // クイズ・スロットは自動的にモーダルを閉じる（別のUIが開くため）
+                          // 5秒後にモーダルを復帰
+                          setTimeout(() => setIsTestingAnimation(false), 5000);
+                        } else {
+                          // 既存のアニメーション開始処理
+                          const tempObj: Obj = {
+                            ...editingObject,
+                            x: editingObject.x !== undefined ? editingObject.x : Math.floor((centerX - rect.width / 2) / cam.scale + cam.tx),
+                            y: editingObject.y !== undefined ? editingObject.y : Math.floor((centerY - rect.height / 2) / cam.scale + cam.ty),
+                            w: editingObject.w !== undefined ? editingObject.w : 1,
+                            h: editingObject.h !== undefined ? editingObject.h : 1,
+                          };
+                          
+                          if (animType === 'fireworks') startFireworksAnimation(tempObj);
+                          else if (animType === 'sparkle') startSparkleAnimation(tempObj);
+                          else if (animType === 'cherryblossom') startCherryBlossomAnimation(tempObj);
+                          else if (animType === 'meteor') startMeteorAnimation(tempObj);
+                          else if (animType === 'coin') startCoinAnimation(tempObj);
+                          else if (animType === 'beartrap') startSoldierAnimation(tempObj);
+                          else if (animType === 'birthday') {
+                            setShowBirthdayCelebration(false);
+                            setTimeout(() => setShowBirthdayCelebration(true), 0);
+                          }
+                          else if (animType === 'cat') {
+                            const targetObjs = objects.filter(o => o.type === 'CITY' && o.id !== editingObject.id);
+                            if (targetObjs.length > 0) {
+                              const target = targetObjs[Math.floor(Math.random() * targetObjs.length)];
+                              startCatAnimation(tempObj, target);
+                            } else {
+                              alert('猫アニメーションのターゲットとなる都市が見つかりません');
+                              setIsTestingAnimation(false);
+                              return;
+                            }
+                          }
+                          else if (animType === 'balloon') startBalloonAnimation(centerX, centerY);
+                          else if (animType === 'aurora') startAuroraAnimation();
+                          else if (animType === 'butterfly') startButterflyAnimation(centerX, centerY);
+                          else if (animType === 'shootingstar') startShootingStarAnimation();
+                          else if (animType === 'autumnleaves') startAutumnLeavesAnimation(centerX, centerY);
+                          else if (animType === 'snow') startSnowAnimation();
+                          else if (animType === 'confetti') startConfettiAnimation(centerX, centerY);
+                          else if (animType === 'rainbow') startRainbowAnimation(centerX, centerY);
+                          else if (animType === 'rain') startRainAnimation();
+                          else if (animType === 'magiccircle') startMagicCircleAnimation(tempObj);
+                          else if (animType === 'flame') startFlameAnimation(tempObj);
+                          else if (animType === 'thunder') startThunderAnimation();
+                          else if (animType === 'wave') startWaveAnimation(tempObj);
+                          else if (animType === 'wind') startWindAnimation();
+                          else if (animType === 'smoke') startSmokeAnimation(tempObj);
+                          else if (animType === 'tornado') startTornadoAnimation(tempObj);
+                          else if (animType === 'gem') startGemAnimation(tempObj);
+                          else if (animType === 'startrail') startStarTrailAnimation(tempObj);
+                          else if (animType === 'lightparticle') startLightParticleAnimation(tempObj);
+                          else if (animType === 'spiral') startSpiralAnimation(tempObj);
+                          else if (animType === 'bird') startBirdAnimation();
+                          else if (animType === 'ghost') startGhostAnimation(tempObj);
+                          else if (animType === 'bee') startBeeAnimation(tempObj);
+                          else if (animType === 'firefly') startFireflyAnimation(tempObj);
+                          else if (animType === 'explosion') startExplosionAnimation(tempObj);
+                          else if (animType === 'target') startTargetAnimation(tempObj);
+                          else if (animType === 'anger') startAngerAnimation(tempObj);
+                          else if (animType === 'petal') startPetalAnimation(tempObj);
+                          else if (animType === 'sunflower') startSunflowerAnimation(tempObj);
+                          else if (animType === 'rose') startRoseAnimation(tempObj);
+                          else if (animType === 'random') {
+                            // ランダムの場合は再度クリック
+                            const allAnims = [
+                              'fireworks', 'sparkle', 'cherryblossom', 'meteor', 'coin',
+                              'balloon', 'aurora', 'butterfly', 'shootingstar', 'autumnleaves',
+                              'snow', 'confetti', 'rainbow', 'rain'
+                            ];
+                            const randomAnim = allAnims[Math.floor(Math.random() * allAnims.length)];
+                            setEditingObject({ ...editingObject, Animation: randomAnim });
+                            setIsTestingAnimation(false);
+                            return;
+                          }
+                          
+                          // 通常のアニメーションは5秒後にモーダルを復帰
+                          setTimeout(() => setIsTestingAnimation(false), 5000);
+                        }
+                      }}
+                      style={{
+                        padding: "10px 16px",
+                        border: "2px solid #3b82f6",
+                        borderRadius: 8,
+                        fontSize: 14,
+                        fontWeight: 600,
+                        backgroundColor: "#3b82f6",
+                        color: "white",
+                        cursor: "pointer",
+                        whiteSpace: "nowrap",
+                        transition: "all 0.2s",
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = "#2563eb";
+                        e.currentTarget.style.borderColor = "#2563eb";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = "#3b82f6";
+                        e.currentTarget.style.borderColor = "#3b82f6";
+                      }}
+                    >
+                      テスト
+                    </button>
+                  </div>
                   </div>
                   
                   {/* X座標 */}
@@ -15283,7 +15712,7 @@ export default function Home() {
                 </button>
                 <div style={{ textAlign: "center", marginBottom: "30px" }}>
                   <div style={{
-                    fontSize: "120px",
+                    fontSize: "80px",
                     fontWeight: "bold",
                     color: "#fff",
                     marginBottom: "15px",
@@ -15564,6 +15993,405 @@ export default function Home() {
                 </button>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* 筋肉クイズUI */}
+      {muscleQuiz && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: "rgba(0,0,0,0.7)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 2000,
+            padding: "20px",
+          }}
+          onClick={() => {
+            if (muscleQuiz.state === 'correct' || muscleQuiz.state === 'wrong') {
+              setMuscleQuiz(null);
+            }
+          }}
+        >
+          <div
+            style={{
+              background: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
+              borderRadius: "20px",
+              padding: "40px",
+              maxWidth: "600px",
+              width: "100%",
+              boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {muscleQuiz.state === 'showing' && (
+              <div style={{ textAlign: "center" }}>
+                <button
+                  onClick={() => {
+                    const refundTotal = totalCoins + 10;
+                    setTotalCoins(refundTotal);
+                    localStorage.setItem('totalCoins', refundTotal.toString());
+                    setMuscleQuiz(null);
+                  }}
+                  style={{
+                    position: "absolute",
+                    top: "10px",
+                    right: "10px",
+                    background: "transparent",
+                    border: "none",
+                    fontSize: "40px",
+                    cursor: "pointer",
+                    color: "rgba(255,255,255,0.7)",
+                    lineHeight: "1",
+                    padding: "5px",
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.color = "white"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.color = "rgba(255,255,255,0.7)"; }}
+                >
+                  ×
+                </button>
+                <div style={{
+                  fontSize: "80px",
+                  color: "white",
+                  marginBottom: "20px",
+                  animation: "pulse 0.8s ease-in-out",
+                }}>
+                  💪
+                </div>
+                <h2 style={{ fontSize: "24px", color: "white" }}>
+                  問題を準備中...
+                </h2>
+              </div>
+            )}
+
+            {muscleQuiz.state === 'answering' && (
+              <div>
+                <button
+                  onClick={() => {
+                    const refundTotal = totalCoins + 10;
+                    setTotalCoins(refundTotal);
+                    localStorage.setItem('totalCoins', refundTotal.toString());
+                    setMuscleQuiz(null);
+                  }}
+                  style={{
+                    position: "absolute",
+                    top: "10px",
+                    right: "10px",
+                    background: "transparent",
+                    border: "none",
+                    fontSize: "40px",
+                    cursor: "pointer",
+                    color: "rgba(255,255,255,0.7)",
+                    lineHeight: "1",
+                    padding: "5px",
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.color = "white"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.color = "rgba(255,255,255,0.7)"; }}
+                >
+                  ×
+                </button>
+                <div style={{ textAlign: "center", marginBottom: "30px" }}>
+                  <div style={{
+                    fontSize: "48px",
+                    fontWeight: "bold",
+                    color: "white",
+                    marginBottom: "15px",
+                  }}>
+                    {muscleQuiz.question.question}
+                  </div>
+                  {muscleQuizConsecutiveCorrect > 0 && (
+                    <div style={{
+                      background: "rgba(255,255,255,0.2)",
+                      padding: "10px",
+                      borderRadius: "8px",
+                      marginTop: "10px",
+                    }}>
+                      <div style={{ fontSize: "14px", color: "white", fontWeight: "bold" }}>
+                        🔥 連続正解中: {muscleQuizConsecutiveCorrect}回
+                      </div>
+                      <div style={{ fontSize: "13px", color: "rgba(255,255,255,0.9)", marginTop: "3px" }}>
+                        次回ボーナス: ×{Math.min(muscleQuizConsecutiveCorrect + 1, 1000)}倍 ({Math.min(muscleQuizConsecutiveCorrect + 1, 1000) * 10}コイン)
+                      </div>
+                    </div>
+                  )}
+                  {muscleQuizConsecutiveCorrect === 0 && (
+                    <div style={{ fontSize: "14px", color: "rgba(255,255,255,0.8)", marginTop: "5px" }}>
+                      正解で ×1倍 (10コイン)！
+                    </div>
+                  )}
+                </div>
+
+                <div style={{ display: "grid", gap: "12px" }}>
+                  {muscleQuiz.choices.map((choice, index) => (
+                    <button
+                      key={index}
+                      onClick={() => {
+                        const isCorrect = choice === muscleQuiz.question.correct;
+                        
+                        if (isCorrect) {
+                          const newConsecutive = muscleQuizConsecutiveCorrect + 1;
+                          const multiplier = Math.min(newConsecutive, 1000);
+                          const reward = 10 * multiplier;
+                          setMuscleQuizConsecutiveCorrect(newConsecutive);
+                          
+                          const newTotal = totalCoins + reward;
+                          setTotalCoins(newTotal);
+                          localStorage.setItem('totalCoins', newTotal.toString());
+
+                          // localStorageに問題IDを記録
+                          const asked = new Set(JSON.parse(localStorage.getItem("muscleQuizAsked") || "[]"));
+                          asked.add(muscleQuiz.question.id);
+                          localStorage.setItem("muscleQuizAsked", JSON.stringify([...asked]));
+
+                          const wrong = new Set(JSON.parse(localStorage.getItem("muscleQuizWrong") || "[]"));
+                          wrong.delete(muscleQuiz.question.id);
+                          localStorage.setItem("muscleQuizWrong", JSON.stringify([...wrong]));
+                          
+                          setMuscleQuiz({
+                            ...muscleQuiz,
+                            selectedAnswer: choice,
+                            state: 'correct',
+                            reward: reward,
+                            consecutiveCount: newConsecutive,
+                          });
+                        } else {
+                          setMuscleQuizConsecutiveCorrect(0);
+
+                          // 間違えた問題をlocalStorageに記録
+                          const wrong = new Set(JSON.parse(localStorage.getItem("muscleQuizWrong") || "[]"));
+                          wrong.add(muscleQuiz.question.id);
+                          localStorage.setItem("muscleQuizWrong", JSON.stringify([...wrong]));
+                          
+                          setMuscleQuiz({
+                            ...muscleQuiz,
+                            selectedAnswer: choice,
+                            state: 'wrong',
+                            reward: 0,
+                            consecutiveCount: 0,
+                          });
+                        }
+                      }}
+                      style={{
+                        padding: "20px",
+                        fontSize: "28px",
+                        fontWeight: "bold",
+                        background: "rgba(255,255,255,0.95)",
+                        border: "3px solid rgba(255,255,255,0.3)",
+                        borderRadius: "12px",
+                        cursor: "pointer",
+                        transition: "all 0.2s",
+                        color: "#000",
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = "scale(1.02)";
+                        e.currentTarget.style.boxShadow = "0 4px 15px rgba(0,0,0,0.15)";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = "scale(1)";
+                        e.currentTarget.style.boxShadow = "none";
+                      }}
+                    >
+                      {choice}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {muscleQuiz.state === 'correct' && (
+              <div style={{ textAlign: "center" }}>
+                <div style={{
+                  fontSize: "100px",
+                  marginBottom: "20px",
+                  animation: "pulse 0.8s ease-in-out infinite",
+                }}>
+                  🎉
+                </div>
+                <div style={{
+                  fontSize: "40px",
+                  fontWeight: "bold",
+                  color: "#fff",
+                  marginBottom: "20px",
+                  animation: "shake 0.5s",
+                }}>
+                  正解！
+                </div>
+                <div style={{
+                  background: "rgba(255,255,255,0.2)",
+                  padding: "15px",
+                  borderRadius: "12px",
+                  marginBottom: "20px",
+                }}>
+                  <div style={{ fontSize: "20px", fontWeight: "bold", color: "#fff", marginBottom: "5px" }}>
+                    💰 +{muscleQuiz.reward} コイン獲得！
+                  </div>
+                  {muscleQuiz.consecutiveCount > 0 && (
+                    <div style={{ fontSize: "16px", color: "#fff" }}>
+                      連続正解 {muscleQuiz.consecutiveCount} 回！
+                    </div>
+                  )}
+                </div>
+                <button
+                  onClick={() => {
+                    setMuscleQuiz(null);
+                    setTimeout(() => {
+                      const canvas = canvasRef.current;
+                      if (canvas) {
+                        const rect = canvas.getBoundingClientRect();
+                        startMuscleQuizAnimation(rect.width / 2, rect.height / 2);
+                      }
+                    }, 100);
+                  }}
+                  style={{
+                    padding: "12px 40px",
+                    fontSize: "18px",
+                    fontWeight: "bold",
+                    background: "rgba(255,255,255,0.9)",
+                    color: "#f5576c",
+                    border: "none",
+                    borderRadius: "50px",
+                    cursor: "pointer",
+                  }}
+                >
+                  次の問題
+                </button>
+              </div>
+            )}
+
+            {muscleQuiz.state === 'wrong' && (
+              <div style={{ textAlign: "center" }}>
+                <div style={{
+                  fontSize: "32px",
+                  fontWeight: "bold",
+                  color: "#fff",
+                  marginBottom: "20px",
+                  animation: "shake 0.5s",
+                }}>
+                  😢 残念！
+                </div>
+                <p style={{ fontSize: "18px", color: "#fff", marginBottom: "10px" }}>
+                  正解は「{muscleQuiz.question.correct}」でした
+                </p>
+                {muscleQuizConsecutiveCorrect > 0 && (
+                  <p style={{ fontSize: "16px", color: "#fff", marginBottom: "15px" }}>
+                    連続正解がリセットされました
+                  </p>
+                )}
+                <button
+                  onClick={() => setMuscleQuiz(null)}
+                  style={{
+                    padding: "12px 40px",
+                    fontSize: "18px",
+                    fontWeight: "bold",
+                    background: "rgba(255,255,255,0.7)",
+                    color: "#000",
+                    border: "none",
+                    borderRadius: "50px",
+                    cursor: "pointer",
+                  }}
+                >
+                  閉じる
+                </button>
+              </div>
+            )}
+
+            {muscleQuiz.state === 'insufficient_coins' && (
+              <div style={{ textAlign: "center" }}>
+                <div style={{
+                  fontSize: "80px",
+                  marginBottom: "20px",
+                }}>
+                  💰
+                </div>
+                <h2 style={{ fontSize: "28px", color: "#fff", marginBottom: "15px" }}>
+                  コインが不足しています
+                </h2>
+                <p style={{ fontSize: "18px", color: "#fff", marginBottom: "20px" }}>
+                  筋肉クイズには10コインが必要です
+                </p>
+                <button
+                  onClick={() => setMuscleQuiz(null)}
+                  style={{
+                    padding: "12px 40px",
+                    fontSize: "18px",
+                    fontWeight: "bold",
+                    background: "rgba(255,255,255,0.9)",
+                    color: "#000",
+                    border: "none",
+                    borderRadius: "50px",
+                    cursor: "pointer",
+                  }}
+                >
+                  閉じる
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* テスト中のインジケーター */}
+      {isTestingAnimation && (
+        <div 
+          onClick={() => setIsTestingAnimation(false)}
+          style={{
+            position: "fixed",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            background: "rgba(0, 0, 0, 0.85)",
+            color: "#fff",
+            padding: "20px 40px",
+            borderRadius: "12px",
+            fontSize: "20px",
+            fontWeight: "bold",
+            zIndex: 999,
+            boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: "8px",
+            animation: "pulse 1.5s infinite",
+            userSelect: "none",
+            cursor: "pointer",
+            transition: "transform 0.2s, background 0.2s",
+            textAlign: "center",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = "rgba(0, 0, 0, 0.95)";
+            e.currentTarget.style.transform = "translate(-50%, -50%) scale(1.05)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = "rgba(0, 0, 0, 0.85)";
+            e.currentTarget.style.transform = "translate(-50%, -50%) scale(1)";
+          }}
+        >
+          <div style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "12px",
+          }}>
+            <div style={{
+              width: "12px",
+              height: "12px",
+              borderRadius: "50%",
+              background: "#4ade80",
+              animation: "blink 1s infinite",
+            }}></div>
+            <div>アニメーションテスト中...</div>
+          </div>
+          <div style={{
+            fontSize: "14px",
+            opacity: 0.8,
+            fontWeight: "normal",
+          }}>
+            （クリックで戻る）
           </div>
         </div>
       )}
