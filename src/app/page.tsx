@@ -14622,6 +14622,7 @@ export default function Home() {
                         borderRadius: "12px",
                         cursor: "pointer",
                         transition: "all 0.2s",
+                        color: "#000",
                       }}
                       onMouseEnter={(e) => {
                         e.currentTarget.style.transform = "scale(1.02)";
