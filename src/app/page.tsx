@@ -14,540 +14,64 @@ import {
   FALLBACK 
 } from './utils';
 
-// 魚クイズ用の問題データ（30問に絞った版）
-type FishQuestion = {
-  id: number;
-  kanji: string;
-  correct: string;
-  wrong1: string;
-  wrong2: string;
-};
+// クイズデータのインポート
+import { FISH_QUESTIONS, type FishQuestion } from './data/fishQuestions';
+import { YOJIJUKUGO_QUESTIONS, type YojijukugoQuestion } from './data/yojijukugoQuestions';
+import { ENGLISH_QUESTIONS, type EnglishQuestion } from './data/englishQuestions';
+import { MUSCLE_QUESTIONS, type MuscleQuestion } from './data/muscleQuestions';
 
-const FISH_QUESTIONS: FishQuestion[] = [
-  { id: 1, kanji: "鯖", correct: "さば", wrong1: "たい", wrong2: "ふぐ" },
-  { id: 2, kanji: "鯛", correct: "たい", wrong1: "さば", wrong2: "かつお" },
-  { id: 3, kanji: "鰯", correct: "いわし", wrong1: "あじ", wrong2: "さんま" },
-  { id: 4, kanji: "鮪", correct: "まぐろ", wrong1: "かつお", wrong2: "ぶり" },
-  { id: 5, kanji: "鰹", correct: "かつお", wrong1: "まぐろ", wrong2: "さば" },
-  { id: 6, kanji: "鮭", correct: "さけ", wrong1: "ます", wrong2: "あゆ" },
-  { id: 7, kanji: "鱒", correct: "ます", wrong1: "さけ", wrong2: "にじます" },
-  { id: 8, kanji: "鮎", correct: "あゆ", wrong1: "さけ", wrong2: "わかさぎ" },
-  { id: 9, kanji: "鰻", correct: "うなぎ", wrong1: "あなご", wrong2: "どじょう" },
-  { id: 10, kanji: "鰈", correct: "かれい", wrong1: "ひらめ", wrong2: "したびらめ" },
-  { id: 11, kanji: "鮃", correct: "ひらめ", wrong1: "かれい", wrong2: "したびらめ" },
-  { id: 12, kanji: "鰆", correct: "さわら", wrong1: "かます", wrong2: "すずき" },
-  { id: 13, kanji: "鯵", correct: "あじ", wrong1: "いわし", wrong2: "さんま" },
-  { id: 14, kanji: "鯉", correct: "こい", wrong1: "ふな", wrong2: "きんぎょ" },
-  { id: 15, kanji: "鱈", correct: "たら", wrong1: "ほっけ", wrong2: "すけとうだら" },
-  { id: 16, kanji: "鰤", correct: "ぶり", wrong1: "かんぱち", wrong2: "ひらまさ" },
-  { id: 17, kanji: "鰊", correct: "にしん", wrong1: "しゃけ", wrong2: "ほっけ" },
-  { id: 18, kanji: "鯨", correct: "くじら", wrong1: "いるか", wrong2: "しゃち" },
-  { id: 19, kanji: "蛸", correct: "たこ", wrong1: "いか", wrong2: "えび" },
-  { id: 20, kanji: "烏賊", correct: "いか", wrong1: "たこ", wrong2: "くらげ" },
-  { id: 21, kanji: "海老", correct: "えび", wrong1: "かに", wrong2: "しゃこ" },
-  { id: 22, kanji: "蟹", correct: "かに", wrong1: "えび", wrong2: "しゃこ" },
-  { id: 23, kanji: "蛤", correct: "はまぐり", wrong1: "あさり", wrong2: "しじみ" },
-  { id: 24, kanji: "蜆", correct: "しじみ", wrong1: "あさり", wrong2: "はまぐり" },
-  { id: 25, kanji: "浅蜊", correct: "あさり", wrong1: "しじみ", wrong2: "はまぐり" },
-  { id: 26, kanji: "牡蠣", correct: "かき", wrong1: "ほたて", wrong2: "あわび" },
-  { id: 27, kanji: "鮑", correct: "あわび", wrong1: "さざえ", wrong2: "とこぶし" },
-  { id: 28, kanji: "海月", correct: "くらげ", wrong1: "いそぎんちゃく", wrong2: "ひとで" },
-  { id: 29, kanji: "海星", correct: "ひとで", wrong1: "くらげ", wrong2: "うに" },
-  { id: 30, kanji: "海胆", correct: "うに", wrong1: "くり", wrong2: "ひとで" },
-];
+// クイズUIコンポーネントのインポート
+import FishQuizUI from './components/quizzes/FishQuizUI';
+import YojijukugoQuizUI from './components/quizzes/YojijukugoQuizUI';
+import EnglishQuizUI from './components/quizzes/EnglishQuizUI';
+import MuscleQuizUI from './components/quizzes/MuscleQuizUI';
 
-// 四字熟語クイズ用の問題データ
-type YojijukugoQuestion = {
-  id: number;
-  kanji: string;
-  correct: string;
-  wrong1: string;
-  wrong2: string;
-  meaning: string;
-};
-
-const YOJIJUKUGO_QUESTIONS: YojijukugoQuestion[] = [
-  { id: 1, kanji: "一期一会", correct: "いちごいちえ", wrong1: "いっきいっかい", wrong2: "いっきいちえ", meaning: "一生に一度だけの出会い。その機会を大切にすべきという教え" },
-  { id: 2, kanji: "四面楚歌", correct: "しめんそか", wrong1: "よんめんそか", wrong2: "しめんそうか", meaning: "周囲が敵や反対者ばかりで、孤立無援の状態" },
-  { id: 3, kanji: "一心不乱", correct: "いっしんふらん", wrong1: "いっしんふみだれ", wrong2: "いっしんぶらん", meaning: "一つのことに心を集中して、他のことに心を奪われないこと" },
-  { id: 4, kanji: "七転八起", correct: "しちてんはっき", wrong1: "ななころびやおき", wrong2: "しちてんばっき", meaning: "何度失敗してもくじけずに、奮起すること" },
-  { id: 5, kanji: "温故知新", correct: "おんこちしん", wrong1: "おんこちあたらし", wrong2: "あたたかこちしん", meaning: "古いことを学んで、そこから新しい知識や見解を得ること" },
-  { id: 6, kanji: "諸行無常", correct: "しょぎょうむじょう", wrong1: "しょこうむじょう", wrong2: "もろぎょうむじょう", meaning: "この世のすべてのものは常に変化して、永遠不変なものはないということ" },
-  { id: 7, kanji: "因果応報", correct: "いんがおうほう", wrong1: "いんかおうほう", wrong2: "いんがおうぼう", meaning: "善い行いには善い報い、悪い行いには悪い報いがあるということ" },
-  { id: 8, kanji: "自業自得", correct: "じごうじとく", wrong1: "じぎょうじとく", wrong2: "じごうじえ", meaning: "自分の行いの報いを自分自身が受けること" },
-  { id: 9, kanji: "弱肉強食", correct: "じゃくにくきょうしょく", wrong1: "よわにくつよしょく", wrong2: "じゃくにくごうしょく", meaning: "弱い者が強い者の餌食になること。力の強い者が弱い者を支配する社会" },
-  { id: 10, kanji: "以心伝心", correct: "いしんでんしん", wrong1: "いこころつたえこころ", wrong2: "もっていしんでんしん", meaning: "言葉を使わなくても、心から心へ通じ合うこと" },
-  { id: 11, kanji: "十人十色", correct: "じゅうにんといろ", wrong1: "じゅうにんじゅっしょく", wrong2: "とおにんといろ", meaning: "人はそれぞれ考え方や好みが違うということ" },
-  { id: 12, kanji: "百発百中", correct: "ひゃっぱつひゃくちゅう", wrong1: "ひゃくはつひゃくちゅう", wrong2: "ひゃっぱつももちゅう", meaning: "何度やっても必ず成功すること。予想や計画が必ず当たること" },
-  { id: 13, kanji: "異口同音", correct: "いくどうおん", wrong1: "いこうどうおん", wrong2: "ことなりくちどうおん", meaning: "多くの人が同じことを言うこと。意見が一致すること" },
-  { id: 14, kanji: "臨機応変", correct: "りんきおうへん", wrong1: "のぞむききおうへん", wrong2: "りんきおうべん", meaning: "その場その場の状況に応じて、適切な処置をとること" },
-  { id: 15, kanji: "試行錯誤", correct: "しこうさくご", wrong1: "しぎょうさくご", wrong2: "ためしこうさくご", meaning: "新しいことを試みる際、失敗を繰り返しながら解決策を見出すこと" },
-  { id: 16, kanji: "適材適所", correct: "てきざいてきしょ", wrong1: "てきざいてきところ", wrong2: "かなうざいてきしょ", meaning: "その人の能力や性質に合った地位や任務につけること" },
-  { id: 17, kanji: "意気投合", correct: "いきとうごう", wrong1: "いきなげあう", wrong2: "おもういきとうごう", meaning: "互いの気持ちや考えがぴったり合うこと" },
-  { id: 18, kanji: "質実剛健", correct: "しつじつごうけん", wrong1: "しちじつごうけん", wrong2: "しつみごうけん", meaning: "飾り気がなく真面目で、心身ともに強くたくましいこと" },
-  { id: 19, kanji: "率先垂範", correct: "そっせんすいはん", wrong1: "りっせんすいはん", wrong2: "そっせんたれはん", meaning: "人の先頭に立ち、自ら模範を示すこと" },
-  { id: 20, kanji: "切磋琢磨", correct: "せっさたくま", wrong1: "せっさたくみがく", wrong2: "きりみがきたくま", meaning: "学問や人格を磨くため、互いに励まし合い競い合うこと" },
-  { id: 21, kanji: "朝令暮改", correct: "ちょうれいぼかい", wrong1: "あされいゆうがいかい", wrong2: "ちょうれいくれかい", meaning: "命令や方針が頻繁に変わり、一定しないこと" },
-  { id: 22, kanji: "有言実行", correct: "ゆうげんじっこう", wrong1: "ゆうげんじつぎょう", wrong2: "ありことじっこう", meaning: "口に出したことは必ず実行すること" },
-  { id: 23, kanji: "前代未聞", correct: "ぜんだいみもん", wrong1: "まえだいみもん", wrong2: "ぜんだいみみず", meaning: "今まで一度も聞いたことがないほど珍しいこと" },
-  { id: 24, kanji: "危機一髪", correct: "ききいっぱつ", wrong1: "ききいちはつ", wrong2: "ききひとつかみ", meaning: "非常に危険な瀬戸際のこと" },
-  { id: 25, kanji: "絶体絶命", correct: "ぜったいぜつめい", wrong1: "ぜったいぜつみょう", wrong2: "ぜつたいぜつめい", meaning: "逃げ道がなく、絶望的な状況のこと" },
-  { id: 26, kanji: "神出鬼没", correct: "しんしゅつきぼつ", wrong1: "かみでおになし", wrong2: "しんしゅっきぼつ", meaning: "出没が予測できず、行動が自由自在なこと" },
-  { id: 27, kanji: "天真爛漫", correct: "てんしんらんまん", wrong1: "てんしんらんばん", wrong2: "あまごころらんまん", meaning: "飾り気がなく、純真で明るいこと" },
-  { id: 28, kanji: "傍若無人", correct: "ぼうじゃくぶじん", wrong1: "かたわかわかものぶじん", wrong2: "ぼうじゃくむにん", meaning: "人前を気にせず、勝手気ままに振る舞うこと" },
-  { id: 29, kanji: "優柔不断", correct: "ゆうじゅうふだん", wrong1: "やさしいやわらかふだん", wrong2: "ゆうじゅうぶだん", meaning: "決断力に欠け、ぐずぐずして決められないこと" },
-  { id: 30, kanji: "意味深長", correct: "いみしんちょう", wrong1: "いみふかながい", wrong2: "いみしんなが", meaning: "言葉や行動に深い意味が含まれていること" },
-];
-
-// 英単語クイズ用の問題データ（大学入試レベル）
-type EnglishQuestion = {
-  id: number;
-  word: string;
-  correct: string;
-  wrong1: string;
-  wrong2: string;
-  type: 'english_to_japanese' | 'japanese_to_english'; // 和訳か洋訳か
-};
-
-const ENGLISH_QUESTIONS: EnglishQuestion[] = [
-  // 英→日（150問）
-  { id: 1, word: "abandon", correct: "捨てる", wrong1: "得る", wrong2: "保つ", type: "english_to_japanese" },
-  { id: 2, word: "ability", correct: "能力", wrong1: "責任", wrong2: "機会", type: "english_to_japanese" },
-  { id: 3, word: "absent", correct: "欠席して", wrong1: "出席して", wrong2: "遅刻して", type: "english_to_japanese" },
-  { id: 4, word: "absolute", correct: "絶対的な", wrong1: "相対的な", wrong2: "部分的な", type: "english_to_japanese" },
-  { id: 5, word: "absorb", correct: "吸収する", wrong1: "放出する", wrong2: "反射する", type: "english_to_japanese" },
-  { id: 6, word: "abstract", correct: "抽象的な", wrong1: "具体的な", wrong2: "現実的な", type: "english_to_japanese" },
-  { id: 7, word: "abundant", correct: "豊富な", wrong1: "不足した", wrong2: "普通の", type: "english_to_japanese" },
-  { id: 8, word: "academic", correct: "学問的な", wrong1: "実用的な", wrong2: "娯楽的な", type: "english_to_japanese" },
-  { id: 9, word: "accelerate", correct: "加速する", wrong1: "減速する", wrong2: "停止する", type: "english_to_japanese" },
-  { id: 10, word: "accept", correct: "受け入れる", wrong1: "拒否する", wrong2: "無視する", type: "english_to_japanese" },
-  { id: 11, word: "access", correct: "接近", wrong1: "距離", wrong2: "障害", type: "english_to_japanese" },
-  { id: 12, word: "accompany", correct: "同行する", wrong1: "置き去りにする", wrong2: "先導する", type: "english_to_japanese" },
-  { id: 13, word: "accomplish", correct: "成し遂げる", wrong1: "失敗する", wrong2: "始める", type: "english_to_japanese" },
-  { id: 14, word: "accurate", correct: "正確な", wrong1: "不正確な", wrong2: "曖昧な", type: "english_to_japanese" },
-  { id: 15, word: "achieve", correct: "達成する", wrong1: "諦める", wrong2: "試みる", type: "english_to_japanese" },
-  { id: 16, word: "acknowledge", correct: "認める", wrong1: "否定する", wrong2: "疑う", type: "english_to_japanese" },
-  { id: 17, word: "acquire", correct: "獲得する", wrong1: "失う", wrong2: "放棄する", type: "english_to_japanese" },
-  { id: 18, word: "adapt", correct: "適応する", wrong1: "抵抗する", wrong2: "逃避する", type: "english_to_japanese" },
-  { id: 19, word: "adequate", correct: "十分な", wrong1: "不十分な", wrong2: "過剰な", type: "english_to_japanese" },
-  { id: 20, word: "adjacent", correct: "隣接した", wrong1: "遠い", wrong2: "対向した", type: "english_to_japanese" },
-  { id: 21, word: "adjust", correct: "調整する", wrong1: "固定する", wrong2: "破壊する", type: "english_to_japanese" },
-  { id: 22, word: "admire", correct: "称賛する", wrong1: "軽蔑する", wrong2: "無視する", type: "english_to_japanese" },
-  { id: 23, word: "admit", correct: "認める", wrong1: "否定する", wrong2: "隠す", type: "english_to_japanese" },
-  { id: 24, word: "adopt", correct: "採用する", wrong1: "拒否する", wrong2: "延期する", type: "english_to_japanese" },
-  { id: 25, word: "advance", correct: "前進する", wrong1: "後退する", wrong2: "停止する", type: "english_to_japanese" },
-  { id: 26, word: "advantage", correct: "利点", wrong1: "欠点", wrong2: "中立", type: "english_to_japanese" },
-  { id: 27, word: "affect", correct: "影響を与える", wrong1: "無関係である", wrong2: "保護する", type: "english_to_japanese" },
-  { id: 28, word: "afford", correct: "余裕がある", wrong1: "不足する", wrong2: "拒否する", type: "english_to_japanese" },
-  { id: 29, word: "agriculture", correct: "農業", wrong1: "工業", wrong2: "商業", type: "english_to_japanese" },
-  { id: 30, word: "aim", correct: "目指す", wrong1: "避ける", wrong2: "放棄する", type: "english_to_japanese" },
-  { id: 31, word: "ancient", correct: "古代の", wrong1: "現代の", wrong2: "未来の", type: "english_to_japanese" },
-  { id: 32, word: "announce", correct: "発表する", wrong1: "隠す", wrong2: "延期する", type: "english_to_japanese" },
-  { id: 33, word: "annual", correct: "年1回の", wrong1: "月1回の", wrong2: "日1回の", type: "english_to_japanese" },
-  { id: 34, word: "anxious", correct: "不安な", wrong1: "安心した", wrong2: "無関心な", type: "english_to_japanese" },
-  { id: 35, word: "apparent", correct: "明白な", wrong1: "不明瞭な", wrong2: "隠された", type: "english_to_japanese" },
-  { id: 36, word: "appeal", correct: "訴える", wrong1: "拒否する", wrong2: "命令する", type: "english_to_japanese" },
-  { id: 37, word: "appear", correct: "現れる", wrong1: "消える", wrong2: "隠れる", type: "english_to_japanese" },
-  { id: 38, word: "appreciate", correct: "感謝する", wrong1: "批判する", wrong2: "無視する", type: "english_to_japanese" },
-  { id: 39, word: "approach", correct: "接近する", wrong1: "遠ざかる", wrong2: "停止する", type: "english_to_japanese" },
-  { id: 40, word: "appropriate", correct: "適切な", wrong1: "不適切な", wrong2: "無関係な", type: "english_to_japanese" },
-  { id: 41, word: "approve", correct: "承認する", wrong1: "拒否する", wrong2: "延期する", type: "english_to_japanese" },
-  { id: 42, word: "argue", correct: "議論する", wrong1: "同意する", wrong2: "沈黙する", type: "english_to_japanese" },
-  { id: 43, word: "artificial", correct: "人工的な", wrong1: "天然の", wrong2: "自然な", type: "english_to_japanese" },
-  { id: 44, word: "aspect", correct: "側面", wrong1: "全体", wrong2: "中心", type: "english_to_japanese" },
-  { id: 45, word: "assess", correct: "評価する", wrong1: "無視する", wrong2: "推測する", type: "english_to_japanese" },
-  { id: 46, word: "assign", correct: "割り当てる", wrong1: "回収する", wrong2: "拒否する", type: "english_to_japanese" },
-  { id: 47, word: "assist", correct: "援助する", wrong1: "妨害する", wrong2: "無視する", type: "english_to_japanese" },
-  { id: 48, word: "assume", correct: "仮定する", wrong1: "証明する", wrong2: "否定する", type: "english_to_japanese" },
-  { id: 49, word: "assure", correct: "保証する", wrong1: "疑う", wrong2: "拒否する", type: "english_to_japanese" },
-  { id: 50, word: "attach", correct: "取り付ける", wrong1: "外す", wrong2: "分離する", type: "english_to_japanese" },
-  { id: 51, word: "attempt", correct: "試みる", wrong1: "諦める", wrong2: "拒否する", type: "english_to_japanese" },
-  { id: 52, word: "attitude", correct: "態度", wrong1: "行動", wrong2: "結果", type: "english_to_japanese" },
-  { id: 53, word: "attribute", correct: "特質", wrong1: "欠点", wrong2: "結果", type: "english_to_japanese" },
-  { id: 54, word: "automatic", correct: "自動的な", wrong1: "手動の", wrong2: "意図的な", type: "english_to_japanese" },
-  { id: 55, word: "available", correct: "利用できる", wrong1: "利用不可の", wrong2: "禁止された", type: "english_to_japanese" },
-  { id: 56, word: "avoid", correct: "避ける", wrong1: "直面する", wrong2: "求める", type: "english_to_japanese" },
-  { id: 57, word: "aware", correct: "気づいている", wrong1: "無知な", wrong2: "無関心な", type: "english_to_japanese" },
-  { id: 58, word: "balance", correct: "バランス", wrong1: "不均衡", wrong2: "混乱", type: "english_to_japanese" },
-  { id: 59, word: "barrier", correct: "障壁", wrong1: "入口", wrong2: "通路", type: "english_to_japanese" },
-  { id: 60, word: "beneficial", correct: "有益な", wrong1: "有害な", wrong2: "無益な", type: "english_to_japanese" },
-  { id: 61, word: "benefit", correct: "利益", wrong1: "損失", wrong2: "負担", type: "english_to_japanese" },
-  { id: 62, word: "brief", correct: "短い", wrong1: "長い", wrong2: "永遠の", type: "english_to_japanese" },
-  { id: 63, word: "burden", correct: "負担", wrong1: "利益", wrong2: "喜び", type: "english_to_japanese" },
-  { id: 64, word: "capable", correct: "能力のある", wrong1: "無能な", wrong2: "拒否する", type: "english_to_japanese" },
-  { id: 65, word: "capacity", correct: "容量", wrong1: "空虚", wrong2: "欠如", type: "english_to_japanese" },
-  { id: 66, word: "capture", correct: "捕らえる", wrong1: "解放する", wrong2: "逃がす", type: "english_to_japanese" },
-  { id: 67, word: "catastrophe", correct: "大惨事", wrong1: "成功", wrong2: "幸運", type: "english_to_japanese" },
-  { id: 68, word: "century", correct: "世紀", wrong1: "年", wrong2: "月", type: "english_to_japanese" },
-  { id: 69, word: "challenge", correct: "挑戦", wrong1: "降参", wrong2: "回避", type: "english_to_japanese" },
-  { id: 70, word: "characteristic", correct: "特徴", wrong1: "欠点", wrong2: "平凡", type: "english_to_japanese" },
-  { id: 71, word: "civilization", correct: "文明", wrong1: "野蛮", wrong2: "混沌", type: "english_to_japanese" },
-  { id: 72, word: "claim", correct: "主張する", wrong1: "否定する", wrong2: "質問する", type: "english_to_japanese" },
-  { id: 73, word: "climate", correct: "気候", wrong1: "天気", wrong2: "季節", type: "english_to_japanese" },
-  { id: 74, word: "colleague", correct: "同僚", wrong1: "敵", wrong2: "上司", type: "english_to_japanese" },
-  { id: 75, word: "colony", correct: "植民地", wrong1: "独立国", wrong2: "同盟国", type: "english_to_japanese" },
-  { id: 76, word: "commerce", correct: "商業", wrong1: "農業", wrong2: "工業", type: "english_to_japanese" },
-  { id: 77, word: "commit", correct: "犯す", wrong1: "防ぐ", wrong2: "避ける", type: "english_to_japanese" },
-  { id: 78, word: "communicate", correct: "伝達する", wrong1: "隠す", wrong2: "拒否する", type: "english_to_japanese" },
-  { id: 79, word: "community", correct: "地域社会", wrong1: "個人", wrong2: "国家", type: "english_to_japanese" },
-  { id: 80, word: "compare", correct: "比較する", wrong1: "分離する", wrong2: "無視する", type: "english_to_japanese" },
-  { id: 81, word: "compete", correct: "競争する", wrong1: "協力する", wrong2: "降参する", type: "english_to_japanese" },
-  { id: 82, word: "complain", correct: "不平を言う", wrong1: "賞賛する", wrong2: "感謝する", type: "english_to_japanese" },
-  { id: 83, word: "complex", correct: "複雑な", wrong1: "単純な", wrong2: "明確な", type: "english_to_japanese" },
-  { id: 84, word: "component", correct: "構成要素", wrong1: "全体", wrong2: "結果", type: "english_to_japanese" },
-  { id: 85, word: "compose", correct: "構成する", wrong1: "破壊する", wrong2: "分解する", type: "english_to_japanese" },
-  { id: 86, word: "comprehensive", correct: "包括的な", wrong1: "部分的な", wrong2: "限定的な", type: "english_to_japanese" },
-  { id: 87, word: "concentrate", correct: "集中する", wrong1: "分散する", wrong2: "無視する", type: "english_to_japanese" },
-  { id: 88, word: "concept", correct: "概念", wrong1: "具体", wrong2: "現実", type: "english_to_japanese" },
-  { id: 89, word: "concern", correct: "関心", wrong1: "無関心", wrong2: "嫌悪", type: "english_to_japanese" },
-  { id: 90, word: "conclude", correct: "結論を出す", wrong1: "始める", wrong2: "継続する", type: "english_to_japanese" },
-  { id: 91, word: "concrete", correct: "具体的な", wrong1: "抽象的な", wrong2: "曖昧な", type: "english_to_japanese" },
-  { id: 92, word: "conduct", correct: "行う", wrong1: "中止する", wrong2: "拒否する", type: "english_to_japanese" },
-  { id: 93, word: "conference", correct: "会議", wrong1: "休憩", wrong2: "独白", type: "english_to_japanese" },
-  { id: 94, word: "confine", correct: "制限する", wrong1: "解放する", wrong2: "拡大する", type: "english_to_japanese" },
-  { id: 95, word: "confirm", correct: "確認する", wrong1: "否定する", wrong2: "疑う", type: "english_to_japanese" },
-  { id: 96, word: "conflict", correct: "対立", wrong1: "協調", wrong2: "平和", type: "english_to_japanese" },
-  { id: 97, word: "confront", correct: "直面する", wrong1: "回避する", wrong2: "逃げる", type: "english_to_japanese" },
-  { id: 98, word: "consequence", correct: "結果", wrong1: "原因", wrong2: "過程", type: "english_to_japanese" },
-  { id: 99, word: "conservative", correct: "保守的な", wrong1: "革新的な", wrong2: "急進的な", type: "english_to_japanese" },
-  { id: 100, word: "consider", correct: "考慮する", wrong1: "無視する", wrong2: "拒否する", type: "english_to_japanese" },
-  { id: 101, word: "consistent", correct: "一貫した", wrong1: "矛盾した", wrong2: "変動する", type: "english_to_japanese" },
-  { id: 102, word: "constant", correct: "不変の", wrong1: "変化する", wrong2: "一時的な", type: "english_to_japanese" },
-  { id: 103, word: "constitute", correct: "構成する", wrong1: "破壊する", wrong2: "分解する", type: "english_to_japanese" },
-  { id: 104, word: "construct", correct: "建設する", wrong1: "破壊する", wrong2: "放置する", type: "english_to_japanese" },
-  { id: 105, word: "consume", correct: "消費する", wrong1: "生産する", wrong2: "保存する", type: "english_to_japanese" },
-  { id: 106, word: "contact", correct: "接触", wrong1: "分離", wrong2: "距離", type: "english_to_japanese" },
-  { id: 107, word: "contain", correct: "含む", wrong1: "除外する", wrong2: "拒否する", type: "english_to_japanese" },
-  { id: 108, word: "contemporary", correct: "現代の", wrong1: "古代の", wrong2: "未来の", type: "english_to_japanese" },
-  { id: 109, word: "content", correct: "内容", wrong1: "形式", wrong2: "外観", type: "english_to_japanese" },
-  { id: 110, word: "context", correct: "文脈", wrong1: "内容", wrong2: "形式", type: "english_to_japanese" },
-  { id: 111, word: "contract", correct: "契約", wrong1: "拒否", wrong2: "破棄", type: "english_to_japanese" },
-  { id: 112, word: "contradict", correct: "矛盾する", wrong1: "一致する", wrong2: "支持する", type: "english_to_japanese" },
-  { id: 113, word: "contrary", correct: "反対の", wrong1: "同じ", wrong2: "類似の", type: "english_to_japanese" },
-  { id: 114, word: "contrast", correct: "対照", wrong1: "類似", wrong2: "同一", type: "english_to_japanese" },
-  { id: 115, word: "contribute", correct: "貢献する", wrong1: "妨害する", wrong2: "破壊する", type: "english_to_japanese" },
-  { id: 116, word: "control", correct: "制御する", wrong1: "放置する", wrong2: "解放する", type: "english_to_japanese" },
-  { id: 117, word: "controversial", correct: "議論の余地のある", wrong1: "明白な", wrong2: "確実な", type: "english_to_japanese" },
-  { id: 118, word: "convention", correct: "慣習", wrong1: "革新", wrong2: "違反", type: "english_to_japanese" },
-  { id: 119, word: "convert", correct: "変換する", wrong1: "維持する", wrong2: "固定する", type: "english_to_japanese" },
-  { id: 120, word: "convince", correct: "納得させる", wrong1: "疑わせる", wrong2: "拒否する", type: "english_to_japanese" },
-  { id: 121, word: "cooperate", correct: "協力する", wrong1: "対立する", wrong2: "拒否する", type: "english_to_japanese" },
-  { id: 122, word: "core", correct: "核心", wrong1: "表面", wrong2: "周辺", type: "english_to_japanese" },
-  { id: 123, word: "correspond", correct: "一致する", wrong1: "矛盾する", wrong2: "無関係である", type: "english_to_japanese" },
-  { id: 124, word: "create", correct: "創造する", wrong1: "破壊する", wrong2: "模倣する", type: "english_to_japanese" },
-  { id: 125, word: "crisis", correct: "危機", wrong1: "安定", wrong2: "平和", type: "english_to_japanese" },
-  { id: 126, word: "criterion", correct: "基準", wrong1: "結果", wrong2: "例外", type: "english_to_japanese" },
-  { id: 127, word: "critical", correct: "批判的な", wrong1: "賞賛的な", wrong2: "無関心な", type: "english_to_japanese" },
-  { id: 128, word: "cultivate", correct: "耕す", wrong1: "荒らす", wrong2: "放置する", type: "english_to_japanese" },
-  { id: 129, word: "cultural", correct: "文化的な", wrong1: "自然な", wrong2: "科学的な", type: "english_to_japanese" },
-  { id: 130, word: "curious", correct: "好奇心の強い", wrong1: "無関心な", wrong2: "恐れる", type: "english_to_japanese" },
-  { id: 131, word: "currency", correct: "通貨", wrong1: "商品", wrong2: "サービス", type: "english_to_japanese" },
-  { id: 132, word: "decade", correct: "10年", wrong1: "100年", wrong2: "1年", type: "english_to_japanese" },
-  { id: 133, word: "decline", correct: "衰退する", wrong1: "繁栄する", wrong2: "維持する", type: "english_to_japanese" },
-  { id: 134, word: "decrease", correct: "減少する", wrong1: "増加する", wrong2: "維持する", type: "english_to_japanese" },
-  { id: 135, word: "dedicate", correct: "捧げる", wrong1: "奪う", wrong2: "無視する", type: "english_to_japanese" },
-  { id: 136, word: "defeat", correct: "打ち負かす", wrong1: "勝つ", wrong2: "引き分ける", type: "english_to_japanese" },
-  { id: 137, word: "defend", correct: "守る", wrong1: "攻撃する", wrong2: "逃げる", type: "english_to_japanese" },
-  { id: 138, word: "define", correct: "定義する", wrong1: "曖昧にする", wrong2: "無視する", type: "english_to_japanese" },
-  { id: 139, word: "definite", correct: "明確な", wrong1: "曖昧な", wrong2: "不明な", type: "english_to_japanese" },
-  { id: 140, word: "deliberate", correct: "意図的な", wrong1: "偶然の", wrong2: "無意識の", type: "english_to_japanese" },
-  { id: 141, word: "democracy", correct: "民主主義", wrong1: "独裁", wrong2: "君主制", type: "english_to_japanese" },
-  { id: 142, word: "demonstrate", correct: "実証する", wrong1: "隠す", wrong2: "否定する", type: "english_to_japanese" },
-  { id: 143, word: "deny", correct: "否定する", wrong1: "肯定する", wrong2: "認める", type: "english_to_japanese" },
-  { id: 144, word: "depend", correct: "依存する", wrong1: "独立する", wrong2: "拒否する", type: "english_to_japanese" },
-  { id: 145, word: "derive", correct: "由来する", wrong1: "創造する", wrong2: "破壊する", type: "english_to_japanese" },
-  { id: 146, word: "descend", correct: "降りる", wrong1: "登る", wrong2: "留まる", type: "english_to_japanese" },
-
-  // 日→英（150問）
-  { id: 147, word: "捨てる", correct: "abandon", wrong1: "obtain", wrong2: "keep", type: "japanese_to_english" },
-  { id: 148, word: "能力", correct: "ability", wrong1: "disability", wrong2: "responsibility", type: "japanese_to_english" },
-  { id: 149, word: "欠席して", correct: "absent", wrong1: "present", wrong2: "late", type: "japanese_to_english" },
-  { id: 150, word: "絶対的な", correct: "absolute", wrong1: "relative", wrong2: "partial", type: "japanese_to_english" },
-  { id: 151, word: "吸収する", correct: "absorb", wrong1: "emit", wrong2: "reflect", type: "japanese_to_english" },
-  { id: 152, word: "抽象的な", correct: "abstract", wrong1: "concrete", wrong2: "realistic", type: "japanese_to_english" },
-  { id: 153, word: "豊富な", correct: "abundant", wrong1: "scarce", wrong2: "ordinary", type: "japanese_to_english" },
-  { id: 154, word: "学問的な", correct: "academic", wrong1: "practical", wrong2: "recreational", type: "japanese_to_english" },
-  { id: 155, word: "加速する", correct: "accelerate", wrong1: "decelerate", wrong2: "stop", type: "japanese_to_english" },
-  { id: 156, word: "受け入れる", correct: "accept", wrong1: "reject", wrong2: "ignore", type: "japanese_to_english" },
-  { id: 157, word: "接近", correct: "access", wrong1: "distance", wrong2: "barrier", type: "japanese_to_english" },
-  { id: 158, word: "同行する", correct: "accompany", wrong1: "abandon", wrong2: "lead", type: "japanese_to_english" },
-  { id: 159, word: "成し遂げる", correct: "accomplish", wrong1: "fail", wrong2: "begin", type: "japanese_to_english" },
-  { id: 160, word: "正確な", correct: "accurate", wrong1: "inaccurate", wrong2: "vague", type: "japanese_to_english" },
-  { id: 161, word: "達成する", correct: "achieve", wrong1: "abandon", wrong2: "attempt", type: "japanese_to_english" },
-  { id: 162, word: "認める", correct: "acknowledge", wrong1: "deny", wrong2: "doubt", type: "japanese_to_english" },
-  { id: 163, word: "獲得する", correct: "acquire", wrong1: "lose", wrong2: "abandon", type: "japanese_to_english" },
-  { id: 164, word: "適応する", correct: "adapt", wrong1: "resist", wrong2: "escape", type: "japanese_to_english" },
-  { id: 165, word: "十分な", correct: "adequate", wrong1: "insufficient", wrong2: "excessive", type: "japanese_to_english" },
-  { id: 166, word: "隣接した", correct: "adjacent", wrong1: "distant", wrong2: "opposite", type: "japanese_to_english" },
-  { id: 167, word: "調整する", correct: "adjust", wrong1: "fix", wrong2: "destroy", type: "japanese_to_english" },
-  { id: 168, word: "称賛する", correct: "admire", wrong1: "despise", wrong2: "ignore", type: "japanese_to_english" },
-  { id: 169, word: "採用する", correct: "adopt", wrong1: "reject", wrong2: "postpone", type: "japanese_to_english" },
-  { id: 170, word: "前進する", correct: "advance", wrong1: "retreat", wrong2: "stop", type: "japanese_to_english" },
-  { id: 171, word: "利点", correct: "advantage", wrong1: "disadvantage", wrong2: "neutral", type: "japanese_to_english" },
-  { id: 172, word: "影響を与える", correct: "affect", wrong1: "ignore", wrong2: "protect", type: "japanese_to_english" },
-  { id: 173, word: "余裕がある", correct: "afford", wrong1: "lack", wrong2: "refuse", type: "japanese_to_english" },
-  { id: 174, word: "農業", correct: "agriculture", wrong1: "industry", wrong2: "commerce", type: "japanese_to_english" },
-  { id: 175, word: "目指す", correct: "aim", wrong1: "avoid", wrong2: "abandon", type: "japanese_to_english" },
-  { id: 176, word: "古代の", correct: "ancient", wrong1: "modern", wrong2: "future", type: "japanese_to_english" },
-  { id: 177, word: "発表する", correct: "announce", wrong1: "hide", wrong2: "postpone", type: "japanese_to_english" },
-  { id: 178, word: "年1回の", correct: "annual", wrong1: "monthly", wrong2: "daily", type: "japanese_to_english" },
-  { id: 179, word: "不安な", correct: "anxious", wrong1: "relieved", wrong2: "indifferent", type: "japanese_to_english" },
-  { id: 180, word: "明白な", correct: "apparent", wrong1: "unclear", wrong2: "hidden", type: "japanese_to_english" },
-  { id: 181, word: "訴える", correct: "appeal", wrong1: "refuse", wrong2: "command", type: "japanese_to_english" },
-  { id: 182, word: "現れる", correct: "appear", wrong1: "disappear", wrong2: "hide", type: "japanese_to_english" },
-  { id: 183, word: "感謝する", correct: "appreciate", wrong1: "criticize", wrong2: "ignore", type: "japanese_to_english" },
-  { id: 184, word: "接近する", correct: "approach", wrong1: "retreat", wrong2: "stop", type: "japanese_to_english" },
-  { id: 185, word: "適切な", correct: "appropriate", wrong1: "inappropriate", wrong2: "irrelevant", type: "japanese_to_english" },
-  { id: 186, word: "承認する", correct: "approve", wrong1: "reject", wrong2: "postpone", type: "japanese_to_english" },
-  { id: 187, word: "議論する", correct: "argue", wrong1: "agree", wrong2: "silence", type: "japanese_to_english" },
-  { id: 188, word: "人工的な", correct: "artificial", wrong1: "natural", wrong2: "organic", type: "japanese_to_english" },
-  { id: 189, word: "側面", correct: "aspect", wrong1: "whole", wrong2: "center", type: "japanese_to_english" },
-  { id: 190, word: "評価する", correct: "assess", wrong1: "ignore", wrong2: "guess", type: "japanese_to_english" },
-  { id: 191, word: "割り当てる", correct: "assign", wrong1: "collect", wrong2: "refuse", type: "japanese_to_english" },
-  { id: 192, word: "援助する", correct: "assist", wrong1: "hinder", wrong2: "ignore", type: "japanese_to_english" },
-  { id: 193, word: "仮定する", correct: "assume", wrong1: "prove", wrong2: "deny", type: "japanese_to_english" },
-  { id: 194, word: "保証する", correct: "assure", wrong1: "doubt", wrong2: "refuse", type: "japanese_to_english" },
-  { id: 195, word: "取り付ける", correct: "attach", wrong1: "detach", wrong2: "separate", type: "japanese_to_english" },
-  { id: 196, word: "試みる", correct: "attempt", wrong1: "abandon", wrong2: "refuse", type: "japanese_to_english" },
-  { id: 197, word: "態度", correct: "attitude", wrong1: "action", wrong2: "result", type: "japanese_to_english" },
-  { id: 198, word: "特質", correct: "attribute", wrong1: "defect", wrong2: "result", type: "japanese_to_english" },
-  { id: 199, word: "自動的な", correct: "automatic", wrong1: "manual", wrong2: "intentional", type: "japanese_to_english" },
-  { id: 200, word: "利用できる", correct: "available", wrong1: "unavailable", wrong2: "forbidden", type: "japanese_to_english" },
-  { id: 201, word: "避ける", correct: "avoid", wrong1: "confront", wrong2: "seek", type: "japanese_to_english" },
-  { id: 202, word: "気づいている", correct: "aware", wrong1: "ignorant", wrong2: "indifferent", type: "japanese_to_english" },
-  { id: 203, word: "バランス", correct: "balance", wrong1: "imbalance", wrong2: "chaos", type: "japanese_to_english" },
-  { id: 204, word: "障壁", correct: "barrier", wrong1: "entrance", wrong2: "passage", type: "japanese_to_english" },
-  { id: 205, word: "有益な", correct: "beneficial", wrong1: "harmful", wrong2: "useless", type: "japanese_to_english" },
-  { id: 206, word: "利益", correct: "benefit", wrong1: "loss", wrong2: "burden", type: "japanese_to_english" },
-  { id: 207, word: "短い", correct: "brief", wrong1: "long", wrong2: "eternal", type: "japanese_to_english" },
-  { id: 208, word: "負担", correct: "burden", wrong1: "benefit", wrong2: "joy", type: "japanese_to_english" },
-  { id: 209, word: "能力のある", correct: "capable", wrong1: "incapable", wrong2: "refusing", type: "japanese_to_english" },
-  { id: 210, word: "容量", correct: "capacity", wrong1: "emptiness", wrong2: "lack", type: "japanese_to_english" },
-  { id: 211, word: "捕らえる", correct: "capture", wrong1: "release", wrong2: "free", type: "japanese_to_english" },
-  { id: 212, word: "大惨事", correct: "catastrophe", wrong1: "success", wrong2: "fortune", type: "japanese_to_english" },
-  { id: 213, word: "世紀", correct: "century", wrong1: "year", wrong2: "month", type: "japanese_to_english" },
-  { id: 214, word: "挑戦", correct: "challenge", wrong1: "surrender", wrong2: "avoidance", type: "japanese_to_english" },
-  { id: 215, word: "特徴", correct: "characteristic", wrong1: "defect", wrong2: "mediocrity", type: "japanese_to_english" },
-  { id: 216, word: "文明", correct: "civilization", wrong1: "barbarism", wrong2: "chaos", type: "japanese_to_english" },
-  { id: 217, word: "主張する", correct: "claim", wrong1: "deny", wrong2: "question", type: "japanese_to_english" },
-  { id: 218, word: "気候", correct: "climate", wrong1: "weather", wrong2: "season", type: "japanese_to_english" },
-  { id: 219, word: "同僚", correct: "colleague", wrong1: "enemy", wrong2: "boss", type: "japanese_to_english" },
-  { id: 220, word: "植民地", correct: "colony", wrong1: "independent", wrong2: "alliance", type: "japanese_to_english" },
-  { id: 221, word: "商業", correct: "commerce", wrong1: "agriculture", wrong2: "industry", type: "japanese_to_english" },
-  { id: 222, word: "犯す", correct: "commit", wrong1: "prevent", wrong2: "avoid", type: "japanese_to_english" },
-  { id: 223, word: "伝達する", correct: "communicate", wrong1: "hide", wrong2: "refuse", type: "japanese_to_english" },
-  { id: 224, word: "地域社会", correct: "community", wrong1: "individual", wrong2: "nation", type: "japanese_to_english" },
-  { id: 225, word: "比較する", correct: "compare", wrong1: "separate", wrong2: "ignore", type: "japanese_to_english" },
-  { id: 226, word: "競争する", correct: "compete", wrong1: "cooperate", wrong2: "surrender", type: "japanese_to_english" },
-  { id: 227, word: "不平を言う", correct: "complain", wrong1: "praise", wrong2: "appreciate", type: "japanese_to_english" },
-  { id: 228, word: "複雑な", correct: "complex", wrong1: "simple", wrong2: "clear", type: "japanese_to_english" },
-  { id: 229, word: "構成要素", correct: "component", wrong1: "whole", wrong2: "result", type: "japanese_to_english" },
-  { id: 230, word: "構成する", correct: "compose", wrong1: "destroy", wrong2: "decompose", type: "japanese_to_english" },
-  { id: 231, word: "包括的な", correct: "comprehensive", wrong1: "partial", wrong2: "limited", type: "japanese_to_english" },
-  { id: 232, word: "集中する", correct: "concentrate", wrong1: "disperse", wrong2: "ignore", type: "japanese_to_english" },
-  { id: 233, word: "概念", correct: "concept", wrong1: "concrete", wrong2: "reality", type: "japanese_to_english" },
-  { id: 234, word: "関心", correct: "concern", wrong1: "indifference", wrong2: "aversion", type: "japanese_to_english" },
-  { id: 235, word: "結論を出す", correct: "conclude", wrong1: "begin", wrong2: "continue", type: "japanese_to_english" },
-  { id: 236, word: "具体的な", correct: "concrete", wrong1: "abstract", wrong2: "vague", type: "japanese_to_english" },
-  { id: 237, word: "行う", correct: "conduct", wrong1: "cancel", wrong2: "refuse", type: "japanese_to_english" },
-  { id: 238, word: "会議", correct: "conference", wrong1: "break", wrong2: "monologue", type: "japanese_to_english" },
-  { id: 239, word: "制限する", correct: "confine", wrong1: "release", wrong2: "expand", type: "japanese_to_english" },
-  { id: 240, word: "確認する", correct: "confirm", wrong1: "deny", wrong2: "doubt", type: "japanese_to_english" },
-  { id: 241, word: "対立", correct: "conflict", wrong1: "cooperation", wrong2: "peace", type: "japanese_to_english" },
-  { id: 242, word: "直面する", correct: "confront", wrong1: "avoid", wrong2: "escape", type: "japanese_to_english" },
-  { id: 243, word: "結果", correct: "consequence", wrong1: "cause", wrong2: "process", type: "japanese_to_english" },
-  { id: 244, word: "保守的な", correct: "conservative", wrong1: "progressive", wrong2: "radical", type: "japanese_to_english" },
-  { id: 245, word: "考慮する", correct: "consider", wrong1: "ignore", wrong2: "refuse", type: "japanese_to_english" },
-  { id: 246, word: "一貫した", correct: "consistent", wrong1: "contradictory", wrong2: "variable", type: "japanese_to_english" },
-  { id: 247, word: "不変の", correct: "constant", wrong1: "changing", wrong2: "temporary", type: "japanese_to_english" },
-  { id: 248, word: "建設する", correct: "construct", wrong1: "destroy", wrong2: "abandon", type: "japanese_to_english" },
-  { id: 249, word: "消費する", correct: "consume", wrong1: "produce", wrong2: "preserve", type: "japanese_to_english" },
-  { id: 250, word: "接触", correct: "contact", wrong1: "separation", wrong2: "distance", type: "japanese_to_english" },
-  { id: 251, word: "含む", correct: "contain", wrong1: "exclude", wrong2: "refuse", type: "japanese_to_english" },
-  { id: 252, word: "現代の", correct: "contemporary", wrong1: "ancient", wrong2: "future", type: "japanese_to_english" },
-  { id: 253, word: "内容", correct: "content", wrong1: "form", wrong2: "appearance", type: "japanese_to_english" },
-  { id: 254, word: "文脈", correct: "context", wrong1: "content", wrong2: "form", type: "japanese_to_english" },
-  { id: 255, word: "契約", correct: "contract", wrong1: "refusal", wrong2: "cancellation", type: "japanese_to_english" },
-  { id: 256, word: "矛盾する", correct: "contradict", wrong1: "agree", wrong2: "support", type: "japanese_to_english" },
-  { id: 257, word: "反対の", correct: "contrary", wrong1: "same", wrong2: "similar", type: "japanese_to_english" },
-  { id: 258, word: "対照", correct: "contrast", wrong1: "similarity", wrong2: "identity", type: "japanese_to_english" },
-  { id: 259, word: "貢献する", correct: "contribute", wrong1: "hinder", wrong2: "destroy", type: "japanese_to_english" },
-  { id: 260, word: "制御する", correct: "control", wrong1: "abandon", wrong2: "release", type: "japanese_to_english" },
-  { id: 261, word: "議論の余地のある", correct: "controversial", wrong1: "obvious", wrong2: "certain", type: "japanese_to_english" },
-  { id: 262, word: "慣習", correct: "convention", wrong1: "innovation", wrong2: "violation", type: "japanese_to_english" },
-  { id: 263, word: "変換する", correct: "convert", wrong1: "maintain", wrong2: "fix", type: "japanese_to_english" },
-  { id: 264, word: "納得させる", correct: "convince", wrong1: "doubt", wrong2: "refuse", type: "japanese_to_english" },
-  { id: 265, word: "協力する", correct: "cooperate", wrong1: "oppose", wrong2: "refuse", type: "japanese_to_english" },
-  { id: 266, word: "核心", correct: "core", wrong1: "surface", wrong2: "periphery", type: "japanese_to_english" },
-  { id: 267, word: "一致する", correct: "correspond", wrong1: "contradict", wrong2: "irrelevant", type: "japanese_to_english" },
-  { id: 268, word: "創造する", correct: "create", wrong1: "destroy", wrong2: "imitate", type: "japanese_to_english" },
-  { id: 269, word: "危機", correct: "crisis", wrong1: "stability", wrong2: "peace", type: "japanese_to_english" },
-  { id: 270, word: "基準", correct: "criterion", wrong1: "result", wrong2: "exception", type: "japanese_to_english" },
-  { id: 271, word: "批判的な", correct: "critical", wrong1: "praising", wrong2: "indifferent", type: "japanese_to_english" },
-  { id: 272, word: "耕す", correct: "cultivate", wrong1: "devastate", wrong2: "abandon", type: "japanese_to_english" },
-  { id: 273, word: "文化的な", correct: "cultural", wrong1: "natural", wrong2: "scientific", type: "japanese_to_english" },
-  { id: 274, word: "好奇心の強い", correct: "curious", wrong1: "indifferent", wrong2: "afraid", type: "japanese_to_english" },
-  { id: 275, word: "通貨", correct: "currency", wrong1: "commodity", wrong2: "service", type: "japanese_to_english" },
-  { id: 276, word: "10年", correct: "decade", wrong1: "century", wrong2: "year", type: "japanese_to_english" },
-  { id: 277, word: "衰退する", correct: "decline", wrong1: "prosper", wrong2: "maintain", type: "japanese_to_english" },
-  { id: 278, word: "減少する", correct: "decrease", wrong1: "increase", wrong2: "maintain", type: "japanese_to_english" },
-  { id: 279, word: "捧げる", correct: "dedicate", wrong1: "take", wrong2: "ignore", type: "japanese_to_english" },
-  { id: 280, word: "打ち負かす", correct: "defeat", wrong1: "win", wrong2: "draw", type: "japanese_to_english" },
-  { id: 281, word: "守る", correct: "defend", wrong1: "attack", wrong2: "flee", type: "japanese_to_english" },
-  { id: 282, word: "定義する", correct: "define", wrong1: "obscure", wrong2: "ignore", type: "japanese_to_english" },
-  { id: 283, word: "明確な", correct: "definite", wrong1: "vague", wrong2: "unclear", type: "japanese_to_english" },
-  { id: 284, word: "意図的な", correct: "deliberate", wrong1: "accidental", wrong2: "unconscious", type: "japanese_to_english" },
-  { id: 285, word: "民主主義", correct: "democracy", wrong1: "dictatorship", wrong2: "monarchy", type: "japanese_to_english" },
-  { id: 286, word: "実証する", correct: "demonstrate", wrong1: "hide", wrong2: "deny", type: "japanese_to_english" },
-  { id: 287, word: "否定する", correct: "deny", wrong1: "affirm", wrong2: "admit", type: "japanese_to_english" },
-  { id: 288, word: "依存する", correct: "depend", wrong1: "independent", wrong2: "refuse", type: "japanese_to_english" },
-  { id: 289, word: "由来する", correct: "derive", wrong1: "create", wrong2: "destroy", type: "japanese_to_english" },
-  { id: 290, word: "降りる", correct: "descend", wrong1: "ascend", wrong2: "stay", type: "japanese_to_english" },
-];
-
-// 筋肉クイズ用の型定義
-type MuscleQuestion = {
-  id: number;
-  question: string;
-  correct: string;
-  wrong1: string;
-  wrong2: string;
-};
-
-// 筋肉クイズのデータ（100問）
-const MUSCLE_QUESTIONS: MuscleQuestion[] = [
-  { id: 1, question: "大腿四頭筋", correct: "だいたいしとうきん", wrong1: "だいたいよんとうきん", wrong2: "おおももしとうきん" },
-  { id: 2, question: "僧帽筋の主な機能は？", correct: "肩甲骨を動かす", wrong1: "肘を曲げる", wrong2: "股関節を伸ばす" },
-  { id: 3, question: "腓腹筋はどこにある？", correct: "ふくらはぎ", wrong1: "太もも", wrong2: "上腕" },
-  { id: 4, question: "上腕二頭筋の主な働きは？", correct: "肘を曲げる", wrong1: "肘を伸ばす", wrong2: "肩を回す" },
-  { id: 5, question: "広背筋", correct: "こうはいきん", wrong1: "ひろせきん", wrong2: "こうせいきん" },
-  { id: 6, question: "大胸筋の主な機能は？", correct: "腕を前に押し出す", wrong1: "腕を後ろに引く", wrong2: "腕を上に上げる" },
-  { id: 7, question: "ハムストリングスはどこの筋肉群？", correct: "太もも裏側", wrong1: "太もも前側", wrong2: "ふくらはぎ" },
-  { id: 8, question: "三角筋", correct: "さんかくきん", wrong1: "みかくきん", wrong2: "さんかどきん" },
-  { id: 9, question: "腹直筋の別名は？", correct: "シックスパック", wrong1: "ツーパック", wrong2: "エイトパック" },
-  { id: 10, question: "大臀筋はどこにある？", correct: "お尻", wrong1: "背中", wrong2: "胸" },
-  { id: 11, question: "上腕三頭筋", correct: "じょうわんさんとうきん", wrong1: "うわうでさんとうきん", wrong2: "じょうわんみつとうきん" },
-  { id: 12, question: "前脛骨筋はどこにある？", correct: "すねの前側", wrong1: "太ももの前側", wrong2: "ふくらはぎ" },
-  { id: 13, question: "大円筋", correct: "だいえんきん", wrong1: "おおまるきん", wrong2: "たいえんきん" },
-  { id: 14, question: "腸腰筋の主な機能は？", correct: "股関節を曲げる", wrong1: "股関節を伸ばす", wrong2: "股関節を開く" },
-  { id: 15, question: "小胸筋はどこにある？", correct: "大胸筋の下", wrong1: "広背筋の下", wrong2: "僧帽筋の下" },
-  { id: 16, question: "菱形筋", correct: "りょうけいきん", wrong1: "ひしがたきん", wrong2: "りょうかくきん" },
-  { id: 17, question: "腓骨筋群はどこにある？", correct: "すねの外側", wrong1: "すねの内側", wrong2: "ふくらはぎの中央" },
-  { id: 18, question: "棘下筋", correct: "きょくかきん", wrong1: "きょっかきん", wrong2: "とげしたきん" },
-  { id: 19, question: "ローテーターカフに含まれない筋肉は？", correct: "三角筋", wrong1: "棘上筋", wrong2: "棘下筋" },
-  { id: 20, question: "内転筋群はどこにある？", correct: "太もも内側", wrong1: "太もも外側", wrong2: "太もも前側" },
-  { id: 21, question: "前鋸筋", correct: "ぜんきょきん", wrong1: "まえのこきん", wrong2: "ぜんきゅうきん" },
-  { id: 22, question: "ヒラメ筋はどこにある？", correct: "ふくらはぎ深層", wrong1: "ふくらはぎ表層", wrong2: "太もも裏側" },
-  { id: 23, question: "外腹斜筋", correct: "がいふくしゃきん", wrong1: "そとはらななめきん", wrong2: "がいはらしゃきん" },
-  { id: 24, question: "大腿筋膜張筋の主な機能は？", correct: "股関節を外転させる", wrong1: "股関節を内転させる", wrong2: "膝を曲げる" },
-  { id: 25, question: "肩甲挙筋", correct: "けんこうきょきん", wrong1: "かたこうあげきん", wrong2: "けんこうきゃくきん" },
-  { id: 26, question: "中臀筋はどこにある？", correct: "お尻の側面", wrong1: "お尻の中央", wrong2: "太ももの側面" },
-  { id: 27, question: "烏口腕筋", correct: "うこうわんきん", wrong1: "からすぐちうできん", wrong2: "うこううできん" },
-  { id: 28, question: "下腿三頭筋に含まれない筋肉は？", correct: "前脛骨筋", wrong1: "腓腹筋", wrong2: "ヒラメ筋" },
-  { id: 29, question: "腹横筋", correct: "ふくおうきん", wrong1: "はらよこきん", wrong2: "ふくよこきん" },
-  { id: 30, question: "大腿二頭筋はどこにある？", correct: "太もも裏側外側", wrong1: "太もも裏側内側", wrong2: "太もも前側" },
-  { id: 31, question: "棘上筋", correct: "きょくじょうきん", wrong1: "とげうえきん", wrong2: "きょくかみきん" },
-  { id: 32, question: "短腓骨筋の主な機能は？", correct: "足を外側に返す", wrong1: "足を内側に返す", wrong2: "足首を曲げる" },
-  { id: 33, question: "梨状筋", correct: "りじょうきん", wrong1: "なしがたきん", wrong2: "りかたきん" },
-  { id: 34, question: "半腱様筋はどこにある？", correct: "太もも裏側内側", wrong1: "太もも裏側外側", wrong2: "太もも前側内側" },
-  { id: 35, question: "小円筋", correct: "しょうえんきん", wrong1: "こまるきん", wrong2: "しょうまるきん" },
-  { id: 36, question: "長掌筋の主な機能は？", correct: "手首を曲げる", wrong1: "手首を伸ばす", wrong2: "指を曲げる" },
-  { id: 37, question: "肩甲下筋", correct: "けんこうかきん", wrong1: "かたこうしたきん", wrong2: "けんこうげきん" },
-  { id: 38, question: "縫工筋の形は？", correct: "人体最長の筋肉", wrong1: "人体最短の筋肉", wrong2: "人体最太の筋肉" },
-  { id: 39, question: "内腹斜筋", correct: "ないふくしゃきん", wrong1: "うちはらななめきん", wrong2: "ないはらしゃきん" },
-  { id: 40, question: "腸骨筋はどこにある？", correct: "骨盤の内側", wrong1: "骨盤の外側", wrong2: "腰の後ろ" },
-  { id: 41, question: "多裂筋", correct: "たれつきん", wrong1: "たさくきん", wrong2: "おおさけきん" },
-  { id: 42, question: "半膜様筋の主な機能は？", correct: "膝を曲げる", wrong1: "膝を伸ばす", wrong2: "股関節を曲げる" },
-  { id: 43, question: "回旋筋腱板に含まれる筋肉の数は？", correct: "4つ", wrong1: "3つ", wrong2: "5つ" },
-  { id: 44, question: "大腰筋", correct: "だいようきん", wrong1: "おおこしきん", wrong2: "たいようきん" },
-  { id: 45, question: "腓腹筋の起始は？", correct: "大腿骨内側顆と外側顆", wrong1: "脛骨", wrong2: "腓骨" },
-  { id: 46, question: "長橈側手根伸筋", correct: "ちょうとうそくしゅこんしんきん", wrong1: "ながとうがわてこんのばしきん", wrong2: "ちょうきょうそくしゅこんしんきん" },
-  { id: 47, question: "深指屈筋はどの指を曲げる？", correct: "2-5指のDIP関節", wrong1: "1-5指のMP関節", wrong2: "2-5指のPIP関節" },
-  { id: 48, question: "上後鋸筋", correct: "じょうこうきょきん", wrong1: "うえうしろのこきん", wrong2: "じょうごきょきん" },
-  { id: 49, question: "恥骨筋の主な機能は？", correct: "股関節を内転させる", wrong1: "股関節を外転させる", wrong2: "股関節を伸ばす" },
-  { id: 50, question: "浅指屈筋", correct: "せんしくっきん", wrong1: "あさゆびまげきん", wrong2: "せんゆびくっきん" },
-  { id: 51, question: "外側広筋はどこにある？", correct: "太もも前側外側", wrong1: "太もも前側内側", wrong2: "太もも裏側外側" },
-  { id: 52, question: "小菱形筋", correct: "しょうりょうけいきん", wrong1: "こひしがたきん", wrong2: "しょうりょうかくきん" },
-  { id: 53, question: "長母指外転筋の主な機能は？", correct: "母指を外転させる", wrong1: "母指を内転させる", wrong2: "母指を伸ばす" },
-  { id: 54, question: "方形回内筋", correct: "ほうけいかいないきん", wrong1: "しかくまわしうちきん", wrong2: "ほうかくかいないきん" },
-  { id: 55, question: "長腓骨筋の停止は？", correct: "第1中足骨", wrong1: "踵骨", wrong2: "第5中足骨" },
-  { id: 56, question: "尺側手根屈筋", correct: "しゃくそくしゅこんくっきん", wrong1: "しゃくがわてこんまげきん", wrong2: "ちょくそくしゅこんくっきん" },
-  { id: 57, question: "内側広筋はどこにある？", correct: "太もも前側内側", wrong1: "太もも前側外側", wrong2: "太もも裏側内側" },
-  { id: 58, question: "回外筋", correct: "かいがいきん", wrong1: "まわしそときん", wrong2: "かいそときん" },
-  { id: 59, question: "後脛骨筋の主な機能は？", correct: "足首を底屈させる", wrong1: "足首を背屈させる", wrong2: "足を外がえしする" },
-  { id: 60, question: "円回内筋", correct: "えんかいないきん", wrong1: "まるまわしうちきん", wrong2: "えんまわしないきん" },
-  { id: 61, question: "中間広筋はどこにある？", correct: "太もも前側深層", wrong1: "太もも前側表層", wrong2: "太もも後側深層" },
-  { id: 62, question: "短橈側手根伸筋", correct: "たんとうそくしゅこんしんきん", wrong1: "みじかとうがわてこんのばしきん", wrong2: "たんきょうそくしゅこんしんきん" },
-  { id: 63, question: "長母指屈筋の支配神経は？", correct: "正中神経", wrong1: "尺骨神経", wrong2: "橈骨神経" },
-  { id: 64, question: "大内転筋", correct: "だいないてんきん", wrong1: "おおうちよせきん", wrong2: "たいないてんきん" },
-  { id: 65, question: "第3腓骨筋の主な機能は？", correct: "足首を背屈させる", wrong1: "足首を底屈させる", wrong2: "足を内がえしする" },
-  { id: 66, question: "回内方形筋", correct: "かいないほうけいきん", wrong1: "まわしうちしかくきん", wrong2: "かいうちほうかくきん" },
-  { id: 67, question: "大腿方形筋はどこにある？", correct: "お尻深層", wrong1: "太もも前側", wrong2: "太もも外側" },
-  { id: 68, question: "掌側骨間筋", correct: "しょうそくこっかんきん", wrong1: "てのひらがわほねあいだきん", wrong2: "しょうがわこつかんきん" },
-  { id: 69, question: "長趾屈筋の主な機能は？", correct: "足趾を底屈させる", wrong1: "足趾を背屈させる", wrong2: "足を外がえしする" },
-  { id: 70, question: "背側骨間筋", correct: "はいそくこっかんきん", wrong1: "せながわほねあいだきん", wrong2: "はいがわこつかんきん" },
-  { id: 71, question: "短母指屈筋はどこにある？", correct: "母指球", wrong1: "小指球", wrong2: "手のひら中央" },
-  { id: 72, question: "虫様筋", correct: "ちゅうようきん", wrong1: "むしがたきん", wrong2: "ちゅうるいきん" },
-  { id: 73, question: "短趾屈筋の主な機能は？", correct: "足趾を曲げる", wrong1: "足趾を伸ばす", wrong2: "足趾を開く" },
-  { id: 74, question: "小指対立筋", correct: "しょうしたいりつきん", wrong1: "こゆびむかいあいきん", wrong2: "しょうゆびたいりつきん" },
-  { id: 75, question: "長趾伸筋の支配神経は？", correct: "深腓骨神経", wrong1: "浅腓骨神経", wrong2: "脛骨神経" },
-  { id: 76, question: "母指内転筋", correct: "ぼしないてんきん", wrong1: "おやゆびうちよせきん", wrong2: "ぼゆびないてんきん" },
-  { id: 77, question: "短母指伸筋はどこにある？", correct: "前腕背側", wrong1: "前腕掌側", wrong2: "手背" },
-  { id: 78, question: "短小指屈筋", correct: "たんしょうしくっきん", wrong1: "みじかこゆびまげきん", wrong2: "たんこゆびくっきん" },
-  { id: 79, question: "足底方形筋の主な機能は？", correct: "長趾屈筋を補助", wrong1: "足のアーチを保つ", wrong2: "足趾を伸ばす" },
-  { id: 80, question: "小指外転筋", correct: "しょうしがいてんきん", wrong1: "こゆびそとひらききん", wrong2: "しょうゆびがいてんきん" },
-  { id: 81, question: "長母指伸筋の停止は？", correct: "母指末節骨", wrong1: "母指基節骨", wrong2: "第1中手骨" },
-  { id: 82, question: "母指対立筋", correct: "ぼしたいりつきん", wrong1: "おやゆびむかいあいきん", wrong2: "ぼゆびたいりつきん" },
-  { id: 83, question: "短趾伸筋はどこにある？", correct: "足背", wrong1: "足底", wrong2: "下腿前面" },
-  { id: 84, question: "短母指外転筋", correct: "たんぼしがいてんきん", wrong1: "みじかおやゆびそとひらききん", wrong2: "たんおやゆびがいてんきん" },
-  { id: 85, question: "足底の筋肉は何層構造？", correct: "4層", wrong1: "3層", wrong2: "5層" },
-  { id: 86, question: "母指球筋の数は？", correct: "4つ", wrong1: "3つ", wrong2: "5つ" },
-  { id: 87, question: "長母趾屈筋の支配神経は？", correct: "脛骨神経", wrong1: "深腓骨神経", wrong2: "浅腓骨神経" },
-  { id: 88, question: "小指球筋", correct: "しょうしきゅうきん", wrong1: "こゆびたまきん", wrong2: "しょうゆびきゅうきん" },
-  { id: 89, question: "長母趾伸筋の主な機能は？", correct: "母趾を背屈させる", wrong1: "母趾を底屈させる", wrong2: "母趾を外転させる" },
-  { id: 90, question: "底側骨間筋", correct: "ていそくこっかんきん", wrong1: "そこがわほねあいだきん", wrong2: "ていがわこつかんきん" },
-  { id: 91, question: "短母趾屈筋はどこにある？", correct: "足底第1層", wrong1: "足底第2層", wrong2: "足底第3層" },
-  { id: 92, question: "背側骨間筋（足）の数は？", correct: "4つ", wrong1: "3つ", wrong2: "5つ" },
-  { id: 93, question: "短母趾伸筋の主な機能は？", correct: "母趾を伸ばす", wrong1: "母趾を曲げる", wrong2: "母趾を外転させる" },
-  { id: 94, question: "虫様筋（足）", correct: "ちゅうようきん", wrong1: "むしがたきん", wrong2: "ちゅうるいきん" },
-  { id: 95, question: "母趾内転筋の起始は？", correct: "中足骨底", wrong1: "踵骨", wrong2: "距骨" },
-  { id: 96, question: "短母趾外転筋", correct: "たんぼしがいてんきん", wrong1: "みじかおやゆびそとひらききん", wrong2: "たんおやゆびがいてんきん" },
-  { id: 97, question: "小趾外転筋はどこにある？", correct: "足底外側", wrong1: "足底内側", wrong2: "足背" },
-  { id: 98, question: "足底筋膜の別名は？", correct: "足底腱膜", wrong1: "足底靭帯", wrong2: "足底板" },
-  { id: 99, question: "底側骨間筋（足）の数は？", correct: "3つ", wrong1: "4つ", wrong2: "2つ" },
-  { id: 100, question: "筋肉の収縮様式でないものは？", correct: "動的収縮", wrong1: "等尺性収縮", wrong2: "等張性収縮" },
-  // ボディビルダー向け問題（101-130）
-  { id: 101, question: "ベンチプレスで主に鍛えられる筋肉は？", correct: "大胸筋", wrong1: "広背筋", wrong2: "大腿四頭筋" },
-  { id: 102, question: "デッドリフトで最も重要な筋肉は？", correct: "脊柱起立筋", wrong1: "大胸筋", wrong2: "三角筋" },
-  { id: 103, question: "スクワットのBIG3での別名は？", correct: "キングオブエクササイズ", wrong1: "クイーンオブエクササイズ", wrong2: "プリンスオブエクササイズ" },
-  { id: 104, question: "プロテインの主成分は？", correct: "タンパク質", wrong1: "炭水化物", wrong2: "脂質" },
-  { id: 105, question: "筋肥大に最適な回数は？", correct: "8-12回", wrong1: "1-5回", wrong2: "20-30回" },
-  { id: 106, question: "ラットプルダウンで鍛える部位は？", correct: "広背筋", wrong1: "大胸筋", wrong2: "僧帽筋上部" },
-  { id: 107, question: "バルクアップに必要なカロリー状態は？", correct: "カロリー余剰", wrong1: "カロリー不足", wrong2: "カロリー均衡" },
-  { id: 108, question: "レッグエクステンションで鍛える筋肉は？", correct: "大腿四頭筋", wrong1: "ハムストリングス", wrong2: "大臀筋" },
-  { id: 109, question: "アーノルド・シュワルツェネッガーが7回優勝した大会は？", correct: "ミスターオリンピア", wrong1: "ミスターユニバース", wrong2: "アーノルドクラシック" },
-  { id: 110, question: "カーフレイズで鍛える筋肉は？", correct: "腓腹筋・ヒラメ筋", wrong1: "前脛骨筋", wrong2: "大腿四頭筋" },
-  { id: 111, question: "筋トレ後のゴールデンタイムは？", correct: "30分以内", wrong1: "2時間以内", wrong2: "6時間以内" },
-  { id: 112, question: "ダンベルフライで効く胸の部位は？", correct: "大胸筋外側", wrong1: "大胸筋内側", wrong2: "大胸筋上部" },
-  { id: 113, question: "クレアチンの主な効果は？", correct: "筋力向上", wrong1: "脂肪燃焼", wrong2: "疲労回復" },
-  { id: 114, question: "ショルダープレスで鍛える筋肉は？", correct: "三角筋", wrong1: "僧帽筋", wrong2: "大胸筋" },
-  { id: 115, question: "筋肉痛の正式名称は？", correct: "遅発性筋肉痛", wrong1: "即発性筋肉痛", wrong2: "慢性筋肉痛" },
-  { id: 116, question: "ケーブルクロスオーバーで効く部位は？", correct: "大胸筋内側", wrong1: "大胸筋外側", wrong2: "大胸筋上部" },
-  { id: 117, question: "BCAA に含まれないアミノ酸は？", correct: "グルタミン", wrong1: "バリン", wrong2: "ロイシン" },
-  { id: 118, question: "ハンマーカールで鍛える筋肉は？", correct: "上腕筋", wrong1: "上腕二頭筋短頭", wrong2: "上腕三頭筋" },
-  { id: 119, question: "減量期に重視すべき栄養素は？", correct: "タンパク質", wrong1: "炭水化物", wrong2: "脂質" },
-  { id: 120, question: "レッグカールで鍛える筋肉は？", correct: "ハムストリングス", wrong1: "大腿四頭筋", wrong2: "内転筋群" },
-  { id: 121, question: "コンパウンド種目の特徴は？", correct: "複数関節を使う", wrong1: "単一関節を使う", wrong2: "関節を使わない" },
-  { id: 122, question: "サイドレイズで鍛える三角筋の部位は？", correct: "中部", wrong1: "前部", wrong2: "後部" },
-  { id: 123, question: "筋グリコーゲンの主な貯蔵元は？", correct: "炭水化物", wrong1: "タンパク質", wrong2: "ビタミン" },
-  { id: 124, question: "ケーブルプレスダウンで鍛える筋肉は？", correct: "上腕三頭筋", wrong1: "上腕二頭筋", wrong2: "前腕筋群" },
-  { id: 125, question: "オーバートレーニング症候群の主な症状は？", correct: "慢性疲労", wrong1: "筋肥大", wrong2: "食欲増進" },
-  { id: 126, question: "インクラインベンチプレスで効く胸の部位は？", correct: "大胸筋上部", wrong1: "大胸筋下部", wrong2: "大胸筋中部" },
-  { id: 127, question: "パワーリフティングのBIG3に含まれないのは？", correct: "ショルダープレス", wrong1: "ベンチプレス", wrong2: "デッドリフト" },
-  { id: 128, question: "リバースグリップで鍛えやすい上腕二頭筋の部位は？", correct: "短頭", wrong1: "長頭", wrong2: "上腕筋" },
-  { id: 129, question: "カーボローディングの目的は？", correct: "筋グリコーゲン貯蔵", wrong1: "脂肪燃焼", wrong2: "タンパク質合成" },
-  { id: 130, question: "フレンチプレスで主に鍛える三頭筋の部位は？", correct: "長頭", wrong1: "内側頭", wrong2: "外側頭" },
-];
+// アニメーション型定義のインポート
+import type {
+  Firework,
+  FireworksAnimation,
+  SparkleAnimation,
+  CherryBlossomAnimation,
+  MeteorAnimation,
+  CoinAnimation,
+  SlotAnimation,
+  FishQuizState,
+  YojijukugoState,
+  EnglishQuizState,
+  MuscleQuizState,
+  BalloonAnimation,
+  AuroraAnimation,
+  ButterflyAnimation,
+  ShootingStarAnimation,
+  AutumnLeavesAnimation,
+  SnowAnimation,
+  ConfettiAnimation,
+  RainbowAnimation,
+  RainAnimation,
+  MagicCircleAnimation,
+  FlameAnimation,
+  ThunderAnimation,
+  WaveAnimation,
+  WindAnimation,
+  SmokeAnimation,
+  TornadoAnimation,
+  GemAnimation,
+  StarTrailAnimation,
+  LightParticleAnimation,
+  SpiralAnimation,
+  BirdAnimation,
+  GhostAnimation,
+  BeeAnimation,
+  FireflyAnimation,
+  ExplosionAnimation,
+  TargetAnimation,
+  AngerAnimation,
+  PetalAnimation,
+  SunflowerAnimation,
+  RoseAnimation,
+  SoldierAnimation,
+  CatAnimation
+} from './types/animations';
 
 export default function Home() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -652,142 +176,29 @@ export default function Home() {
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   // 熊罠→兵士アニメーション用
-  type SoldierAnimation = {
-    from: { x: number; y: number; label: string }; // 出発地（都市）
-    to: { x: number; y: number; label: string }; // 目的地（熊罠）
-    progress: number; // 0-1のアニメーション進捗
-    startTime: number; // アニメーション開始時刻
-    randomSeed: number; // ダメージ計算用のランダムシード（固定）
-    totalDamage?: number; // 計算済みの合計ダメージ（固定値）
-    damages?: Array<{ damage: number; isCritical: boolean }>; // 個別ダメージ配列（固定値）
-    recordSaved?: boolean; // 記録保存済みフラグ
-    isNewRecord?: boolean; // 新記録フラグ（表示用）
-    bearIndex?: number; // 使用する熊画像のインデックス（0-8）
-    soldiers: Array<{ // 兵士群（複数の兵士が行進）
-      offsetX: number; // 隊列のオフセット
-      offsetY: number;
-      delay: number; // 出発タイミングのずれ
-      type: 'shield' | 'archer' | 'spear'; // 兵士の種類
-    }>;
-  };
   const [soldierAnimations, setSoldierAnimations] = useState<SoldierAnimation[]>([]);
   const soldierAnimationRef = useRef<number | null>(null);
   const isAnimationStartingRef = useRef<boolean>(false); // アニメーション開始中フラグ
 
   // 花火アニメーション用
-  type Firework = {
-    x: number;
-    y: number;
-    mapX: number; // マップ座標X
-    mapY: number; // マップ座標Y
-    particles: Array<{
-      vx: number;
-      vy: number;
-      life: number;
-      maxLife: number;
-      color: string;
-      x: number;
-      y: number;
-    }>;
-    startTime: number;
-  };
-  const [fireworks, setFireworks] = useState<Firework[]>([]);
+  const [fireworks, setFireworks] = useState<FireworksAnimation[]>([]);
   const fireworksAnimationRef = useRef<number | null>(null);
 
   // キラキラエフェクト用
-  type Sparkle = {
-    x: number;
-    y: number;
-    mapX: number; // マップ座標X
-    mapY: number; // マップ座標Y
-    particles: Array<{
-      offsetX: number;
-      offsetY: number;
-      vx: number; // 速度ベクトルX
-      vy: number; // 速度ベクトルY
-      size: number;
-      rotation: number;
-      life: number;
-      maxLife: number;
-      color: string;
-    }>;
-    startTime: number;
-    targetObj: Obj;
-  };
-  const [sparkles, setSparkles] = useState<Sparkle[]>([]);
+  const [sparkles, setSparkles] = useState<SparkleAnimation[]>([]);
   const sparklesAnimationRef = useRef<number | null>(null);
 
   // 花吹雪アニメーション用
-  type CherryBlossom = {
-    x: number; // スクリーン座標X
-    y: number; // スクリーン座標Y
-    mapX: number; // マップ座標X
-    mapY: number; // マップ座標Y
-    particles: Array<{
-      offsetX: number; // 中心からのオフセットX
-      offsetY: number; // 中心からのオフセットY
-      vx: number; // 速度ベクトルX
-      vy: number; // 速度ベクトルY
-      size: number;
-      rotation: number;
-      life: number;
-      maxLife: number;
-      color: string;
-    }>;
-    startTime: number;
-    targetObj: Obj;
-  };
-  const [cherryBlossoms, setCherryBlossoms] = useState<CherryBlossom[]>([]);
+  const [cherryBlossoms, setCherryBlossoms] = useState<CherryBlossomAnimation[]>([]);
   const cherryBlossomsAnimationRef = useRef<number | null>(null);
 
   // 隕石アニメーション用
-  type Meteor = {
-    x: number; // スクリーン座標X（開始位置）
-    y: number; // スクリーン座標Y（開始位置）
-    meteors: Array<{
-      offsetX: number;
-      offsetY: number;
-      vx: number; // 横方向速度
-      vy: number; // 縦方向速度
-      size: number; // 大きさ（1=大、0.5=小）
-      rotation: number;
-      swayOffset: number; // 揺れのオフセット
-      swaySpeed: number; // 揺れの速度
-      life: number;
-    }>;
-    startTime: number;
-  };
-  const [meteors, setMeteors] = useState<Meteor[]>([]);
+  const [meteors, setMeteors] = useState<MeteorAnimation[]>([]);
   const meteorsAnimationRef = useRef<number | null>(null);
   const meteorImageRef = useRef<HTMLImageElement | null>(null);
 
   // コインアニメーション用
-  type CoinDrop = {
-    x: number; // スクリーン座標X（開始位置）
-    y: number; // スクリーン座標Y（開始位置）
-    coins: Array<{
-      offsetX: number;
-      offsetY: number;
-      vx: number; // 横方向速度
-      vy: number; // 縦方向速度（初速）
-      rotation: number;
-      rotationSpeed: number; // 回転速度
-      rotationAxis: 'x' | 'y' | 'z'; // 回転軸（縦回転、横回転、斜め回転）
-      rotationAngle: number; // 3D回転角度
-      size: number; // 大きさ（1=通常、1.5=大当たり）
-      life: number;
-      isJackpot: boolean; // 大当たりかどうか
-    }>;  
-    startTime: number;
-    totalCoins: number; // このドロップで獲得したコイン枚数
-    textPhysics?: { // 「+N枚」テキストの物理演算
-      x: number;
-      y: number;
-      vx: number;
-      vy: number;
-    };
-  };
-  const [coinDrops, setCoinDrops] = useState<CoinDrop[]>([]);
+  const [coinDrops, setCoinDrops] = useState<CoinAnimation[]>([]);
   const coinDropsAnimationRef = useRef<number | null>(null);
   const coinImageRef = useRef<HTMLImageElement | null>(null);
   const [totalCoins, setTotalCoins] = useState<number>(0);
@@ -797,98 +208,22 @@ export default function Home() {
   const [muscleQuizConsecutiveCorrect, setMuscleQuizConsecutiveCorrect] = useState<number>(0);
 
   // スロットアニメーション用
-  type SlotAnimation = {
-    x: number; // スクリーン座標X
-    y: number; // スクリーン座標Y
-    reels: Array<{
-      symbols: string[]; // 絵柄配列
-      offset: number; // リールのオフセット
-      speed: number; // 回転速度
-      stopping: boolean; // 停止中か
-      stopped: boolean; // 停止完了か
-      finalIndex: number; // 最終的に止まる絵柄のインデックス
-      stopTime: number; // 停止開始時刻
-    }>;
-    startTime: number;
-    result: string[]; // 結果（3つの絵柄）
-    payout: number; // 配当
-    isWin: boolean; // 当たりかどうか
-  };
   const [slotAnimations, setSlotAnimations] = useState<SlotAnimation[]>([]);
   const slotAnimationsRef = useRef<number | null>(null);
 
   // 魚クイズアニメーション用
-  type FishQuizState = {
-    x: number; // スクリーン座標X
-    y: number; // スクリーン座標Y
-    question: FishQuestion;
-    choices: string[];
-    state: 'showing' | 'answering' | 'correct' | 'wrong' | 'insufficient_coins';
-    selectedAnswer: string | null;
-    startTime: number;
-    reward: number;
-    consecutiveCount: number; // 連続正解数
-  };
   const [fishQuiz, setFishQuiz] = useState<FishQuizState | null>(null);
 
   // 四字熟語クイズアニメーション用
-  type YojijukugoQuizState = {
-    x: number; // スクリーン座標X
-    y: number; // スクリーン座標Y
-    question: YojijukugoQuestion;
-    choices: string[];
-    state: 'showing' | 'answering' | 'correct' | 'wrong' | 'insufficient_coins';
-    selectedAnswer: string | null;
-    startTime: number;
-    reward: number;
-    consecutiveCount: number; // 連続正解数
-  };
-  const [yojijukugoQuiz, setYojijukugoQuiz] = useState<YojijukugoQuizState | null>(null);
+  const [yojijukugoQuiz, setYojijukugoQuiz] = useState<YojijukugoState | null>(null);
 
   // 英単語クイズアニメーション用
-  type EnglishQuizState = {
-    x: number; // スクリーン座標X
-    y: number; // スクリーン座標Y
-    question: EnglishQuestion;
-    choices: string[];
-    state: 'showing' | 'answering' | 'correct' | 'wrong' | 'insufficient_coins';
-    selectedAnswer: string | null;
-    startTime: number;
-    reward: number;
-    consecutiveCount: number; // 連続正解数
-  };
   const [englishQuiz, setEnglishQuiz] = useState<EnglishQuizState | null>(null);
 
   // 筋肉クイズアニメーション用
-  type MuscleQuizState = {
-    x: number; // スクリーン座標X
-    y: number; // スクリーン座標Y
-    question: MuscleQuestion;
-    choices: string[];
-    state: 'showing' | 'answering' | 'correct' | 'wrong' | 'insufficient_coins';
-    selectedAnswer: string | null;
-    startTime: number;
-    reward: number;
-    consecutiveCount: number; // 連続正解数
-  };
   const [muscleQuiz, setMuscleQuiz] = useState<MuscleQuizState | null>(null);
 
   // 猫アニメーション用
-  type CatAnimation = {
-    from: { x: number; y: number }; // 出発地（マップ座標）
-    to: { x: number; y: number }; // 目的地（マップ座標）
-    progress: number; // 0-1のアニメーション進捗
-    startTime: number; // アニメーション開始時刻
-    pawPrints: Array<{ // 足跡の配列
-      x: number; // マップ座標X
-      y: number; // マップ座標Y
-      rotation: number; // 回転角度（ラジアン）
-      scale: number; // スケール
-      alpha: number; // 透明度
-    }>;
-    showCat: boolean; // 猫を表示するか
-    catAlpha: number; // 猫の透明度
-  };
   const [catAnimations, setCatAnimations] = useState<CatAnimation[]>([]);
   const catAnimationsDataRef = useRef<CatAnimation[]>([]); // 最新のアニメーションデータ
   const catAnimationRef = useRef<number | null>(null);
@@ -896,661 +231,122 @@ export default function Home() {
   const pawImageRef = useRef<HTMLImageElement | null>(null);
 
   // バルーンアニメーション用
-  type BalloonAnimation = {
-    x: number; // スクリーン座標X
-    y: number; // スクリーン座標Y
-    balloons: Array<{
-      offsetX: number;
-      offsetY: number;
-      vy: number; // 上昇速度
-      swayOffset: number; // 揺れのオフセット
-      swaySpeed: number; // 揺れの速度
-      size: number; // 大きさ
-      color: string; // 色
-      life: number; // 残り寿命
-      stringLength: number; // 紐の長さ
-    }>;
-    startTime: number;
-  };
   const [balloonAnimations, setBalloonAnimations] = useState<BalloonAnimation[]>([]);
   const balloonAnimationRef = useRef<number | null>(null);
 
   // オーロラアニメーション用
-  type AuroraAnimation = {
-    waves: Array<{
-      offsetY: number; // Y方向のオフセット
-      amplitude: number; // 波の振幅
-      frequency: number; // 波の周波数
-      speed: number; // 波の速度
-      phase: number; // 波の位相
-      color: string; // グラデーション色
-      alpha: number; // 透明度
-    }>;
-    startTime: number;
-    life: number; // 残り寿命
-  };
   const [auroraAnimations, setAuroraAnimations] = useState<AuroraAnimation[]>([]);
   const auroraAnimationRef = useRef<number | null>(null);
 
   // 蝶々アニメーション用
-  type ButterflyAnimation = {
-    butterflies: Array<{
-      x: number; // スクリーン座標X
-      y: number; // スクリーン座標Y
-      vx: number; // X方向速度
-      vy: number; // Y方向速度
-      angle: number; // 進行方向角度
-      flutterPhase: number; // 羽ばたき位相
-      flutterSpeed: number; // 羽ばたき速度
-      size: number; // 大きさ
-      color: string; // 色
-      life: number; // 残り寿命
-      pathType: 'figure8' | 'random'; // 動きのパターン
-      pathProgress: number; // パターンの進捗
-    }>;
-    startTime: number;
-  };
   const [butterflyAnimations, setButterflyAnimations] = useState<ButterflyAnimation[]>([]);
   const butterflyAnimationRef = useRef<number | null>(null);
 
   // 流れ星アニメーション用
-  type ShootingStarAnimation = {
-    stars: Array<{
-      x: number; // スクリーン座標X（開始位置）
-      y: number; // スクリーン座標Y（開始位置）
-      vx: number; // X方向速度
-      vy: number; // Y方向速度
-      length: number; // 尾の長さ
-      brightness: number; // 明るさ
-      life: number; // 残り寿命
-      trailPoints: Array<{ x: number; y: number; alpha: number }>; // 尾の軌跡
-    }>;
-    startTime: number;
-  };
   const [shootingStarAnimations, setShootingStarAnimations] = useState<ShootingStarAnimation[]>([]);
   const shootingStarAnimationRef = useRef<number | null>(null);
 
   // 紅葉アニメーション用
-  type AutumnLeavesAnimation = {
-    x: number; // スクリーン座標X
-    y: number; // スクリーン座標Y
-    leaves: Array<{
-      offsetX: number;
-      offsetY: number;
-      vx: number; // 横方向速度
-      vy: number; // 縦方向速度
-      rotation: number; // 回転角度
-      rotationSpeed: number; // 回転速度
-      swayOffset: number; // 揺れ
-      swaySpeed: number; // 揺れ速度
-      size: number; // 大きさ
-      color: string; // 色（赤、黄、橙）
-      leafType: 'maple' | 'ginkgo' | 'oak'; // 葉の種類
-      life: number;
-    }>;
-    startTime: number;
-  };
   const [autumnLeavesAnimations, setAutumnLeavesAnimations] = useState<AutumnLeavesAnimation[]>([]);
   const autumnLeavesAnimationRef = useRef<number | null>(null);
 
   // 雪アニメーション用
-  type SnowAnimation = {
-    snowflakes: Array<{
-      x: number; // スクリーン座標X
-      y: number; // スクリーン座標Y
-      vx: number; // 横方向速度
-      vy: number; // 縦方向速度
-      size: number; // 大きさ
-      rotation: number; // 回転角度
-      rotationSpeed: number; // 回転速度
-      swayOffset: number; // 揺れ
-      swaySpeed: number; // 揺れ速度
-      opacity: number; // 透明度
-      life: number;
-    }>;
-    startTime: number;
-    duration: number; // 継続時間
-  };
   const [snowAnimations, setSnowAnimations] = useState<SnowAnimation[]>([]);
   const snowAnimationRef = useRef<number | null>(null);
 
   // 紙吹雪アニメーション用（強化版）
-  type ConfettiAnimation = {
-    x: number; // スクリーン座標X
-    y: number; // スクリーン座標Y
-    confetti: Array<{
-      offsetX: number;
-      offsetY: number;
-      vx: number; // 横方向速度
-      vy: number; // 縦方向速度
-      rotation: number; // 回転角度
-      rotationSpeed: number; // 回転速度
-      width: number; // 幅
-      height: number; // 高さ
-      color: string; // 色
-      shape: 'rectangle' | 'circle' | 'star'; // 形状
-      life: number;
-    }>;
-    startTime: number;
-  };
   const [confettiAnimations, setConfettiAnimations] = useState<ConfettiAnimation[]>([]);
   const confettiAnimationRef = useRef<number | null>(null);
 
   // 虹アニメーション用
-  type RainbowAnimation = {
-    x: number; // スクリーン座標X（中心）
-    y: number; // スクリーン座標Y（アーチの底）
-    radius: number; // 虹の半径
-    width: number; // 虹の幅
-    alpha: number; // 透明度
-    life: number; // 残り寿命
-    startTime: number;
-  };
   const [rainbowAnimations, setRainbowAnimations] = useState<RainbowAnimation[]>([]);
   const rainbowAnimationRef = useRef<number | null>(null);
 
   // 雨アニメーション用
-  type RainAnimation = {
-    raindrops: Array<{
-      x: number; // スクリーン座標X
-      y: number; // スクリーン座標Y
-      vy: number; // 落下速度
-      length: number; // 雨粒の長さ
-      opacity: number; // 透明度
-      splash: boolean; // 地面に当たったか
-      splashProgress: number; // 跳ね返り進捗
-      life: number;
-    }>;
-    startTime: number;
-    duration: number; // 継続時間
-  };
   const [rainAnimations, setRainAnimations] = useState<RainAnimation[]>([]);
   const rainAnimationRef = useRef<number | null>(null);
 
   // 魔法陣アニメーション用
-  type MagicCircleAnimation = {
-    x: number; // スクリーン座標X
-    y: number; // スクリーン座標Y
-    mapX: number; // マップ座標X
-    mapY: number; // マップ座標Y
-    radius: number; // 魔法陣の半径
-    rotation: number; // 回転角度
-    rotationSpeed: number; // 回転速度
-    alpha: number; // 透明度
-    life: number; // 残り寿命
-    glowIntensity: number; // 発光の強さ
-    startTime: number;
-    targetObj: Obj;
-  };
   const [magicCircleAnimations, setMagicCircleAnimations] = useState<MagicCircleAnimation[]>([]);
   const magicCircleAnimationRef = useRef<number | null>(null);
 
   // 炎アニメーション用
-  type FlameAnimation = {
-    x: number;
-    y: number;
-    mapX: number;
-    mapY: number;
-    flames: Array<{
-      offsetX: number;
-      offsetY: number;
-      size: number;
-      vy: number;
-      opacity: number;
-      color: string;
-      life: number;
-      flicker: number;
-    }>;
-    startTime: number;
-    targetObj: Obj;
-  };
   const [flameAnimations, setFlameAnimations] = useState<FlameAnimation[]>([]);
   const flameAnimationRef = useRef<number | null>(null);
 
   // 雷アニメーション用
-  type ThunderAnimation = {
-    segments: Array<{
-      x: number;
-      y: number;
-      endX: number;
-      endY: number;
-      alpha: number;
-      thickness: number;
-    }>;
-    startTime: number;
-    life: number;
-  };
   const [thunderAnimations, setThunderAnimations] = useState<ThunderAnimation[]>([]);
   const thunderAnimationRef = useRef<number | null>(null);
 
   // 波/水しぶきアニメーション用
-  type WaveAnimation = {
-    x: number;
-    y: number;
-    mapX: number;
-    mapY: number;
-    drops: Array<{
-      offsetX: number;
-      offsetY: number;
-      vx: number;
-      vy: number;
-      size: number;
-      opacity: number;
-      life: number;
-    }>;
-    rings: Array<{
-      radius: number;
-      alpha: number;
-      speed: number;
-    }>;
-    startTime: number;
-    targetObj: Obj;
-  };
   const [waveAnimations, setWaveAnimations] = useState<WaveAnimation[]>([]);
   const waveAnimationRef = useRef<number | null>(null);
 
   // 風/葉アニメーション用
-  type WindAnimation = {
-    leaves: Array<{
-      x: number;
-      y: number;
-      vx: number;
-      vy: number;
-      size: number;
-      rotation: number;
-      rotationSpeed: number;
-      opacity: number;
-      life: number;
-      color: string;
-    }>;
-    startTime: number;
-    duration: number;
-  };
   const [windAnimations, setWindAnimations] = useState<WindAnimation[]>([]);
   const windAnimationRef = useRef<number | null>(null);
 
   // 煙/霧アニメーション用
-  type SmokeAnimation = {
-    x: number;
-    y: number;
-    mapX: number;
-    mapY: number;
-    clouds: Array<{
-      offsetX: number;
-      offsetY: number;
-      size: number;
-      vy: number;
-      opacity: number;
-      expansion: number;
-      life: number;
-    }>;
-    startTime: number;
-    targetObj: Obj;
-  };
   const [smokeAnimations, setSmokeAnimations] = useState<SmokeAnimation[]>([]);
   const smokeAnimationRef = useRef<number | null>(null);
 
   // 竜巻アニメーション用
-  type TornadoAnimation = {
-    x: number;
-    y: number;
-    mapX: number;
-    mapY: number;
-    particles: Array<{
-      angle: number;
-      height: number;
-      radius: number;
-      speed: number;
-      size: number;
-      opacity: number;
-    }>;
-    rotation: number;
-    startTime: number;
-    life: number;
-    targetObj: Obj;
-  };
   const [tornadoAnimations, setTornadoAnimations] = useState<TornadoAnimation[]>([]);
   const tornadoAnimationRef = useRef<number | null>(null);
 
   // 宝石アニメーション用
-  type GemAnimation = {
-    x: number;
-    y: number;
-    mapX: number;
-    mapY: number;
-    gems: Array<{
-      offsetX: number;
-      offsetY: number;
-      vx: number;
-      vy: number;
-      size: number;
-      rotation: number;
-      rotationSpeed: number;
-      color: string;
-      sparkle: number;
-      life: number;
-    }>;
-    startTime: number;
-    targetObj: Obj;
-  };
   const [gemAnimations, setGemAnimations] = useState<GemAnimation[]>([]);
   const gemAnimationRef = useRef<number | null>(null);
 
   // 星の軌跡アニメーション用
-  type StarTrailAnimation = {
-    x: number;
-    y: number;
-    mapX: number;
-    mapY: number;
-    stars: Array<{
-      angle: number;
-      radius: number;
-      size: number;
-      speed: number;
-      trail: Array<{ x: number; y: number; alpha: number }>;
-      color: string;
-    }>;
-    rotation: number;
-    startTime: number;
-    life: number;
-    targetObj: Obj;
-  };
   const [starTrailAnimations, setStarTrailAnimations] = useState<StarTrailAnimation[]>([]);
   const starTrailAnimationRef = useRef<number | null>(null);
 
   // 光の粒アニメーション用
-  type LightParticleAnimation = {
-    x: number;
-    y: number;
-    mapX: number;
-    mapY: number;
-    particles: Array<{
-      offsetX: number;
-      offsetY: number;
-      vx: number;
-      vy: number;
-      size: number;
-      opacity: number;
-      color: string;
-      life: number;
-    }>;
-    startTime: number;
-    targetObj: Obj;
-  };
   const [lightParticleAnimations, setLightParticleAnimations] = useState<LightParticleAnimation[]>([]);
   const lightParticleAnimationRef = useRef<number | null>(null);
 
   // スパイラルアニメーション用
-  type SpiralAnimation = {
-    x: number;
-    y: number;
-    mapX: number;
-    mapY: number;
-    particles: Array<{
-      angle: number;
-      radius: number;
-      height: number;
-      size: number;
-      color: string;
-      opacity: number;
-    }>;
-    rotation: number;
-    expansion: number;
-    startTime: number;
-    life: number;
-    targetObj: Obj;
-  };
   const [spiralAnimations, setSpiralAnimations] = useState<SpiralAnimation[]>([]);
   const spiralAnimationRef = useRef<number | null>(null);
 
   // 鳥/羽アニメーション用
-  type BirdAnimation = {
-    birds: Array<{
-      x: number;
-      y: number;
-      vx: number;
-      vy: number;
-      size: number;
-      wingPhase: number;
-      rotation: number;
-      life: number;
-    }>;
-    feathers: Array<{
-      x: number;
-      y: number;
-      vx: number;
-      vy: number;
-      rotation: number;
-      rotationSpeed: number;
-      size: number;
-      opacity: number;
-      life: number;
-    }>;
-    startTime: number;
-    duration: number;
-  };
   const [birdAnimations, setBirdAnimations] = useState<BirdAnimation[]>([]);
   const birdAnimationRef = useRef<number | null>(null);
 
   // ゴーストアニメーション用
-  type GhostAnimation = {
-    x: number;
-    y: number;
-    mapX: number;
-    mapY: number;
-    ghosts: Array<{
-      offsetX: number;
-      offsetY: number;
-      vx: number;
-      vy: number;
-      size: number;
-      opacity: number;
-      wavePhase: number;
-      life: number;
-    }>;
-    startTime: number;
-    targetObj: Obj;
-  };
   const [ghostAnimations, setGhostAnimations] = useState<GhostAnimation[]>([]);
   const ghostAnimationRef = useRef<number | null>(null);
 
   // 蜂アニメーション用
-  type BeeAnimation = {
-    x: number;
-    y: number;
-    mapX: number;
-    mapY: number;
-    bees: Array<{
-      offsetX: number;
-      offsetY: number;
-      angle: number;
-      radius: number;
-      speed: number;
-      wingPhase: number;
-      size: number;
-      life: number;
-    }>;
-    startTime: number;
-    targetObj: Obj;
-  };
   const [beeAnimations, setBeeAnimations] = useState<BeeAnimation[]>([]);
   const beeAnimationRef = useRef<number | null>(null);
 
   // 蛍アニメーション用
-  type FireflyAnimation = {
-    x: number;
-    y: number;
-    mapX: number;
-    mapY: number;
-    fireflies: Array<{
-      offsetX: number;
-      offsetY: number;
-      vx: number;
-      vy: number;
-      glow: number;
-      glowPhase: number;
-      size: number;
-      life: number;
-    }>;
-    startTime: number;
-    targetObj: Obj;
-  };
   const [fireflyAnimations, setFireflyAnimations] = useState<FireflyAnimation[]>([]);
   const fireflyAnimationRef = useRef<number | null>(null);
 
   // 爆発アニメーション用
-  type ExplosionAnimation = {
-    x: number;
-    y: number;
-    mapX: number;
-    mapY: number;
-    particles: Array<{
-      offsetX: number;
-      offsetY: number;
-      vx: number;
-      vy: number;
-      size: number;
-      color: string;
-      opacity: number;
-      life: number;
-    }>;
-    shockwave: {
-      radius: number;
-      alpha: number;
-    };
-    flash: number;
-    startTime: number;
-    targetObj: Obj;
-  };
   const [explosionAnimations, setExplosionAnimations] = useState<ExplosionAnimation[]>([]);
   const explosionAnimationRef = useRef<number | null>(null);
 
   // ターゲットアニメーション用
-  type TargetAnimation = {
-    x: number;
-    y: number;
-    mapX: number;
-    mapY: number;
-    rings: Array<{
-      radius: number;
-      alpha: number;
-      speed: number;
-    }>;
-    crosshair: {
-      size: number;
-      rotation: number;
-      alpha: number;
-    };
-    startTime: number;
-    life: number;
-    targetObj: Obj;
-  };
   const [targetAnimations, setTargetAnimations] = useState<TargetAnimation[]>([]);
   const targetAnimationRef = useRef<number | null>(null);
 
   // 怒りマークアニメーション用
-  type AngerAnimation = {
-    x: number;
-    y: number;
-    mapX: number;
-    mapY: number;
-    marks: Array<{
-      offsetX: number;
-      offsetY: number;
-      size: number;
-      rotation: number;
-      opacity: number;
-      bounce: number;
-      life: number;
-    }>;
-    startTime: number;
-    targetObj: Obj;
-  };
   const [angerAnimations, setAngerAnimations] = useState<AngerAnimation[]>([]);
   const angerAnimationRef = useRef<number | null>(null);
 
   // 花びらアニメーション用
-  type PetalAnimation = {
-    x: number;
-    y: number;
-    mapX: number;
-    mapY: number;
-    petals: Array<{
-      offsetX: number;
-      offsetY: number;
-      vx: number;
-      vy: number;
-      rotation: number;
-      rotationSpeed: number;
-      size: number;
-      color: string;
-      opacity: number;
-      life: number;
-    }>;
-    startTime: number;
-    targetObj: Obj;
-  };
   const [petalAnimations, setPetalAnimations] = useState<PetalAnimation[]>([]);
   const petalAnimationRef = useRef<number | null>(null);
 
   // ひまわりアニメーション用
-  type SunflowerAnimation = {
-    x: number;
-    y: number;
-    mapX: number;
-    mapY: number;
-    flowers: Array<{
-      offsetX: number;
-      offsetY: number;
-      size: number;
-      rotation: number;
-      growth: number;
-      opacity: number;
-      life: number;
-    }>;
-    seeds: Array<{
-      offsetX: number;
-      offsetY: number;
-      vx: number;
-      vy: number;
-      size: number;
-      rotation: number;
-      life: number;
-    }>;
-    startTime: number;
-    targetObj: Obj;
-  };
   const [sunflowerAnimations, setSunflowerAnimations] = useState<SunflowerAnimation[]>([]);
   const sunflowerAnimationRef = useRef<number | null>(null);
 
   // バラアニメーション用
-  type RoseAnimation = {
-    x: number;
-    y: number;
-    mapX: number;
-    mapY: number;
-    petals: Array<{
-      offsetX: number;
-      offsetY: number;
-      vx: number;
-      vy: number;
-      rotation: number;
-      rotationSpeed: number;
-      size: number;
-      layer: number;
-      opacity: number;
-      life: number;
-    }>;
-    sparkles: Array<{
-      offsetX: number;
-      offsetY: number;
-      size: number;
-      opacity: number;
-      life: number;
-    }>;
-    startTime: number;
-    targetObj: Obj;
-  };
   const [roseAnimations, setRoseAnimations] = useState<RoseAnimation[]>([]);
   const roseAnimationRef = useRef<number | null>(null);
 
@@ -5626,7 +4422,7 @@ export default function Home() {
     const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH);
     
     // オブジェクト中心から360度に広がる花火
-    const newFireworks: Firework[] = [];
+    const newFireworks: FireworksAnimation[] = [];
     const colors = ['#ff1744', '#00e676', '#2979ff', '#ffd600', '#e040fb', '#00e5ff', '#ff6e40', '#ff4081'];
     
     const particles = [];
@@ -14858,758 +13654,143 @@ export default function Home() {
 
       {/* 魚クイズモーダル */}
       {fishQuiz && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: "rgba(0,0,0,0.7)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 2000,
-            padding: "20px",
+        <FishQuizUI
+          quiz={fishQuiz}
+          consecutiveCorrect={fishQuizConsecutiveCorrect}
+          onClose={() => {
+            // 問題に答える前に閉じた場合は掛け金を返金
+            const refundTotal = totalCoins + 10;
+            setTotalCoins(refundTotal);
+            localStorage.setItem('totalCoins', refundTotal.toString());
+            setFishQuiz(null);
           }}
-          onClick={() => {
-            if (fishQuiz.state === 'correct' || fishQuiz.state === 'wrong') {
-              setFishQuiz(null);
+          onChoiceClick={(choice) => {
+            const isCorrect = choice === fishQuiz.question.correct;
+            
+            if (isCorrect) {
+              // 正解：掛け金×倍率（上限1000倍）
+              const newConsecutive = fishQuizConsecutiveCorrect + 1;
+              const multiplier = Math.min(newConsecutive, 1000);
+              const reward = 10 * multiplier;
+              setFishQuizConsecutiveCorrect(newConsecutive);
+              
+              const newTotal = totalCoins + reward;
+              setTotalCoins(newTotal);
+              localStorage.setItem('totalCoins', newTotal.toString());
+
+              // localStorageに問題IDを記録
+              const asked = new Set(JSON.parse(localStorage.getItem("fishQuizAsked") || "[]"));
+              asked.add(fishQuiz.question.id);
+              localStorage.setItem("fishQuizAsked", JSON.stringify([...asked]));
+
+              const wrong = new Set(JSON.parse(localStorage.getItem("fishQuizWrong") || "[]"));
+              wrong.delete(fishQuiz.question.id);
+              localStorage.setItem("fishQuizWrong", JSON.stringify([...wrong]));
+              
+              setFishQuiz({
+                ...fishQuiz,
+                selectedAnswer: choice,
+                state: 'correct',
+                reward: reward,
+                consecutiveCount: newConsecutive,
+              });
+            } else {
+              // 不正解：連続正解数をリセット
+              setFishQuizConsecutiveCorrect(0);
+
+              // 間違えた問題をlocalStorageに記録
+              const wrong = new Set(JSON.parse(localStorage.getItem("fishQuizWrong") || "[]"));
+              wrong.add(fishQuiz.question.id);
+              localStorage.setItem("fishQuizWrong", JSON.stringify([...wrong]));
+              
+              setFishQuiz({
+                ...fishQuiz,
+                selectedAnswer: choice,
+                state: 'wrong',
+                reward: 0,
+                consecutiveCount: 0,
+              });
             }
           }}
-        >
-          <div
-            style={{
-              background: "white",
-              borderRadius: "20px",
-              padding: "40px",
-              maxWidth: "600px",
-              width: "100%",
-              boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            {fishQuiz.state === 'showing' && (
-              <div style={{ textAlign: "center" }}>
-                <button
-                  onClick={() => {
-                    // 問題に答える前に閉じた場合は掛け金を返金
-                    const refundTotal = totalCoins + 10;
-                    setTotalCoins(refundTotal);
-                    localStorage.setItem('totalCoins', refundTotal.toString());
-                    setFishQuiz(null);
-                  }}
-                  style={{
-                    position: "absolute",
-                    top: "10px",
-                    right: "10px",
-                    background: "transparent",
-                    border: "none",
-                    fontSize: "40px",
-                    cursor: "pointer",
-                    color: "#999",
-                    lineHeight: "1",
-                    padding: "5px",
-                  }}
-                  onMouseEnter={(e) => { e.currentTarget.style.color = "#333"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.color = "#999"; }}
-                >
-                  ×
-                </button>
-                <div style={{
-                  fontSize: "100px",
-                  marginBottom: "20px",
-                  animation: "pulse 0.8s ease-in-out",
-                }}>
-                  🐟
-                </div>
-                <h2 style={{ fontSize: "24px", color: "#000" }}>
-                  問題を準備中...
-                </h2>
-              </div>
-            )}
-
-            {fishQuiz.state === 'answering' && (
-              <div>
-                <button
-                  onClick={() => {
-                    // 問題に答える前に閉じた場合は掛け金を返金
-                    const refundTotal = totalCoins + 10;
-                    setTotalCoins(refundTotal);
-                    localStorage.setItem('totalCoins', refundTotal.toString());
-                    setFishQuiz(null);
-                  }}
-                  style={{
-                    position: "absolute",
-                    top: "10px",
-                    right: "10px",
-                    background: "transparent",
-                    border: "none",
-                    fontSize: "40px",
-                    cursor: "pointer",
-                    color: "#999",
-                    lineHeight: "1",
-                    padding: "5px",
-                  }}
-                  onMouseEnter={(e) => { e.currentTarget.style.color = "#333"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.color = "#999"; }}
-                >
-                  ×
-                </button>
-                <div style={{ textAlign: "center", marginBottom: "30px" }}>
-                  <div style={{
-                    fontSize: "120px",
-                    fontWeight: "bold",
-                    color: "#000",
-                    marginBottom: "15px",
-                  }}>
-                    {fishQuiz.question.kanji}
-                  </div>
-                  <p style={{ fontSize: "20px", color: "#666", marginBottom: "10px" }}>
-                    この漢字の読み方は？
-                  </p>
-                  {fishQuizConsecutiveCorrect > 0 && (
-                    <div style={{
-                      background: "#f0fdf4",
-                      padding: "10px",
-                      borderRadius: "8px",
-                      marginTop: "10px",
-                    }}>
-                      <div style={{ fontSize: "14px", color: "#37b24d", fontWeight: "bold" }}>
-                        🔥 連続正解中: {fishQuizConsecutiveCorrect}回
-                      </div>
-                      <div style={{ fontSize: "13px", color: "#666", marginTop: "3px" }}>
-                        次回ボーナス: ×{Math.min(fishQuizConsecutiveCorrect + 1, 1000)}倍 ({Math.min(fishQuizConsecutiveCorrect + 1, 1000) * 10}コイン)
-                      </div>
-                    </div>
-                  )}
-                  {fishQuizConsecutiveCorrect === 0 && (
-                    <div style={{ fontSize: "14px", color: "#999", marginTop: "5px" }}>
-                      正解で ×1倍 (10コイン)！
-                    </div>
-                  )}
-                </div>
-
-                <div style={{ display: "grid", gap: "12px" }}>
-                  {fishQuiz.choices.map((choice, index) => (
-                    <button
-                      key={index}
-                      onClick={() => {
-                        const isCorrect = choice === fishQuiz.question.correct;
-                        
-                        if (isCorrect) {
-                          // 正解：掛け金×倍率（上限1000倍）
-                          const newConsecutive = fishQuizConsecutiveCorrect + 1;
-                          const multiplier = Math.min(newConsecutive, 1000);
-                          const reward = 10 * multiplier;
-                          setFishQuizConsecutiveCorrect(newConsecutive);
-                          
-                          const newTotal = totalCoins + reward;
-                          setTotalCoins(newTotal);
-                          localStorage.setItem('totalCoins', newTotal.toString());
-
-                          // localStorageに問題IDを記録
-                          const asked = new Set(JSON.parse(localStorage.getItem("fishQuizAsked") || "[]"));
-                          asked.add(fishQuiz.question.id);
-                          localStorage.setItem("fishQuizAsked", JSON.stringify([...asked]));
-
-                          const wrong = new Set(JSON.parse(localStorage.getItem("fishQuizWrong") || "[]"));
-                          wrong.delete(fishQuiz.question.id);
-                          localStorage.setItem("fishQuizWrong", JSON.stringify([...wrong]));
-                          
-                          setFishQuiz({
-                            ...fishQuiz,
-                            selectedAnswer: choice,
-                            state: 'correct',
-                            reward: reward,
-                            consecutiveCount: newConsecutive,
-                          });
-                        } else {
-                          // 不正解：連続正解数をリセット
-                          setFishQuizConsecutiveCorrect(0);
-
-                          // 間違えた問題をlocalStorageに記録
-                          const wrong = new Set(JSON.parse(localStorage.getItem("fishQuizWrong") || "[]"));
-                          wrong.add(fishQuiz.question.id);
-                          localStorage.setItem("fishQuizWrong", JSON.stringify([...wrong]));
-                          
-                          setFishQuiz({
-                            ...fishQuiz,
-                            selectedAnswer: choice,
-                            state: 'wrong',
-                            reward: 0,
-                            consecutiveCount: 0,
-                          });
-                        }
-                      }}
-                      style={{
-                        padding: "20px",
-                        fontSize: "28px",
-                        fontWeight: "bold",
-                        background: "#f8f9fa",
-                        border: "3px solid #ddd",
-                        borderRadius: "12px",
-                        cursor: "pointer",
-                        transition: "all 0.2s",
-                        color: "#000",
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.transform = "scale(1.02)";
-                        e.currentTarget.style.boxShadow = "0 4px 15px rgba(0,0,0,0.15)";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.transform = "scale(1)";
-                        e.currentTarget.style.boxShadow = "none";
-                      }}
-                    >
-                      {choice}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {fishQuiz.state === 'correct' && (
-              <div style={{ textAlign: "center" }}>
-                <button
-                  onClick={() => setFishQuiz(null)}
-                  style={{
-                    position: "absolute",
-                    top: "10px",
-                    right: "10px",
-                    background: "transparent",
-                    border: "none",
-                    fontSize: "40px",
-                    cursor: "pointer",
-                    color: "#999",
-                    lineHeight: "1",
-                    padding: "5px",
-                  }}
-                  onMouseEnter={(e) => { e.currentTarget.style.color = "#333"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.color = "#999"; }}
-                >
-                  ×
-                </button>
-                <div style={{
-                  fontSize: "32px",
-                  fontWeight: "bold",
-                  color: "#37b24d",
-                  marginBottom: "20px",
-                  animation: "bounce 0.5s",
-                }}>
-                  🎉 正解！ 🎉
-                </div>
-                <p style={{ fontSize: "18px", color: "#666", marginBottom: "10px" }}>
-                  「{fishQuiz.question.kanji}」は「{fishQuiz.question.correct}」です
-                </p>
-                <div style={{
-                  background: "linear-gradient(135deg, #ffd700 0%, #ffed4e 100%)",
-                  padding: "15px",
-                  borderRadius: "12px",
-                  marginBottom: "20px",
-                }}>
-                  <div style={{ fontSize: "20px", fontWeight: "bold", color: "#37b24d", marginBottom: "5px" }}>
-                    💰 +{fishQuiz.reward} コイン獲得！
-                  </div>
-                  {fishQuiz.consecutiveCount > 0 && (
-                    <div style={{ fontSize: "16px", color: "#666" }}>
-                      連続正解 {fishQuiz.consecutiveCount} 回！
-                    </div>
-                  )}
-                </div>
-                <button
-                  onClick={() => {
-                    setFishQuiz(null);
-                    setTimeout(() => {
-                      const canvas = canvasRef.current;
-                      if (canvas) {
-                        const rect = canvas.getBoundingClientRect();
-                        startFishQuizAnimation(rect.width / 2, rect.height / 2);
-                      }
-                    }, 100);
-                  }}
-                  style={{
-                    padding: "12px 40px",
-                    fontSize: "18px",
-                    fontWeight: "bold",
-                    background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "50px",
-                    cursor: "pointer",
-                  }}
-                >
-                  次の問題
-                </button>
-              </div>
-            )}
-
-            {fishQuiz.state === 'wrong' && (
-              <div style={{ textAlign: "center" }}>
-                <button
-                  onClick={() => setFishQuiz(null)}
-                  style={{
-                    position: "absolute",
-                    top: "10px",
-                    right: "10px",
-                    background: "transparent",
-                    border: "none",
-                    fontSize: "40px",
-                    cursor: "pointer",
-                    color: "#999",
-                    lineHeight: "1",
-                    padding: "5px",
-                  }}
-                  onMouseEnter={(e) => { e.currentTarget.style.color = "#333"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.color = "#999"; }}
-                >
-                  ×
-                </button>
-                <div style={{
-                  fontSize: "32px",
-                  fontWeight: "bold",
-                  color: "#fa5252",
-                  marginBottom: "20px",
-                  animation: "shake 0.5s",
-                }}>
-                  😢 残念！
-                </div>
-                <p style={{ fontSize: "18px", color: "#666", marginBottom: "10px" }}>
-                  正解は「{fishQuiz.question.correct}」でした
-                </p>
-                {fishQuizConsecutiveCorrect > 0 && (
-                  <p style={{ fontSize: "16px", color: "#fa5252", marginBottom: "15px" }}>
-                    連続正解がリセットされました
-                  </p>
-                )}
-                <button
-                  onClick={() => setFishQuiz(null)}
-                  style={{
-                    padding: "12px 40px",
-                    fontSize: "18px",
-                    fontWeight: "bold",
-                    background: "#6b7280",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "50px",
-                    cursor: "pointer",
-                  }}
-                >
-                  閉じる
-                </button>
-              </div>
-            )}
-
-            {fishQuiz.state === 'insufficient_coins' && (
-              <div style={{ textAlign: "center" }}>
-                <div style={{
-                  fontSize: "80px",
-                  marginBottom: "20px",
-                }}>
-                  💸
-                </div>
-                <div style={{
-                  fontSize: "28px",
-                  fontWeight: "bold",
-                  color: "#fa5252",
-                  marginBottom: "15px",
-                }}>
-                  コイン不足
-                </div>
-                <p style={{ fontSize: "18px", color: "#666", marginBottom: "25px" }}>
-                  魚クイズには10コインが必要です
-                </p>
-                <button
-                  onClick={() => setFishQuiz(null)}
-                  style={{
-                    padding: "12px 40px",
-                    fontSize: "18px",
-                    fontWeight: "bold",
-                    background: "#6b7280",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "50px",
-                    cursor: "pointer",
-                  }}
-                >
-                  閉じる
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
+          onNextQuestion={() => {
+            setFishQuiz(null);
+            setTimeout(() => {
+              const canvas = canvasRef.current;
+              if (canvas) {
+                const rect = canvas.getBoundingClientRect();
+                startFishQuizAnimation(rect.width / 2, rect.height / 2);
+              }
+            }, 100);
+          }}
+        />
       )}
 
       {/* 英単語クイズモーダル */}
       {englishQuiz && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: "rgba(0,0,0,0.7)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 2000,
-            padding: "20px",
+        <EnglishQuizUI
+          quiz={englishQuiz}
+          consecutiveCorrect={englishQuizConsecutiveCorrect}
+          onClose={() => {
+            const refundTotal = totalCoins + 10;
+            setTotalCoins(refundTotal);
+            localStorage.setItem('totalCoins', refundTotal.toString());
+            setEnglishQuiz(null);
           }}
-          onClick={() => {
-            if (englishQuiz.state === 'correct' || englishQuiz.state === 'wrong') {
-              setEnglishQuiz(null);
+          onChoiceClick={(choice) => {
+            const isCorrect = choice === englishQuiz.question.correct;
+            
+            if (isCorrect) {
+              const newConsecutive = englishQuizConsecutiveCorrect + 1;
+              const multiplier = Math.min(newConsecutive, 1000);
+              const reward = 10 * multiplier;
+              setEnglishQuizConsecutiveCorrect(newConsecutive);
+              
+              const newTotal = totalCoins + reward;
+              setTotalCoins(newTotal);
+              localStorage.setItem('totalCoins', newTotal.toString());
+
+              const asked = new Set(JSON.parse(localStorage.getItem("englishQuizAsked") || "[]"));
+              asked.add(englishQuiz.question.id);
+              localStorage.setItem("englishQuizAsked", JSON.stringify([...asked]));
+
+              const wrong = new Set(JSON.parse(localStorage.getItem("englishQuizWrong") || "[]"));
+              wrong.delete(englishQuiz.question.id);
+              localStorage.setItem("englishQuizWrong", JSON.stringify([...wrong]));
+              
+              setEnglishQuiz({
+                ...englishQuiz,
+                selectedAnswer: choice,
+                state: 'correct',
+                reward: reward,
+                consecutiveCount: newConsecutive,
+              });
+            } else {
+              setEnglishQuizConsecutiveCorrect(0);
+
+              const wrong = new Set(JSON.parse(localStorage.getItem("englishQuizWrong") || "[]"));
+              wrong.add(englishQuiz.question.id);
+              localStorage.setItem("englishQuizWrong", JSON.stringify([...wrong]));
+              
+              setEnglishQuiz({
+                ...englishQuiz,
+                selectedAnswer: choice,
+                state: 'wrong',
+                reward: 0,
+                consecutiveCount: 0,
+              });
             }
           }}
-        >
-          <div
-            style={{
-              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-              borderRadius: "20px",
-              padding: "40px",
-              maxWidth: "600px",
-              width: "100%",
-              boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            {englishQuiz.state === 'showing' && (
-              <div style={{ textAlign: "center" }}>
-                <button
-                  onClick={() => {
-                    const refundTotal = totalCoins + 10;
-                    setTotalCoins(refundTotal);
-                    localStorage.setItem('totalCoins', refundTotal.toString());
-                    setEnglishQuiz(null);
-                  }}
-                  style={{
-                    position: "absolute",
-                    top: "10px",
-                    right: "10px",
-                    background: "transparent",
-                    border: "none",
-                    fontSize: "40px",
-                    cursor: "pointer",
-                    color: "rgba(255,255,255,0.7)",
-                    lineHeight: "1",
-                    padding: "5px",
-                  }}
-                  onMouseEnter={(e) => { e.currentTarget.style.color = "white"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.color = "rgba(255,255,255,0.7)"; }}
-                >
-                  ×
-                </button>
-                <div style={{
-                  fontSize: "80px",
-                  color: "white",
-                  marginBottom: "20px",
-                  animation: "pulse 0.8s ease-in-out",
-                }}>
-                  📖
-                </div>
-                <h2 style={{ fontSize: "24px", color: "white" }}>
-                  問題を準備中...
-                </h2>
-              </div>
-            )}
-
-            {englishQuiz.state === 'answering' && (
-              <div>
-                <button
-                  onClick={() => {
-                    const refundTotal = totalCoins + 10;
-                    setTotalCoins(refundTotal);
-                    localStorage.setItem('totalCoins', refundTotal.toString());
-                    setEnglishQuiz(null);
-                  }}
-                  style={{
-                    position: "absolute",
-                    top: "10px",
-                    right: "10px",
-                    background: "transparent",
-                    border: "none",
-                    fontSize: "40px",
-                    cursor: "pointer",
-                    color: "rgba(255,255,255,0.7)",
-                    lineHeight: "1",
-                    padding: "5px",
-                  }}
-                  onMouseEnter={(e) => { e.currentTarget.style.color = "white"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.color = "rgba(255,255,255,0.7)"; }}
-                >
-                  ×
-                </button>
-                <div style={{ textAlign: "center", marginBottom: "30px" }}>
-                  <div style={{
-                    fontSize: "80px",
-                    fontWeight: "bold",
-                    color: "white",
-                    marginBottom: "15px",
-                  }}>
-                    {englishQuiz.question.word}
-                  </div>
-                  <p style={{ fontSize: "20px", color: "white", marginBottom: "10px" }}>
-                    {englishQuiz.question.type === 'english_to_japanese'
-                      ? 'この英単語の意味は？'
-                      : 'この日本語を英語で？'}
-                  </p>
-                  {englishQuizConsecutiveCorrect > 0 && (
-                    <div style={{
-                      background: "rgba(255,255,255,0.2)",
-                      padding: "10px",
-                      borderRadius: "8px",
-                      marginTop: "10px",
-                    }}>
-                      <div style={{ fontSize: "14px", color: "white", fontWeight: "bold" }}>
-                        🔥 連続正解中: {englishQuizConsecutiveCorrect}回
-                      </div>
-                      <div style={{ fontSize: "13px", color: "rgba(255,255,255,0.9)", marginTop: "3px" }}>
-                        次回ボーナス: ×{Math.min(englishQuizConsecutiveCorrect + 1, 1000)}倍 ({Math.min(englishQuizConsecutiveCorrect + 1, 1000) * 10}コイン)
-                      </div>
-                    </div>
-                  )}
-                  {englishQuizConsecutiveCorrect === 0 && (
-                    <div style={{ fontSize: "14px", color: "rgba(255,255,255,0.8)", marginTop: "5px" }}>
-                      正解で ×1倍 (10コイン)！
-                    </div>
-                  )}
-                </div>
-
-                <div style={{ display: "grid", gap: "12px" }}>
-                  {englishQuiz.choices.map((choice, index) => (
-                    <button
-                      key={index}
-                      onClick={() => {
-                        const isCorrect = choice === englishQuiz.question.correct;
-                        
-                        if (isCorrect) {
-                          const newConsecutive = englishQuizConsecutiveCorrect + 1;
-                          const multiplier = Math.min(newConsecutive, 1000);
-                          const reward = 10 * multiplier;
-                          setEnglishQuizConsecutiveCorrect(newConsecutive);
-                          
-                          const newTotal = totalCoins + reward;
-                          setTotalCoins(newTotal);
-                          localStorage.setItem('totalCoins', newTotal.toString());
-
-                          // localStorageに問題IDを記録
-                          const asked = new Set(JSON.parse(localStorage.getItem("englishQuizAsked") || "[]"));
-                          asked.add(englishQuiz.question.id);
-                          localStorage.setItem("englishQuizAsked", JSON.stringify([...asked]));
-
-                          const wrong = new Set(JSON.parse(localStorage.getItem("englishQuizWrong") || "[]"));
-                          wrong.delete(englishQuiz.question.id);
-                          localStorage.setItem("englishQuizWrong", JSON.stringify([...wrong]));
-                          
-                          setEnglishQuiz({
-                            ...englishQuiz,
-                            selectedAnswer: choice,
-                            state: 'correct',
-                            reward: reward,
-                            consecutiveCount: newConsecutive,
-                          });
-                        } else {
-                          setEnglishQuizConsecutiveCorrect(0);
-
-                          // 間違えた問題をlocalStorageに記録
-                          const wrong = new Set(JSON.parse(localStorage.getItem("englishQuizWrong") || "[]"));
-                          wrong.add(englishQuiz.question.id);
-                          localStorage.setItem("englishQuizWrong", JSON.stringify([...wrong]));
-                          
-                          setEnglishQuiz({
-                            ...englishQuiz,
-                            selectedAnswer: choice,
-                            state: 'wrong',
-                            reward: 0,
-                            consecutiveCount: 0,
-                          });
-                        }
-                      }}
-                      style={{
-                        padding: "20px",
-                        fontSize: "28px",
-                        fontWeight: "bold",
-                        background: "rgba(255,255,255,0.95)",
-                        border: "3px solid rgba(255,255,255,0.3)",
-                        borderRadius: "12px",
-                        cursor: "pointer",
-                        transition: "all 0.2s",
-                        color: "#764ba2",
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.transform = "scale(1.02)";
-                        e.currentTarget.style.boxShadow = "0 4px 15px rgba(0,0,0,0.15)";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.transform = "scale(1)";
-                        e.currentTarget.style.boxShadow = "none";
-                      }}
-                    >
-                      {choice}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {englishQuiz.state === 'correct' && (
-              <div style={{ textAlign: "center" }}>
-                <button
-                  onClick={() => setEnglishQuiz(null)}
-                  style={{
-                    position: "absolute",
-                    top: "10px",
-                    right: "10px",
-                    background: "transparent",
-                    border: "none",
-                    fontSize: "40px",
-                    cursor: "pointer",
-                    color: "rgba(255,255,255,0.7)",
-                    lineHeight: "1",
-                    padding: "5px",
-                  }}
-                  onMouseEnter={(e) => { e.currentTarget.style.color = "white"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.color = "rgba(255,255,255,0.7)"; }}
-                >
-                  ×
-                </button>
-                <div style={{
-                  fontSize: "32px",
-                  fontWeight: "bold",
-                  color: "white",
-                  marginBottom: "20px",
-                  animation: "bounce 0.5s",
-                }}>
-                  🎉 正解！ 🎉
-                </div>
-                <p style={{ fontSize: "18px", color: "white", marginBottom: "10px" }}>
-                  「{englishQuiz.question.word}」は「{englishQuiz.question.correct}」です
-                </p>
-                <div style={{
-                  background: "linear-gradient(135deg, #ffd700 0%, #ffed4e 100%)",
-                  padding: "15px",
-                  borderRadius: "12px",
-                  marginBottom: "20px",
-                }}>
-                  <div style={{ fontSize: "20px", fontWeight: "bold", color: "#37b24d", marginBottom: "5px" }}>
-                    💰 +{englishQuiz.reward} コイン獲得！
-                  </div>
-                  {englishQuiz.consecutiveCount > 0 && (
-                    <div style={{ fontSize: "16px", color: "#666" }}>
-                      連続正解 {englishQuiz.consecutiveCount} 回！
-                    </div>
-                  )}
-                </div>
-                <button
-                  onClick={() => {
-                    setEnglishQuiz(null);
-                    setTimeout(() => {
-                      const canvas = canvasRef.current;
-                      if (canvas) {
-                        const rect = canvas.getBoundingClientRect();
-                        startEnglishQuizAnimation(rect.width / 2, rect.height / 2);
-                      }
-                    }, 100);
-                  }}
-                  style={{
-                    padding: "12px 40px",
-                    fontSize: "18px",
-                    fontWeight: "bold",
-                    background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "50px",
-                    cursor: "pointer",
-                  }}
-                >
-                  次の問題
-                </button>
-              </div>
-            )}
-
-            {englishQuiz.state === 'wrong' && (
-              <div style={{ textAlign: "center" }}>
-                <button
-                  onClick={() => setEnglishQuiz(null)}
-                  style={{
-                    position: "absolute",
-                    top: "10px",
-                    right: "10px",
-                    background: "transparent",
-                    border: "none",
-                    fontSize: "40px",
-                    cursor: "pointer",
-                    color: "rgba(255,255,255,0.7)",
-                    lineHeight: "1",
-                    padding: "5px",
-                  }}
-                  onMouseEnter={(e) => { e.currentTarget.style.color = "white"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.color = "rgba(255,255,255,0.7)"; }}
-                >
-                  ×
-                </button>
-                <div style={{
-                  fontSize: "32px",
-                  fontWeight: "bold",
-                  color: "white",
-                  marginBottom: "20px",
-                  animation: "shake 0.5s",
-                }}>
-                  😢 残念！
-                </div>
-                <p style={{ fontSize: "18px", color: "white", marginBottom: "10px" }}>
-                  正解は「{englishQuiz.question.correct}」でした
-                </p>
-                {englishQuizConsecutiveCorrect > 0 && (
-                  <p style={{ fontSize: "16px", color: "rgba(255,255,255,0.9)", marginBottom: "15px" }}>
-                    連続正解がリセットされました
-                  </p>
-                )}
-                <button
-                  onClick={() => setEnglishQuiz(null)}
-                  style={{
-                    padding: "12px 40px",
-                    fontSize: "18px",
-                    fontWeight: "bold",
-                    background: "#6b7280",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "50px",
-                    cursor: "pointer",
-                  }}
-                >
-                  閉じる
-                </button>
-              </div>
-            )}
-
-            {englishQuiz.state === 'insufficient_coins' && (
-              <div style={{ textAlign: "center" }}>
-                <div style={{ fontSize: "28px", fontWeight: "bold", color: "white", marginBottom: "20px" }}>
-                  コイン不足
-                </div>
-                <p style={{ fontSize: "18px", color: "white", marginBottom: "25px" }}>
-                  英単語クイズには10コインが必要です
-                </p>
-                <button
-                  onClick={() => setEnglishQuiz(null)}
-                  style={{
-                    padding: "12px 40px",
-                    fontSize: "18px",
-                    fontWeight: "bold",
-                    background: "#6b7280",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "50px",
-                    cursor: "pointer",
-                  }}
-                >
-                  閉じる
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
+          onNextQuestion={() => {
+            setEnglishQuiz(null);
+            setTimeout(() => {
+              const canvas = canvasRef.current;
+              if (canvas) {
+                const rect = canvas.getBoundingClientRect();
+                startEnglishQuizAnimation(rect.width / 2, rect.height / 2);
+              }
+            }, 100);
+          }}
+        />
       )}
 
       {/* 四字熟語クイズUI */}

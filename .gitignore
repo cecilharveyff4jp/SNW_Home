@@ -45,6 +45,3 @@ next-env.d.ts
 
 # animation test page
 /src/app/animation-test/
-
-# game pages
-/src/app/game/
