@@ -8243,6 +8243,27 @@ export default function Home() {
     const sx = e.clientX - rect.left;
     const sy = e.clientY - rect.top;
 
+    // おみくじ確認ウィンドウの判定（最優先で処理）
+    if (omikujiConfirms.length > 0) {
+      // おみくじ確認ウィンドウが表示されている場合、全てのクリックをブロック
+      // onPointerUpで処理されるので、ここでは下のオブジェクトへの伝播を防ぐ
+      return;
+    }
+
+    // おみくじアニメーション表示中の判定
+    if (omikujiAnimations.length > 0) {
+      // おみくじアニメーションが表示されている場合、全てのクリックをブロック
+      // onPointerUpで処理されるので、ここでは下のオブジェクトへの伝播を防ぐ
+      return;
+    }
+
+    // クイズウィンドウの判定
+    if (fishQuiz || yojijukugoQuiz || englishQuiz || muscleQuiz) {
+      // クイズウィンドウが表示されている場合、全てのクリックをブロック
+      // クイズUIコンポーネント内で処理されるので、ここでは下のオブジェクトへの伝播を防ぐ
+      return;
+    }
+
     // スロットマシンの判定（最優先で処理、全ての処理より前）
     if (slotAnimations.length > 0) {
       const slot = slotAnimations[0];
@@ -8416,6 +8437,12 @@ export default function Home() {
     const prev = pointersRef.current.get(e.pointerId);
     if (!prev) return;
 
+    // おみくじ確認ウィンドウ、おみくじアニメーション、またはクイズウィンドウ表示中は移動を無視
+    if (omikujiConfirms.length > 0 || omikujiAnimations.length > 0 || 
+        fishQuiz || yojijukugoQuiz || englishQuiz || muscleQuiz) {
+      return;
+    }
+
     // 長押し待機中に移動したらキャンセル
     if (longPressTimerRef.current && pointerStartRef.current) {
       const moveDistance = Math.hypot(
@@ -8575,16 +8602,30 @@ export default function Home() {
         const sy = e.clientY - rect.top;
         const omikuji = omikujiAnimations[0];
         
-        // 画面中央基準での計算
-        const baseWidth = Math.min(500, rect.width * 0.9);
-        const baseHeight = omikuji.phase === 'roulette' ? 200 : (omikuji.phase === 'result' ? 250 : Math.min(600, rect.height * 0.8));
+        // 画面中央基準での計算（描画コードと完全に一致）
+        const viewW = rect.width;
+        const viewH = rect.height;
+        const baseWidth = Math.min(500, viewW * 0.9);
+        const baseHeight = Math.min(600, viewH * 0.8);
+        
+        // フェーズに応じて高さを調整（描画コードと完全に一致）
+        let boxWidth = baseWidth;
+        let boxHeight: number;
+        if (omikuji.phase === 'roulette') {
+          boxHeight = 200;
+        } else if (omikuji.phase === 'result') {
+          boxHeight = 250;
+        } else {
+          boxHeight = baseHeight;
+        }
+        
         const centerX = rect.width / 2;
         const centerY = rect.height / 2;
         
-        const omikujiLeft = centerX - baseWidth / 2;
-        const omikujiRight = centerX + baseWidth / 2;
-        const omikujiTop = centerY - baseHeight / 2;
-        const omikujiBottom = centerY + baseHeight / 2;
+        const omikujiLeft = centerX - boxWidth / 2;
+        const omikujiRight = centerX + boxWidth / 2;
+        const omikujiTop = centerY - boxHeight / 2;
+        const omikujiBottom = centerY + boxHeight / 2;
         
         const isInOmikujiArea = sx >= omikujiLeft && sx <= omikujiRight && sy >= omikujiTop && sy <= omikujiBottom;
         
@@ -8597,9 +8638,10 @@ export default function Home() {
             ));
           } else if (omikuji.phase === 'detail') {
             // 閉じるボタンの範囲チェック（右上の×ボタン）
+            // 描画コードと完全に一致させる
             const closeButtonSize = 40;
-            const closeButtonX = centerX + baseWidth / 2 - closeButtonSize / 2 - 10;
-            const closeButtonY = centerY - baseHeight / 2 + closeButtonSize / 2 + 10;
+            const closeButtonX = centerX + boxWidth / 2 - closeButtonSize / 2 - 10;
+            const closeButtonY = centerY - boxHeight / 2 + closeButtonSize / 2 + 10;
             
             const distToCloseButton = Math.hypot(sx - closeButtonX, sy - closeButtonY);
             
