@@ -818,3 +818,36 @@ export type RoseAnimation = {
   startTime: number;
   targetObj: Obj;
 };
+
+// おみくじ確認ウィンドウ用
+export type OmikujiConfirmAnimation = {
+  x: number; // 表示位置X
+  y: number; // 表示位置Y
+  startTime: number; // アニメーション開始時刻
+  cityLabel: string; // クリックした都市名
+};
+
+// おみくじアニメーション用
+export type OmikujiAnimation = {
+  x: number; // 表示位置X
+  y: number; // 表示位置Y
+  phase: 'roulette' | 'result' | 'detail'; // アニメーションフェーズ（ルーレット→結果→詳細）
+  progress: number; // 0-1のアニメーション進捗
+  startTime: number; // アニメーション開始時刻
+  fortune: string; // 運勢の名前
+  level: number; // 運勢レベル
+  message: string; // メッセージ
+  luckyItem: string; // ラッキーアイテム
+  coinEffect: number; // コイン増減効果
+  rouletteIndex: number; // ルーレット表示中のインデックス
+  rouletteSpeed: number; // ルーレットの回転速度
+  particles: Array<{ // 演出用パーティクル
+    x: number;
+    y: number;
+    vx: number;
+    vy: number;
+    life: number;
+    color: string;
+    size: number;
+  }>;
+};

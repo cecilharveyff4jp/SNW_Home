@@ -19,6 +19,7 @@ import { FISH_QUESTIONS, type FishQuestion } from './data/fishQuestions';
 import { YOJIJUKUGO_QUESTIONS, type YojijukugoQuestion } from './data/yojijukugoQuestions';
 import { ENGLISH_QUESTIONS, type EnglishQuestion } from './data/englishQuestions';
 import { MUSCLE_QUESTIONS, type MuscleQuestion } from './data/muscleQuestions';
+import { drawOmikuji, FORTUNES } from './data/omikujiData';
 
 // クイズUIコンポーネントのインポート
 import FishQuizUI from './components/quizzes/FishQuizUI';
@@ -70,7 +71,9 @@ import type {
   SunflowerAnimation,
   RoseAnimation,
   SoldierAnimation,
-  CatAnimation
+  CatAnimation,
+  OmikujiConfirmAnimation,
+  OmikujiAnimation
 } from './types/animations';
 
 export default function Home() {
@@ -229,6 +232,13 @@ export default function Home() {
   const catAnimationRef = useRef<number | null>(null);
   const catImageRef = useRef<HTMLImageElement | null>(null);
   const pawImageRef = useRef<HTMLImageElement | null>(null);
+
+  // おみくじ確認ウィンドウ用
+  const [omikujiConfirms, setOmikujiConfirms] = useState<OmikujiConfirmAnimation[]>([]);
+
+  // おみくじアニメーション用
+  const [omikujiAnimations, setOmikujiAnimations] = useState<OmikujiAnimation[]>([]);
+  const omikujiAnimationRef = useRef<number | null>(null);
 
   // バルーンアニメーション用
   const [balloonAnimations, setBalloonAnimations] = useState<BalloonAnimation[]>([]);
@@ -2943,6 +2953,429 @@ export default function Home() {
       });
     }
 
+    // おみくじ確認ウィンドウの描画
+    if (omikujiConfirms.length > 0) {
+      omikujiConfirms.forEach((confirm) => {
+        ctx.save();
+        
+        const boxWidth = Math.min(400, viewW * 0.85);
+        const boxHeight = 200;
+        const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        
+        ctx.translate(confirm.x, confirm.y);
+        
+        // 背景
+        const bgGradient = ctx.createLinearGradient(-boxWidth / 2, -boxHeight / 2, boxWidth / 2, boxHeight / 2);
+        if (isDark) {
+          bgGradient.addColorStop(0, '#2A2A3A');
+          bgGradient.addColorStop(1, '#1E1E2E');
+        } else {
+          bgGradient.addColorStop(0, '#FFFFFF');
+          bgGradient.addColorStop(1, '#F5F5F8');
+        }
+        
+        const cornerRadius = 15;
+        ctx.fillStyle = bgGradient;
+        ctx.shadowColor = 'rgba(0,0,0,0.3)';
+        ctx.shadowBlur = 20;
+        ctx.beginPath();
+        ctx.moveTo(-boxWidth / 2 + cornerRadius, -boxHeight / 2);
+        ctx.lineTo(boxWidth / 2 - cornerRadius, -boxHeight / 2);
+        ctx.quadraticCurveTo(boxWidth / 2, -boxHeight / 2, boxWidth / 2, -boxHeight / 2 + cornerRadius);
+        ctx.lineTo(boxWidth / 2, boxHeight / 2 - cornerRadius);
+        ctx.quadraticCurveTo(boxWidth / 2, boxHeight / 2, boxWidth / 2 - cornerRadius, boxHeight / 2);
+        ctx.lineTo(-boxWidth / 2 + cornerRadius, boxHeight / 2);
+        ctx.quadraticCurveTo(-boxWidth / 2, boxHeight / 2, -boxWidth / 2, boxHeight / 2 - cornerRadius);
+        ctx.lineTo(-boxWidth / 2, -boxHeight / 2 + cornerRadius);
+        ctx.quadraticCurveTo(-boxWidth / 2, -boxHeight / 2, -boxWidth / 2 + cornerRadius, -boxHeight / 2);
+        ctx.closePath();
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        
+        // タイトル
+        ctx.fillStyle = isDark ? '#FFD700' : '#FF6B6B';
+        ctx.font = 'bold 24px "Noto Sans JP", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('おみくじを引きますか？', 0, -50);
+        
+        // 説明
+        ctx.fillStyle = isDark ? '#CCCCCC' : '#666666';
+        ctx.font = '16px "Noto Sans JP", sans-serif';
+        ctx.fillText('おみくじには100コインが必要です', 0, -15);
+        
+        // ボタン1: おみくじを引く
+        const btn1Width = 150;
+        const btn1Height = 45;
+        const btn1X = -80;
+        const btn1Y = 30; // 中央に配置
+        
+        const btn1Gradient = ctx.createLinearGradient(btn1X - btn1Width / 2, btn1Y - btn1Height / 2, btn1X + btn1Width / 2, btn1Y + btn1Height / 2);
+        btn1Gradient.addColorStop(0, '#4CAF50');
+        btn1Gradient.addColorStop(1, '#45a049');
+        ctx.fillStyle = btn1Gradient;
+        ctx.beginPath();
+        ctx.roundRect(btn1X - btn1Width / 2, btn1Y - btn1Height / 2, btn1Width, btn1Height, 10);
+        ctx.fill();
+        
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = 'bold 16px "Noto Sans JP", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('おみくじを引く', btn1X, btn1Y - 5);
+        ctx.font = '12px "Noto Sans JP", sans-serif';
+        ctx.fillText('(100コイン)', btn1X, btn1Y + 10);
+        
+        // ボタン2: やめとく
+        const btn2Width = 120;
+        const btn2Height = 45;
+        const btn2X = 80;
+        const btn2Y = 30; // 中央に配置
+        
+        const btn2Gradient = ctx.createLinearGradient(btn2X - btn2Width / 2, btn2Y - btn2Height / 2, btn2X + btn2Width / 2, btn2Y + btn2Height / 2);
+        btn2Gradient.addColorStop(0, '#888888');
+        btn2Gradient.addColorStop(1, '#666666');
+        ctx.fillStyle = btn2Gradient;
+        ctx.beginPath();
+        ctx.roundRect(btn2X - btn2Width / 2, btn2Y - btn2Height / 2, btn2Width, btn2Height, 10);
+        ctx.fill();
+        
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = 'bold 16px "Noto Sans JP", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('やめとく', btn2X, btn2Y);
+        
+        ctx.restore();
+      });
+    }
+
+    // おみくじアニメーションの描画
+    if (omikujiAnimations.length > 0) {
+      omikujiAnimations.forEach((omikuji, omikujiIdx) => {
+        const elapsed = (Date.now() - omikuji.startTime) / 1000;
+        
+        ctx.save();
+        
+        // レスポンシブ対応：画面幅に応じてボックスサイズを調整
+        const baseWidth = Math.min(500, viewW * 0.9);
+        const baseHeight = Math.min(600, viewH * 0.8);
+        
+        // フェーズに応じて高さを調整
+        let boxWidth = baseWidth;
+        let boxHeight: number;
+        if (omikuji.phase === 'roulette') {
+          boxHeight = 200; // 抽選中は低く
+        } else if (omikuji.phase === 'result') {
+          boxHeight = 250; // 結果表示も低め
+        } else {
+          boxHeight = baseHeight; // 詳細は高く
+        }
+        
+        // 画面中央に配置
+        const centerX = viewW / 2;
+        const centerY = viewH / 2;
+        
+        ctx.translate(centerX, centerY);
+        
+        // パーティクル描画（背景）
+        omikuji.particles.forEach((p) => {
+          ctx.save();
+          ctx.globalAlpha = p.life * 0.6;
+          const gradient = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size * 2);
+          gradient.addColorStop(0, p.color);
+          gradient.addColorStop(1, 'rgba(255,255,255,0)');
+          ctx.fillStyle = gradient;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.size * 2, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        });
+        
+        const fontSize = boxWidth < 400 ? 16 : 20;
+        const titleSize = boxWidth < 400 ? 40 : 56;
+        
+        // ダークモード対応
+        const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        // rouletteフェーズでは背景色を中立にして結果がバレないようにする
+        const isGood = omikuji.phase !== 'roulette' && omikuji.level >= 16;
+        
+        // 外側のグロー効果（rouletteフェーズは中立色）
+        if (omikuji.phase === 'roulette') {
+          ctx.shadowColor = isDark ? 'rgba(150, 150, 200, 0.3)' : 'rgba(200, 200, 220, 0.3)';
+        } else {
+          ctx.shadowColor = isGood 
+            ? (isDark ? 'rgba(255, 215, 0, 0.5)' : 'rgba(255, 215, 0, 0.4)')
+            : (isDark ? 'rgba(100, 100, 255, 0.3)' : 'rgba(150, 150, 200, 0.3)');
+        }
+        ctx.shadowBlur = 30;
+        
+        // メインボックスの背景（グラデーション + 角丸）
+        const bgGradient = ctx.createLinearGradient(-boxWidth / 2, -boxHeight / 2, boxWidth / 2, boxHeight / 2);
+        if (omikuji.phase === 'roulette') {
+          // 抽選中は中立的な色
+          if (isDark) {
+            bgGradient.addColorStop(0, '#2A2A3A');
+            bgGradient.addColorStop(0.5, '#1E1E2E');
+            bgGradient.addColorStop(1, '#2A2A3A');
+          } else {
+            bgGradient.addColorStop(0, '#F5F5F8');
+            bgGradient.addColorStop(0.5, '#EDEDF0');
+            bgGradient.addColorStop(1, '#F5F5F8');
+          }
+        } else if (isDark) {
+          if (isGood) {
+            bgGradient.addColorStop(0, '#3D2817');
+            bgGradient.addColorStop(0.5, '#2C1F10');
+            bgGradient.addColorStop(1, '#4A3520');
+          } else {
+            bgGradient.addColorStop(0, '#1E1E2E');
+            bgGradient.addColorStop(0.5, '#2A2A3A');
+            bgGradient.addColorStop(1, '#1A1A28');
+          }
+        } else {
+          if (isGood) {
+            bgGradient.addColorStop(0, '#FFFBF0');
+            bgGradient.addColorStop(0.5, '#FFF5E1');
+            bgGradient.addColorStop(1, '#FFEDCC');
+          } else {
+            bgGradient.addColorStop(0, '#F0F0F8');
+            bgGradient.addColorStop(0.5, '#E8E8F0');
+            bgGradient.addColorStop(1, '#E0E0E8');
+          }
+        }
+        
+        // 角丸矩形を描画
+        const cornerRadius = 20;
+        ctx.fillStyle = bgGradient;
+        ctx.beginPath();
+        ctx.moveTo(-boxWidth / 2 + cornerRadius, -boxHeight / 2);
+        ctx.lineTo(boxWidth / 2 - cornerRadius, -boxHeight / 2);
+        ctx.quadraticCurveTo(boxWidth / 2, -boxHeight / 2, boxWidth / 2, -boxHeight / 2 + cornerRadius);
+        ctx.lineTo(boxWidth / 2, boxHeight / 2 - cornerRadius);
+        ctx.quadraticCurveTo(boxWidth / 2, boxHeight / 2, boxWidth / 2 - cornerRadius, boxHeight / 2);
+        ctx.lineTo(-boxWidth / 2 + cornerRadius, boxHeight / 2);
+        ctx.quadraticCurveTo(-boxWidth / 2, boxHeight / 2, -boxWidth / 2, boxHeight / 2 - cornerRadius);
+        ctx.lineTo(-boxWidth / 2, -boxHeight / 2 + cornerRadius);
+        ctx.quadraticCurveTo(-boxWidth / 2, -boxHeight / 2, -boxWidth / 2 + cornerRadius, -boxHeight / 2);
+        ctx.closePath();
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        
+        // 内側のハイライト（上部）
+        const highlightGradient = ctx.createLinearGradient(0, -boxHeight / 2, 0, -boxHeight / 2 + 60);
+        highlightGradient.addColorStop(0, isDark ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.6)');
+        highlightGradient.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.fillStyle = highlightGradient;
+        ctx.beginPath();
+        ctx.moveTo(-boxWidth / 2 + cornerRadius, -boxHeight / 2);
+        ctx.lineTo(boxWidth / 2 - cornerRadius, -boxHeight / 2);
+        ctx.quadraticCurveTo(boxWidth / 2, -boxHeight / 2, boxWidth / 2, -boxHeight / 2 + cornerRadius);
+        ctx.lineTo(boxWidth / 2, -boxHeight / 2 + 60);
+        ctx.lineTo(-boxWidth / 2, -boxHeight / 2 + 60);
+        ctx.lineTo(-boxWidth / 2, -boxHeight / 2 + cornerRadius);
+        ctx.quadraticCurveTo(-boxWidth / 2, -boxHeight / 2, -boxWidth / 2 + cornerRadius, -boxHeight / 2);
+        ctx.closePath();
+        ctx.fill();
+        
+        // 枠線（グラデーション）
+        const borderGradient = ctx.createLinearGradient(-boxWidth / 2, -boxHeight / 2, boxWidth / 2, boxHeight / 2);
+        if (isGood) {
+          borderGradient.addColorStop(0, isDark ? '#C9A961' : '#FFD700');
+          borderGradient.addColorStop(0.5, isDark ? '#B8963D' : '#FFA500');
+          borderGradient.addColorStop(1, isDark ? '#C9A961' : '#FFD700');
+        } else {
+          borderGradient.addColorStop(0, isDark ? '#6B7280' : '#9CA3AF');
+          borderGradient.addColorStop(0.5, isDark ? '#4B5563' : '#6B7280');
+          borderGradient.addColorStop(1, isDark ? '#6B7280' : '#9CA3AF');
+        }
+        ctx.strokeStyle = borderGradient;
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(-boxWidth / 2 + cornerRadius, -boxHeight / 2);
+        ctx.lineTo(boxWidth / 2 - cornerRadius, -boxHeight / 2);
+        ctx.quadraticCurveTo(boxWidth / 2, -boxHeight / 2, boxWidth / 2, -boxHeight / 2 + cornerRadius);
+        ctx.lineTo(boxWidth / 2, boxHeight / 2 - cornerRadius);
+        ctx.quadraticCurveTo(boxWidth / 2, boxHeight / 2, boxWidth / 2 - cornerRadius, boxHeight / 2);
+        ctx.lineTo(-boxWidth / 2 + cornerRadius, boxHeight / 2);
+        ctx.quadraticCurveTo(-boxWidth / 2, boxHeight / 2, -boxWidth / 2, boxHeight / 2 - cornerRadius);
+        ctx.lineTo(-boxWidth / 2, -boxHeight / 2 + cornerRadius);
+        ctx.quadraticCurveTo(-boxWidth / 2, -boxHeight / 2, -boxWidth / 2 + cornerRadius, -boxHeight / 2);
+        ctx.closePath();
+        ctx.stroke();
+        
+        // 閉じるボタン（右上に×）
+        if (omikuji.phase === 'detail') {
+          const closeButtonSize = 40;
+          const closeButtonX = boxWidth / 2 - closeButtonSize / 2 - 10;
+          const closeButtonY = -boxHeight / 2 + closeButtonSize / 2 + 10;
+          
+          // ボタン背景（円形）
+          ctx.fillStyle = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
+          ctx.beginPath();
+          ctx.arc(closeButtonX, closeButtonY, closeButtonSize / 2, 0, Math.PI * 2);
+          ctx.fill();
+          
+          // ×マーク
+          ctx.strokeStyle = isDark ? '#FFFFFF' : '#333333';
+          ctx.lineWidth = 3;
+          ctx.lineCap = 'round';
+          const crossSize = 12;
+          ctx.beginPath();
+          ctx.moveTo(closeButtonX - crossSize / 2, closeButtonY - crossSize / 2);
+          ctx.lineTo(closeButtonX + crossSize / 2, closeButtonY + crossSize / 2);
+          ctx.moveTo(closeButtonX + crossSize / 2, closeButtonY - crossSize / 2);
+          ctx.lineTo(closeButtonX - crossSize / 2, closeButtonY + crossSize / 2);
+          ctx.stroke();
+        }
+        
+        // フェーズ別の描画
+        if (omikuji.phase === 'roulette') {
+          // ルーレット演出：運勢名が高速で変わる（回転演出なし）
+          const displayIndex = Math.floor(omikuji.rouletteIndex) % FORTUNES.length;
+          const rouletteText = FORTUNES[displayIndex].fortune;
+          
+          // 運勢タイトル（中立色、回転なし）
+          ctx.fillStyle = isDark ? '#FFFFFF' : '#333333';
+          ctx.font = `bold ${titleSize}px "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.shadowColor = isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)';
+          ctx.shadowBlur = 10;
+          ctx.fillText(rouletteText, 0, 0);
+          ctx.shadowBlur = 0;
+          
+        } else if (omikuji.phase === 'result') {
+          // 結果表示：運勢タイトルのみ大きく + 拡大アニメーション
+          const scaleAnim = Math.min((elapsed - 2.0) * 3, 1);
+          const scale = 0.8 + scaleAnim * 0.2;
+          
+          ctx.save();
+          ctx.scale(scale, scale);
+          
+          // グラデーションテキスト
+          const textGradient = ctx.createLinearGradient(-150, -titleSize / 2, 150, titleSize / 2);
+          if (isGood) {
+            textGradient.addColorStop(0, isDark ? '#FFD700' : '#FF6B6B');
+            textGradient.addColorStop(0.5, isDark ? '#FFA500' : '#FF8E53');
+            textGradient.addColorStop(1, isDark ? '#FFD700' : '#FFD700');
+          } else {
+            textGradient.addColorStop(0, isDark ? '#9CA3AF' : '#6B7280');
+            textGradient.addColorStop(0.5, isDark ? '#6B7280' : '#4B5563');
+            textGradient.addColorStop(1, isDark ? '#9CA3AF' : '#6B7280');
+          }
+          
+          ctx.fillStyle = textGradient;
+          ctx.font = `bold ${titleSize}px "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.shadowColor = isGood ? 'rgba(255,215,0,0.6)' : 'rgba(100,100,150,0.4)';
+          ctx.shadowBlur = 20;
+          ctx.fillText(omikuji.fortune, 0, -20);
+          ctx.shadowBlur = 0;
+          ctx.restore();
+          
+          // 「タップで詳細を表示」（センタリング）
+          const pulseAlpha = 0.5 + Math.sin(elapsed * 3) * 0.3;
+          ctx.globalAlpha = pulseAlpha;
+          ctx.fillStyle = isDark ? '#888888' : '#666666';
+          ctx.font = `${Math.floor(fontSize * 1.1)}px sans-serif`;
+          ctx.textAlign = 'center';
+          ctx.fillText('👆 タップで詳細を表示', 0, 50);
+          ctx.globalAlpha = 1;
+          
+        } else if (omikuji.phase === 'detail') {
+          // 詳細表示：すべての情報を表示
+          const contentStartY = -boxHeight / 2 + 70;
+          
+          // 運勢タイトル（resultと同じスタイル）
+          const textGradient = ctx.createLinearGradient(-150, -titleSize / 2, 150, titleSize / 2);
+          if (isGood) {
+            textGradient.addColorStop(0, isDark ? '#FFD700' : '#FF6B6B');
+            textGradient.addColorStop(0.5, isDark ? '#FFA500' : '#FF8E53');
+            textGradient.addColorStop(1, isDark ? '#FFD700' : '#FFD700');
+          } else {
+            textGradient.addColorStop(0, isDark ? '#9CA3AF' : '#6B7280');
+            textGradient.addColorStop(0.5, isDark ? '#6B7280' : '#4B5563');
+            textGradient.addColorStop(1, isDark ? '#9CA3AF' : '#6B7280');
+          }
+          
+          ctx.fillStyle = textGradient;
+          ctx.font = `bold ${titleSize}px "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'top';
+          ctx.shadowColor = isGood ? 'rgba(255,215,0,0.6)' : 'rgba(100,100,150,0.4)';
+          ctx.shadowBlur = 20;
+          ctx.fillText(omikuji.fortune, 0, contentStartY);
+          ctx.shadowBlur = 0;
+          
+          // メッセージ（折り返し対応、文字を大きく）
+          ctx.fillStyle = isDark ? '#E5E5E5' : '#333333';
+          ctx.font = `${Math.floor(fontSize * 1.15)}px "Noto Sans JP", "Hiragino Kaku Gothic ProN", sans-serif`;
+          const lines = omikuji.message.split('\n');
+          const lineHeight = Math.floor(fontSize * 1.6);
+          let messageY = contentStartY + 60;
+          
+          lines.forEach((line) => {
+            // 長い行を折り返し
+            const maxWidth = boxWidth - 60;
+            const words = line.split('');
+            let currentLine = '';
+            let testLine = '';
+            
+            for (let i = 0; i < words.length; i++) {
+              testLine += words[i];
+              const metrics = ctx.measureText(testLine);
+              if (metrics.width > maxWidth && currentLine.length > 0) {
+                ctx.fillText(currentLine, 0, messageY);
+                messageY += lineHeight;
+                currentLine = words[i];
+                testLine = words[i];
+              } else {
+                currentLine += words[i];
+              }
+            }
+            if (currentLine.length > 0) {
+              ctx.fillText(currentLine, 0, messageY);
+              messageY += lineHeight;
+            }
+          });
+          
+          // ラッキーアイテム（かわいいアイコン付き）
+          const itemY = boxHeight / 2 - 120;
+          ctx.fillStyle = isGood 
+            ? (isDark ? '#C9A961' : '#FF8E53')
+            : (isDark ? '#777777' : '#666666');
+          ctx.font = `bold ${Math.floor(fontSize * 1.1)}px sans-serif`;
+          ctx.fillText('🍀 ラッキーアイテム', 0, itemY);
+          
+          ctx.fillStyle = isDark ? '#FFD700' : '#FF6B6B';
+          ctx.font = `bold ${Math.floor(fontSize * 1.3)}px "Noto Sans JP", sans-serif`;
+          ctx.fillText(omikuji.luckyItem, 0, itemY + 30);
+          
+          // コイン効果表示（強調）
+          if (omikuji.coinEffect !== 0) {
+            const coinY = boxHeight / 2 - 60;
+            const coinColor = omikuji.coinEffect > 0 ? '#4CAF50' : '#F44336';
+            
+            // コインアイコン
+            ctx.fillStyle = coinColor;
+            ctx.font = `bold ${Math.floor(fontSize * 1.2)}px sans-serif`;
+            const coinText = omikuji.coinEffect > 0 
+              ? `💰 +${omikuji.coinEffect.toLocaleString()}コイン！` 
+              : `💸 ${omikuji.coinEffect.toLocaleString()}コイン`;
+            
+            // グロー効果
+            ctx.shadowColor = coinColor;
+            ctx.shadowBlur = 10;
+            ctx.fillText(coinText, 0, coinY);
+            ctx.shadowBlur = 0;
+          }
+        }
+        
+        ctx.restore();
+      });
+    }
+
     // バルーンアニメーションの描画
     if (balloonAnimations.length > 0) {
       balloonAnimations.forEach((anim) => {
@@ -4392,7 +4825,7 @@ export default function Home() {
     if (obj.Animation && obj.Animation.trim()) {
       const anim = obj.Animation.toLowerCase();
       if ([
-        'fireworks', 'sparkle', 'beartrap', 'birthday', 'cherryblossom', 'meteor', 'coin', 'slot', 'fishquiz', 'yojijukugo', 'englishquiz', 'musclequiz', 'cat',
+        'fireworks', 'sparkle', 'beartrap', 'birthday', 'cherryblossom', 'meteor', 'coin', 'slot', 'fishquiz', 'yojijukugo', 'englishquiz', 'musclequiz', 'cat', 'omikuji',
         'balloon', 'aurora', 'butterfly', 'shootingstar', 'autumnleaves', 'snow', 'confetti', 'rainbow', 'rain', 'magiccircle',
         'flame', 'thunder', 'wave', 'wind', 'smoke', 'tornado', 'gem', 'startrail', 'lightparticle', 'spiral',
         'bird', 'ghost', 'bee', 'firefly', 'explosion', 'target', 'anger', 'petal', 'sunflower', 'rose',
@@ -4687,6 +5120,132 @@ export default function Home() {
       }
       return newTotal;
     });
+  };
+
+  // おみくじ確認ウィンドウを表示
+  const showOmikujiConfirm = (obj: Obj) => {
+    // コインが100枚未満なら実行しない
+    if (totalCoins < 100) {
+      setToastMessage('⚠️ おみくじに必要なコイン数が不足です（100枚必要）');
+      return;
+    }
+    
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
+    const rect = canvas.getBoundingClientRect();
+    const viewW = rect.width;
+    const viewH = rect.height;
+    
+    const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell;
+    const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell;
+    const screen = mapToScreen(objMapX, objMapY, viewW, viewH);
+    
+    setOmikujiConfirms([{
+      x: viewW / 2,
+      y: viewH / 2,
+      startTime: Date.now(),
+      cityLabel: obj.label || '都市',
+    }]);
+  };
+
+  // おみくじアニメーション開始（確認ウィンドウから呼ばれる）
+  const startOmikujiAnimation = () => {
+    // コインが100枚未満なら実行しない
+    if (totalCoins < 100) {
+      alert('おみくじを引くには100コインが必要です！');
+      setOmikujiConfirms([]);
+      return;
+    }
+
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
+    const rect = canvas.getBoundingClientRect();
+    const viewW = rect.width;
+    const viewH = rect.height;
+    
+    const startX = viewW / 2;
+    const startY = viewH / 2;
+    
+    // おみくじを引く（100コイン消費）
+    setTotalCoins(prev => {
+      const newTotal = prev - 100;
+      try {
+        localStorage.setItem('totalCoins', newTotal.toString());
+      } catch (e) {
+        console.error('Failed to save totalCoins:', e);
+      }
+      return newTotal;
+    });
+    
+    // 確認ウィンドウを閉じる
+    setOmikujiConfirms([]);
+    
+    // おみくじ結果を取得
+    const { result, message, luckyItem } = drawOmikuji();
+    
+    // パーティクル生成
+    const particles: Array<{
+      x: number;
+      y: number;
+      vx: number;
+      vy: number;
+      life: number;
+      color: string;
+      size: number;
+    }> = [];
+    
+    // 運勢レベルに応じた色とパーティクル数
+    const isGood = result.level >= 16;
+    const particleCount = Math.floor(result.level * 2); // レベルに応じて増加
+    const colors = isGood 
+      ? ['#FFD700', '#FFA500', '#FF69B4', '#00CED1', '#7FFF00'] // 良い運勢は明るい色
+      : ['#696969', '#808080', '#A9A9A9', '#778899', '#2F4F4F']; // 悪い運勢は暗い色
+    
+    for (let i = 0; i < particleCount; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = 2 + Math.random() * 3;
+      particles.push({
+        x: 0,
+        y: 0,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        life: 1.0,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        size: 2 + Math.random() * 3,
+      });
+    }
+    
+    // おみくじアニメーションを追加（ルーレット演出付き）
+    setOmikujiAnimations(prev => [...prev, {
+      x: startX,
+      y: startY,
+      phase: 'roulette',
+      progress: 0,
+      startTime: Date.now(),
+      fortune: result.fortune,
+      level: result.level,
+      message: message,
+      luckyItem: luckyItem,
+      coinEffect: result.coinEffect,
+      rouletteIndex: 0,
+      rouletteSpeed: 20, // 初期速度
+      particles: particles,
+    }]);
+    
+    // コイン効果を適用（3秒後に適用）
+    setTimeout(() => {
+      setTotalCoins(prev => {
+        const newTotal = Math.max(0, prev + result.coinEffect);
+        try {
+          localStorage.setItem('totalCoins', newTotal.toString());
+        } catch (e) {
+          console.error('Failed to save totalCoins:', e);
+        }
+        return newTotal;
+      });
+    }, 3000);
   };
 
   // スロットアニメーション開始
@@ -6222,6 +6781,90 @@ export default function Home() {
       }
     };
   }, [catAnimations.length > 0 ? catAnimations[0]?.startTime : 0, bearTrapMaxDamage]);
+
+  // おみくじアニメーションループ
+  useEffect(() => {
+    if (omikujiAnimations.length === 0) return;
+
+    let animationId: number | null = null;
+    
+    const animate = () => {
+      setOmikujiAnimations(prev => {
+        if (prev.length === 0) return prev;
+        
+        const now = Date.now();
+        const updated = prev.map(omikuji => {
+          const elapsed = (now - omikuji.startTime) / 1000;
+          
+          // パーティクル更新
+          const updatedParticles = omikuji.particles.map(p => ({
+            ...p,
+            x: p.x + p.vx,
+            y: p.y + p.vy,
+            vy: p.vy + 0.1, // 重力
+            life: p.life - 0.01,
+          })).filter(p => p.life > 0);
+          
+          // フェーズ管理
+          let newPhase = omikuji.phase;
+          let newProgress = omikuji.progress;
+          let newRouletteIndex = omikuji.rouletteIndex;
+          let newRouletteSpeed = omikuji.rouletteSpeed;
+          
+          if (omikuji.phase === 'roulette') {
+            // ルーレット演出：2秒間回転して減速
+            const rouletteDuration = 2.0;
+            newProgress = Math.min(elapsed / rouletteDuration, 1);
+            
+            // 速度を徐々に減速（イージングアウト）
+            const deceleration = 1 - Math.pow(newProgress, 2);
+            newRouletteSpeed = 20 * deceleration + 0.5;
+            newRouletteIndex += newRouletteSpeed;
+            
+            if (newProgress >= 1) {
+              // ルーレット終了、結果表示へ
+              newPhase = 'result';
+              newProgress = 0;
+            }
+          } else if (omikuji.phase === 'result') {
+            // 結果表示：3秒後に自動でdetailへ遷移
+            const resultDuration = 3.0;
+            newProgress = elapsed;
+            
+            if (newProgress >= resultDuration) {
+              newPhase = 'detail';
+              newProgress = 0;
+            }
+          } else if (omikuji.phase === 'detail') {
+            // 詳細表示：クリックで閉じる待ち
+            newProgress = 1;
+          }
+          
+          return {
+            ...omikuji,
+            phase: newPhase,
+            progress: newProgress,
+            rouletteIndex: newRouletteIndex,
+            rouletteSpeed: newRouletteSpeed,
+            particles: updatedParticles,
+          };
+        });
+        
+        return updated;
+      });
+      
+      requestDraw();
+      animationId = requestAnimationFrame(animate);
+    };
+
+    animationId = requestAnimationFrame(animate);
+
+    return () => {
+      if (animationId !== null) {
+        cancelAnimationFrame(animationId);
+      }
+    };
+  }, [omikujiAnimations.length > 0, requestDraw]);
 
   // バルーンアニメーションループ
   useEffect(() => {
@@ -7869,6 +8512,117 @@ export default function Home() {
   };
 
   const onPointerUp = (e: React.PointerEvent) => {
+    // おみくじ確認ウィンドウのクリック処理
+    if (omikujiConfirms.length > 0) {
+      const canvas = canvasRef.current;
+      if (canvas) {
+        const rect = canvas.getBoundingClientRect();
+        const sx = e.clientX - rect.left;
+        const sy = e.clientY - rect.top;
+        const confirm = omikujiConfirms[0];
+        
+        const boxWidth = Math.min(400, rect.width * 0.85);
+        const boxHeight = 200;
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        
+        // ボタン1: おみくじを引く
+        const btn1Width = 150;
+        const btn1Height = 45;
+        const btn1X = centerX - 80;
+        const btn1Y = centerY + 30;
+        
+        if (sx >= btn1X - btn1Width / 2 && sx <= btn1X + btn1Width / 2 &&
+            sy >= btn1Y - btn1Height / 2 && sy <= btn1Y + btn1Height / 2) {
+          // おみくじを引くボタンをクリック
+          startOmikujiAnimation();
+          return;
+        }
+        
+        // ボタン2: やめとく
+        const btn2Width = 120;
+        const btn2Height = 45;
+        const btn2X = centerX + 80;
+        const btn2Y = centerY + 30;
+        
+        if (sx >= btn2X - btn2Width / 2 && sx <= btn2X + btn2Width / 2 &&
+            sy >= btn2Y - btn2Height / 2 && sy <= btn2Y + btn2Height / 2) {
+          // やめとくボタンをクリック
+          setOmikujiConfirms([]);
+          return;
+        }
+        
+        // ウィンドウ外をクリック → 閉じる
+        const windowLeft = centerX - boxWidth / 2;
+        const windowRight = centerX + boxWidth / 2;
+        const windowTop = centerY - boxHeight / 2;
+        const windowBottom = centerY + boxHeight / 2;
+        
+        if (sx < windowLeft || sx > windowRight || sy < windowTop || sy > windowBottom) {
+          setOmikujiConfirms([]);
+          return;
+        }
+      }
+      return; // 確認ウィンドウ表示中は他の処理をスキップ
+    }
+    
+    // おみくじ表示中のクリック処理
+    if (omikujiAnimations.length > 0) {
+      const canvas = canvasRef.current;
+      if (canvas) {
+        const rect = canvas.getBoundingClientRect();
+        const sx = e.clientX - rect.left;
+        const sy = e.clientY - rect.top;
+        const omikuji = omikujiAnimations[0];
+        
+        // 画面中央基準での計算
+        const baseWidth = Math.min(500, rect.width * 0.9);
+        const baseHeight = omikuji.phase === 'roulette' ? 200 : (omikuji.phase === 'result' ? 250 : Math.min(600, rect.height * 0.8));
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        
+        const omikujiLeft = centerX - baseWidth / 2;
+        const omikujiRight = centerX + baseWidth / 2;
+        const omikujiTop = centerY - baseHeight / 2;
+        const omikujiBottom = centerY + baseHeight / 2;
+        
+        const isInOmikujiArea = sx >= omikujiLeft && sx <= omikujiRight && sy >= omikujiTop && sy <= omikujiBottom;
+        
+        if (isInOmikujiArea) {
+          // おみくじ範囲内のクリック
+          if (omikuji.phase === 'result') {
+            // result フェーズ → detail フェーズへ遷移（手動でも可能）
+            setOmikujiAnimations(prev => prev.map(o => 
+              o === omikuji ? { ...o, phase: 'detail', progress: 0, startTime: Date.now() } : o
+            ));
+          } else if (omikuji.phase === 'detail') {
+            // 閉じるボタンの範囲チェック（右上の×ボタン）
+            const closeButtonSize = 40;
+            const closeButtonX = centerX + baseWidth / 2 - closeButtonSize / 2 - 10;
+            const closeButtonY = centerY - baseHeight / 2 + closeButtonSize / 2 + 10;
+            
+            const distToCloseButton = Math.hypot(sx - closeButtonX, sy - closeButtonY);
+            
+            if (distToCloseButton <= closeButtonSize / 2) {
+              // 閉じるボタンをクリック → おみくじを閉じる
+              setOmikujiAnimations(prev => prev.filter(o => o !== omikuji));
+            }
+            // ×ボタン以外の部分をクリック → 何もしない（閉じない）
+          }
+          // roulette フェーズ中はクリックを無視
+          
+          // おみくじ内のクリックは以降の処理をスキップ
+          if (longPressTimerRef.current) {
+            clearTimeout(longPressTimerRef.current);
+            longPressTimerRef.current = null;
+          }
+          pointerStartRef.current = null;
+          pointersRef.current.delete(e.pointerId);
+          return;
+        }
+      }
+    }
+    
     // スロットマシン表示中はオブジェクト選択を完全にブロック
     if (slotAnimations.length > 0) {
       const canvas = canvasRef.current;
@@ -8293,7 +9047,7 @@ export default function Home() {
       let actualAnimationType = animationType;
       if (animationType === 'random') {
         const allAnimations = [
-          'fireworks', 'sparkle', 'beartrap', 'birthday', 'cherryblossom', 'meteor', 'coin', 'slot', 'fishquiz', 'yojijukugo', 'englishquiz', 'musclequiz', 'cat',
+          'fireworks', 'sparkle', 'beartrap', 'birthday', 'cherryblossom', 'meteor', 'coin', 'slot', 'fishquiz', 'yojijukugo', 'englishquiz', 'musclequiz', 'cat', 'omikuji',
           'balloon', 'aurora', 'butterfly', 'shootingstar', 'autumnleaves', 'snow', 'confetti', 'rainbow', 'rain', 'magiccircle',
           'flame', 'thunder', 'wave', 'wind', 'smoke', 'tornado', 'gem', 'startrail', 'lightparticle', 'spiral',
           'bird', 'ghost', 'bee', 'firefly', 'explosion', 'target', 'anger', 'petal', 'sunflower', 'rose'
@@ -8384,6 +9138,9 @@ export default function Home() {
           const randomTarget = visibleObjects[Math.floor(Math.random() * visibleObjects.length)];
           startCatAnimation(hit, randomTarget);
         }
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'omikuji') {
+        showOmikujiConfirm(hit);
         setSelectedId(hit?.id ? String(hit.id) : null);
       } else if (actualAnimationType === 'balloon') {
         const canvas = canvasRef.current;
@@ -11668,6 +12425,7 @@ export default function Home() {
                       <option value="englishquiz">📖 英単語クイズ</option>
                       <option value="musclequiz">💪 筋肉クイズ</option>
                       <option value="cat">🐱 猫</option>
+                      <option value="omikuji">🎎 おみくじ</option>
                       <option value="balloon">🎈 バルーン</option>
                       <option value="aurora">💫 オーロラ</option>
                       <option value="butterfly">🦋 蝶々</option>
@@ -11759,6 +12517,10 @@ export default function Home() {
                               setIsTestingAnimation(false);
                               return;
                             }
+                          }
+                          else if (animType === 'omikuji') {
+                            // テスト用：確認ウィンドウなしで直接開始
+                            startOmikujiAnimation();
                           }
                           else if (animType === 'balloon') startBalloonAnimation(centerX, centerY);
                           else if (animType === 'aurora') startAuroraAnimation();
