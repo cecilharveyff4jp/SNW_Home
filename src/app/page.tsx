@@ -14494,7 +14494,7 @@ export default function Home() {
                 }}>
                   🐟
                 </div>
-                <h2 style={{ fontSize: "24px", color: "#333" }}>
+                <h2 style={{ fontSize: "24px", color: "#000" }}>
                   問題を準備中...
                 </h2>
               </div>
@@ -14531,7 +14531,7 @@ export default function Home() {
                   <div style={{
                     fontSize: "120px",
                     fontWeight: "bold",
-                    color: "#333",
+                    color: "#000",
                     marginBottom: "15px",
                   }}>
                     {fishQuiz.question.kanji}
@@ -15373,7 +15373,7 @@ export default function Home() {
                         borderRadius: "12px",
                         cursor: "pointer",
                         transition: "all 0.2s",
-                        color: "#333",
+                        color: "#000",
                       }}
                       onMouseEnter={(e) => {
                         e.currentTarget.style.transform = "scale(1.02)";
@@ -15521,7 +15521,7 @@ export default function Home() {
                     fontSize: "18px",
                     fontWeight: "bold",
                     background: "rgba(255,255,255,0.7)",
-                    color: "#333",
+                    color: "#000",
                     border: "none",
                     borderRadius: "50px",
                     cursor: "pointer",
@@ -15553,7 +15553,7 @@ export default function Home() {
                     fontSize: "18px",
                     fontWeight: "bold",
                     background: "rgba(255,255,255,0.9)",
-                    color: "#333",
+                    color: "#000",
                     border: "none",
                     borderRadius: "50px",
                     cursor: "pointer",
