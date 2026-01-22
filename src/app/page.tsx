@@ -19,6 +19,10 @@ import { FISH_QUESTIONS, type FishQuestion } from './data/fishQuestions';
 import { YOJIJUKUGO_QUESTIONS, type YojijukugoQuestion } from './data/yojijukugoQuestions';
 import { ENGLISH_QUESTIONS, type EnglishQuestion } from './data/englishQuestions';
 import { MUSCLE_QUESTIONS, type MuscleQuestion } from './data/muscleQuestions';
+import { MOVIE_QUESTIONS, type MovieQuestion } from './data/movieQuestions';
+import { RAMEN_QUESTIONS, type RamenQuestion } from './data/ramenQuestions';
+import { HERITAGE_QUESTIONS, type HeritageQuestion } from './data/heritageQuestions';
+import { SWEETS_QUESTIONS, type SweetsQuestion } from './data/sweetsQuestions';
 import { drawOmikuji, FORTUNES } from './data/omikujiData';
 
 // クイズUIコンポーネントのインポート
@@ -26,6 +30,10 @@ import FishQuizUI from './components/quizzes/FishQuizUI';
 import YojijukugoQuizUI from './components/quizzes/YojijukugoQuizUI';
 import EnglishQuizUI from './components/quizzes/EnglishQuizUI';
 import MuscleQuizUI from './components/quizzes/MuscleQuizUI';
+import MovieQuizUI from './components/quizzes/MovieQuizUI';
+import RamenQuizUI from './components/quizzes/RamenQuizUI';
+import HeritageQuizUI from './components/quizzes/HeritageQuizUI';
+import SweetsQuizUI from './components/quizzes/SweetsQuizUI';
 
 // アニメーション型定義のインポート
 import type {
@@ -40,6 +48,10 @@ import type {
   YojijukugoState,
   EnglishQuizState,
   MuscleQuizState,
+  MovieQuizState,
+  RamenQuizState,
+  HeritageQuizState,
+  SweetsQuizState,
   BalloonAnimation,
   AuroraAnimation,
   ButterflyAnimation,
@@ -73,7 +85,67 @@ import type {
   SoldierAnimation,
   CatAnimation,
   OmikujiConfirmAnimation,
-  OmikujiAnimation
+  OmikujiAnimation,
+  BubbleAnimation,
+  MusicNoteAnimation,
+  HeartAnimation,
+  ConstellationAnimation,
+  ElectricAnimation,
+  IceAnimation,
+  SakuraAnimation,
+  DandelionAnimation,
+  CrownAnimation,
+  DragonBreathAnimation,
+  MoonbeamAnimation,
+  PrismAnimation,
+  PortalAnimation,
+  AuraBeamAnimation,
+  ChainLightningAnimation,
+  NeonSignAnimation,
+  LaserBeamAnimation,
+  HologramAnimation,
+  CyberCircleAnimation,
+  PixelExplosionAnimation,
+  GlitchAnimation,
+  SandstormAnimation,
+  ClockAnimation,
+  GearAnimation,
+  DNAHelixAnimation,
+  ShieldAnimation,
+  EnergyBallAnimation,
+  TeleportAnimation,
+  PeachBlossomAnimation,
+  HydrangeaAnimation,
+  PlumeBlossomAnimation,
+  LotusAnimation,
+  BambooAnimation,
+  LanternAnimation,
+  KoinoboriAnimation,
+  MilkyWayAnimation,
+  SunAnimation,
+  PlanetAnimation,
+  GalaxyAnimation,
+  CometAnimation,
+  BlackHoleAnimation,
+  SupernovaAnimation,
+  WarpAnimation,
+  UFOAnimation,
+  AlienAnimation,
+  RobotAnimation,
+  MechanicalAnimation,
+  FactoryAnimation,
+  RainbowBridgeAnimation,
+  CloudAnimation,
+  FogAnimation,
+  StormAnimation,
+  TsunamiAnimation,
+  EarthquakeAnimation,
+  VolcanoAnimation,
+  OceanAnimation,
+  WaterfallAnimation,
+  OnsenAnimation,
+  CampfireAnimation,
+  TreasureChestAnimation
 } from './types/animations';
 
 export default function Home() {
@@ -209,6 +281,10 @@ export default function Home() {
   const [yojijukugoQuizConsecutiveCorrect, setYojijukugoQuizConsecutiveCorrect] = useState<number>(0);
   const [englishQuizConsecutiveCorrect, setEnglishQuizConsecutiveCorrect] = useState<number>(0);
   const [muscleQuizConsecutiveCorrect, setMuscleQuizConsecutiveCorrect] = useState<number>(0);
+  const [movieQuizConsecutiveCorrect, setMovieQuizConsecutiveCorrect] = useState<number>(0);
+  const [ramenQuizConsecutiveCorrect, setRamenQuizConsecutiveCorrect] = useState<number>(0);
+  const [heritageQuizConsecutiveCorrect, setHeritageQuizConsecutiveCorrect] = useState<number>(0);
+  const [sweetsQuizConsecutiveCorrect, setSweetsQuizConsecutiveCorrect] = useState<number>(0);
 
   // スロットアニメーション用
   const [slotAnimations, setSlotAnimations] = useState<SlotAnimation[]>([]);
@@ -225,6 +301,18 @@ export default function Home() {
 
   // 筋肉クイズアニメーション用
   const [muscleQuiz, setMuscleQuiz] = useState<MuscleQuizState | null>(null);
+
+  // 映画クイズアニメーション用
+  const [movieQuiz, setMovieQuiz] = useState<MovieQuizState | null>(null);
+
+  // ラーメンクイズアニメーション用
+  const [ramenQuiz, setRamenQuiz] = useState<RamenQuizState | null>(null);
+
+  // 世界遺産クイズアニメーション用
+  const [heritageQuiz, setHeritageQuiz] = useState<HeritageQuizState | null>(null);
+
+  // スイーツクイズアニメーション用
+  const [sweetsQuiz, setSweetsQuiz] = useState<SweetsQuizState | null>(null);
 
   // 猫アニメーション用
   const [catAnimations, setCatAnimations] = useState<CatAnimation[]>([]);
@@ -359,6 +447,68 @@ export default function Home() {
   // バラアニメーション用
   const [roseAnimations, setRoseAnimations] = useState<RoseAnimation[]>([]);
   const roseAnimationRef = useRef<number | null>(null);
+
+  // 新アニメーション用状態（60種類）
+  const [bubbleAnimations, setBubbleAnimations] = useState<BubbleAnimation[]>([]);
+  const [musicNoteAnimations, setMusicNoteAnimations] = useState<MusicNoteAnimation[]>([]);
+  const [heartAnimations, setHeartAnimations] = useState<HeartAnimation[]>([]);
+  const [constellationAnimations, setConstellationAnimations] = useState<ConstellationAnimation[]>([]);
+  const [electricAnimations, setElectricAnimations] = useState<ElectricAnimation[]>([]);
+  const [iceAnimations, setIceAnimations] = useState<IceAnimation[]>([]);
+  const [sakuraAnimations, setSakuraAnimations] = useState<SakuraAnimation[]>([]);
+  const [dandelionAnimations, setDandelionAnimations] = useState<DandelionAnimation[]>([]);
+  const [crownAnimations, setCrownAnimations] = useState<CrownAnimation[]>([]);
+  const [dragonBreathAnimations, setDragonBreathAnimations] = useState<DragonBreathAnimation[]>([]);
+  const [moonbeamAnimations, setMoonbeamAnimations] = useState<MoonbeamAnimation[]>([]);
+  const [prismAnimations, setPrismAnimations] = useState<PrismAnimation[]>([]);
+  const [portalAnimations, setPortalAnimations] = useState<PortalAnimation[]>([]);
+  const [auraBeamAnimations, setAuraBeamAnimations] = useState<AuraBeamAnimation[]>([]);
+  const [chainLightningAnimations, setChainLightningAnimations] = useState<ChainLightningAnimation[]>([]);
+  const [neonSignAnimations, setNeonSignAnimations] = useState<NeonSignAnimation[]>([]);
+  const [laserBeamAnimations, setLaserBeamAnimations] = useState<LaserBeamAnimation[]>([]);
+  const [hologramAnimations, setHologramAnimations] = useState<HologramAnimation[]>([]);
+  const [cyberCircleAnimations, setCyberCircleAnimations] = useState<CyberCircleAnimation[]>([]);
+  const [pixelExplosionAnimations, setPixelExplosionAnimations] = useState<PixelExplosionAnimation[]>([]);
+  const [glitchAnimations, setGlitchAnimations] = useState<GlitchAnimation[]>([]);
+  const [sandstormAnimations, setSandstormAnimations] = useState<SandstormAnimation[]>([]);
+  const [clockAnimations, setClockAnimations] = useState<ClockAnimation[]>([]);
+  const [gearAnimations, setGearAnimations] = useState<GearAnimation[]>([]);
+  const [dnaHelixAnimations, setDNAHelixAnimations] = useState<DNAHelixAnimation[]>([]);
+  const [shieldAnimations, setShieldAnimations] = useState<ShieldAnimation[]>([]);
+  const [energyBallAnimations, setEnergyBallAnimations] = useState<EnergyBallAnimation[]>([]);
+  const [teleportAnimations, setTeleportAnimations] = useState<TeleportAnimation[]>([]);
+  const [peachBlossomAnimations, setPeachBlossomAnimations] = useState<PeachBlossomAnimation[]>([]);
+  const [hydrangeaAnimations, setHydrangeaAnimations] = useState<HydrangeaAnimation[]>([]);
+  const [plumeBlossomAnimations, setPlumeBlossomAnimations] = useState<PlumeBlossomAnimation[]>([]);
+  const [lotusAnimations, setLotusAnimations] = useState<LotusAnimation[]>([]);
+  const [bambooAnimations, setBambooAnimations] = useState<BambooAnimation[]>([]);
+  const [lanternAnimations, setLanternAnimations] = useState<LanternAnimation[]>([]);
+  const [koinoboriAnimations, setKoinoboriAnimations] = useState<KoinoboriAnimation[]>([]);
+  const [milkyWayAnimations, setMilkyWayAnimations] = useState<MilkyWayAnimation[]>([]);
+  const [sunAnimations, setSunAnimations] = useState<SunAnimation[]>([]);
+  const [planetAnimations, setPlanetAnimations] = useState<PlanetAnimation[]>([]);
+  const [galaxyAnimations, setGalaxyAnimations] = useState<GalaxyAnimation[]>([]);
+  const [cometAnimations, setCometAnimations] = useState<CometAnimation[]>([]);
+  const [blackHoleAnimations, setBlackHoleAnimations] = useState<BlackHoleAnimation[]>([]);
+  const [supernovaAnimations, setSupernovaAnimations] = useState<SupernovaAnimation[]>([]);
+  const [warpAnimations, setWarpAnimations] = useState<WarpAnimation[]>([]);
+  const [ufoAnimations, setUFOAnimations] = useState<UFOAnimation[]>([]);
+  const [alienAnimations, setAlienAnimations] = useState<AlienAnimation[]>([]);
+  const [robotAnimations, setRobotAnimations] = useState<RobotAnimation[]>([]);
+  const [mechanicalAnimations, setMechanicalAnimations] = useState<MechanicalAnimation[]>([]);
+  const [factoryAnimations, setFactoryAnimations] = useState<FactoryAnimation[]>([]);
+  const [rainbowBridgeAnimations, setRainbowBridgeAnimations] = useState<RainbowBridgeAnimation[]>([]);
+  const [cloudAnimations, setCloudAnimations] = useState<CloudAnimation[]>([]);
+  const [fogAnimations, setFogAnimations] = useState<FogAnimation[]>([]);
+  const [stormAnimations, setStormAnimations] = useState<StormAnimation[]>([]);
+  const [tsunamiAnimations, setTsunamiAnimations] = useState<TsunamiAnimation[]>([]);
+  const [earthquakeAnimations, setEarthquakeAnimations] = useState<EarthquakeAnimation[]>([]);
+  const [volcanoAnimations, setVolcanoAnimations] = useState<VolcanoAnimation[]>([]);
+  const [oceanAnimations, setOceanAnimations] = useState<OceanAnimation[]>([]);
+  const [waterfallAnimations, setWaterfallAnimations] = useState<WaterfallAnimation[]>([]);
+  const [onsenAnimations, setOnsenAnimations] = useState<OnsenAnimation[]>([]);
+  const [campfireAnimations, setCampfireAnimations] = useState<CampfireAnimation[]>([]);
+  const [treasureChestAnimations, setTreasureChestAnimations] = useState<TreasureChestAnimation[]>([]);
 
   // カメラ：パン(tx,ty)は「画面座標系」での移動量（ピクセル）、scaleは倍率
   // 初期ズーム: 統一して1.0でスタート（SSRハイドレーションエラー回避）
@@ -4190,6 +4340,387 @@ export default function Home() {
       });
     });
 
+    // バブルアニメーション
+    bubbleAnimations.forEach(anim => {
+      const { sx, sy } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH);
+      anim.bubbles.forEach(p => {
+        ctx.save();
+        ctx.globalAlpha = p.life * 0.6;
+        ctx.strokeStyle = '#88ccff';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(sx + p.offsetX, sy + p.offsetY, p.size, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.fillStyle = 'rgba(136, 204, 255, 0.2)';
+        ctx.fill();
+        ctx.restore();
+      });
+    });
+
+    // 音符アニメーション
+    musicNoteAnimations.forEach(anim => {
+      const { sx, sy } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH);
+      anim.notes.forEach(n => {
+        ctx.save();
+        ctx.globalAlpha = n.life;
+        ctx.font = `${n.size}px serif`;
+        ctx.fillStyle = '#000000';
+        ctx.fillText(n.noteType, sx + n.offsetX, sy + n.offsetY);
+        ctx.restore();
+      });
+    });
+
+    // ハートアニメーション
+    heartAnimations.forEach(anim => {
+      const { sx, sy } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH);
+      anim.hearts.forEach(h => {
+        ctx.save();
+        ctx.globalAlpha = h.life;
+        ctx.font = `${h.size}px serif`;
+        ctx.fillStyle = h.color;
+        ctx.fillText('❤', sx + h.offsetX, sy + h.offsetY);
+        ctx.restore();
+      });
+    });
+
+    // 桜アニメーション
+    sakuraAnimations.forEach(anim => {
+      const { sx, sy } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH);
+      anim.petals.forEach(p => {
+        ctx.save();
+        ctx.translate(sx + p.offsetX, sy + p.offsetY);
+        ctx.rotate(p.rotation);
+        ctx.globalAlpha = p.life;
+        ctx.fillStyle = '#ffb7c5';
+        ctx.beginPath();
+        ctx.ellipse(0, 0, p.size, p.size * 1.5, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      });
+    });
+
+    // ポータルアニメーション
+    portalAnimations.forEach(anim => {
+      const elapsed = (Date.now() - anim.startTime) / 1000;
+      const alpha = Math.max(0, 1 - elapsed / 5);
+      const { sx, sy } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH);
+      anim.particles.forEach(p => {
+        const x = sx + Math.cos(p.angle + elapsed) * p.radius;
+        const y = sy + Math.sin(p.angle + elapsed) * p.radius;
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle = p.color;
+        ctx.shadowColor = p.color;
+        ctx.shadowBlur = 10;
+        ctx.beginPath();
+        ctx.arc(x, y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      });
+    });
+
+    // ホログラムアニメーション
+    hologramAnimations.forEach(anim => {
+      const { sx, sy } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH);
+      ctx.save();
+      ctx.globalAlpha = anim.life * 0.5;
+      anim.scanlines.forEach(s => {
+        ctx.strokeStyle = '#00ffff';
+        ctx.lineWidth = 1;
+        ctx.globalAlpha = s.opacity;
+        ctx.beginPath();
+        ctx.moveTo(sx - 50, sy + s.offsetY - 50);
+        ctx.lineTo(sx + 50, sy + s.offsetY - 50);
+        ctx.stroke();
+      });
+      ctx.restore();
+    });
+
+    // 電撃アニメーション
+    electricAnimations.forEach(anim => {
+      const { sx, sy } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH);
+      anim.bolts.forEach(b => {
+        ctx.save();
+        ctx.globalAlpha = b.life;
+        ctx.strokeStyle = '#ffff00';
+        ctx.lineWidth = b.thickness;
+        ctx.shadowColor = '#ffff00';
+        ctx.shadowBlur = 15;
+        ctx.beginPath();
+        b.segments.forEach((pt, i) => {
+          if (i === 0) ctx.moveTo(sx + pt.x, sy + pt.y);
+          else ctx.lineTo(sx + pt.x, sy + pt.y);
+        });
+        ctx.stroke();
+        ctx.restore();
+      });
+    });
+
+    // 氷アニメーション
+    iceAnimations.forEach(anim => {
+      const { sx, sy } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH);
+      anim.crystals.forEach(c => {
+        ctx.save();
+        ctx.globalAlpha = c.opacity;
+        ctx.strokeStyle = '#aaddff';
+        ctx.lineWidth = 2;
+        ctx.translate(sx + c.offsetX, sy + c.offsetY);
+        ctx.rotate(c.rotation);
+        ctx.beginPath();
+        for (let i = 0; i < 6; i++) {
+          const angle = (Math.PI / 3) * i;
+          const x = Math.cos(angle) * c.size;
+          const y = Math.sin(angle) * c.size;
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.closePath();
+        ctx.stroke();
+        ctx.restore();
+      });
+    });
+
+    // 星座アニメーション
+    constellationAnimations.forEach(anim => {
+      const { sx, sy } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH);
+      ctx.save();
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1;
+      ctx.globalAlpha = anim.lineAlpha;
+      anim.stars.forEach((star, i) => {
+        star.connections.forEach(toIndex => {
+          if (toIndex < anim.stars.length) {
+            ctx.beginPath();
+            ctx.moveTo(sx + star.offsetX, sy + star.offsetY);
+            ctx.lineTo(sx + anim.stars[toIndex].offsetX, sy + anim.stars[toIndex].offsetY);
+            ctx.stroke();
+          }
+        });
+      });
+      anim.stars.forEach(s => {
+        const twinkle = 0.5 + Math.sin(s.twinkle) * 0.5;
+        ctx.globalAlpha = twinkle;
+        ctx.fillStyle = '#ffffff';
+        ctx.shadowColor = '#ffffff';
+        ctx.shadowBlur = 8;
+        ctx.beginPath();
+        ctx.arc(sx + s.offsetX, sy + s.offsetY, s.size, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      ctx.restore();
+    });
+
+    // たんぽぽアニメーション
+    dandelionAnimations.forEach(anim => {
+      const { sx, sy } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH);
+      anim.seeds.forEach(s => {
+        ctx.save();
+        ctx.globalAlpha = s.life;
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(sx + s.offsetX, sy + s.offsetY);
+        ctx.lineTo(sx + s.offsetX, sy + s.offsetY - 5);
+        ctx.stroke();
+        ctx.fillStyle = '#f0f0f0';
+        ctx.beginPath();
+        ctx.arc(sx + s.offsetX, sy + s.offsetY - 5, 2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      });
+    });
+
+    // 王冠アニメーション
+    crownAnimations.forEach(anim => {
+      const { sx, sy } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH);
+      ctx.save();
+      ctx.translate(sx, sy);
+      ctx.rotate(anim.crown.rotation);
+      ctx.globalAlpha = anim.crown.opacity;
+      ctx.fillStyle = '#ffd700';
+      ctx.strokeStyle = '#ffaa00';
+      ctx.lineWidth = 2;
+      ctx.font = `${anim.crown.size}px serif`;
+      ctx.fillText('👑', -20, 20);
+      anim.jewels.forEach(j => {
+        const sparkle = 0.5 + Math.sin(j.sparkle) * 0.5;
+        ctx.globalAlpha = sparkle;
+        ctx.fillStyle = j.color;
+        ctx.beginPath();
+        ctx.arc(j.offsetX, j.offsetY, 3, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      ctx.restore();
+    });
+
+    // プリズムアニメーション
+    prismAnimations.forEach(anim => {
+      const { sx, sy } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH);
+      anim.rays.forEach(r => {
+        ctx.save();
+        ctx.globalAlpha = r.opacity;
+        ctx.strokeStyle = r.color;
+        ctx.lineWidth = 3;
+        ctx.shadowColor = r.color;
+        ctx.shadowBlur = 10;
+        ctx.beginPath();
+        const endX = sx + Math.cos(r.angle) * r.length;
+        const endY = sy + Math.sin(r.angle) * r.length;
+        ctx.moveTo(sx, sy);
+        ctx.lineTo(endX, endY);
+        ctx.stroke();
+        ctx.restore();
+      });
+    });
+
+    // 残りの48アニメーション（動きとフェードアウト付き）
+    dragonBreathAnimations.forEach(anim => { const elapsed = (Date.now() - anim.startTime) / 1000; const progress = Math.min(1, elapsed / 5); const alpha = 1 - progress; const { sx, sy } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH); for (let i = 0; i < 15; i++) { const angle = (i / 15) * Math.PI / 3 - Math.PI / 6 + Math.sin(elapsed * 3) * 0.2; const dist = elapsed * 30 + i * 5; const px = sx + Math.cos(angle) * dist; const py = sy + Math.sin(angle) * dist; ctx.save(); ctx.globalAlpha = alpha * (1 - dist / 150); ctx.fillStyle = i % 2 === 0 ? '#ff4400' : '#ffaa00'; ctx.shadowColor = '#ff4400'; ctx.shadowBlur = 10; ctx.beginPath(); ctx.arc(px, py, 5 + Math.sin(elapsed * 5 + i) * 2, 0, Math.PI * 2); ctx.fill(); ctx.restore(); } });
+    moonbeamAnimations.forEach(anim => { const elapsed = (Date.now() - anim.startTime) / 1000; const progress = Math.min(1, elapsed / 5); const alpha = 1 - progress; const { sx, sy } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH); for (let i = 0; i < 12; i++) { const beamY = sy - elapsed * 40 - i * 15; ctx.save(); ctx.globalAlpha = alpha * 0.7; ctx.fillStyle = '#ccddff'; ctx.shadowColor = '#ccddff'; ctx.shadowBlur = 15; ctx.beginPath(); ctx.ellipse(sx, beamY, 15, 30, 0, 0, Math.PI * 2); ctx.fill(); ctx.restore(); } });
+    auraBeamAnimations.forEach(anim => { const elapsed = (Date.now() - anim.startTime) / 1000; const progress = Math.min(1, elapsed / 5); const alpha = 1 - progress; const { sx, sy } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH); for (let i = 0; i < 8; i++) { const angle = (i / 8) * Math.PI * 2 + elapsed * 2; const radius = 30 + Math.sin(elapsed * 3 + i) * 10; ctx.save(); ctx.globalAlpha = alpha; ctx.strokeStyle = '#ff00ff'; ctx.shadowColor = '#ff00ff'; ctx.shadowBlur = 20; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(sx, sy, radius, angle, angle + Math.PI / 8); ctx.stroke(); ctx.restore(); } });
+    chainLightningAnimations.forEach(anim => { const elapsed = (Date.now() - anim.startTime) / 1000; const progress = Math.min(1, elapsed / 5); const alpha = 1 - progress; const { sx, sy } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH); ctx.save(); ctx.globalAlpha = alpha; ctx.strokeStyle = '#00ffff'; ctx.shadowColor = '#00ffff'; ctx.shadowBlur = 15; ctx.lineWidth = 2; for (let i = 0; i < 5; i++) { const points = []; let x = sx; let y = sy; points.push({ x, y }); for (let j = 0; j < 6; j++) { x += (Math.random() - 0.5) * 20; y += 12; points.push({ x, y }); } ctx.beginPath(); ctx.moveTo(points[0].x, points[0].y); for (let j = 1; j < points.length; j++) { ctx.lineTo(points[j].x, points[j].y); } ctx.stroke(); } ctx.restore(); });
+    neonSignAnimations.forEach(anim => { const elapsed = (Date.now() - anim.startTime) / 1000; const progress = Math.min(1, elapsed / 5); const alpha = 1 - progress; const flicker = Math.random() > 0.1 ? 1 : 0.3; const { sx, sy } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH); ctx.save(); ctx.globalAlpha = alpha * flicker; ctx.fillStyle = '#ff00aa'; ctx.shadowColor = '#ff00aa'; ctx.shadowBlur = 20; ctx.font = 'bold 30px monospace'; ctx.fillText('NEON', sx - 35, sy); ctx.restore(); });
+    laserBeamAnimations.forEach(anim => { const elapsed = (Date.now() - anim.startTime) / 1000; const progress = Math.min(1, elapsed / 5); const alpha = 1 - progress; const { sx, sy } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH); const length = Math.min(elapsed * 100, 200); ctx.save(); ctx.globalAlpha = alpha; ctx.strokeStyle = '#ff0000'; ctx.shadowColor = '#ff0000'; ctx.shadowBlur = 10; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(sx + length, sy - length * 0.5); ctx.stroke(); ctx.lineWidth = 2; ctx.strokeStyle = '#ffffff'; ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(sx + length, sy - length * 0.5); ctx.stroke(); ctx.restore(); });
+    cyberCircleAnimations.forEach(anim => { const elapsed = (Date.now() - anim.startTime) / 1000; const progress = Math.min(1, elapsed / 5); const alpha = 1 - progress; const { sx, sy } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH); for (let i = 0; i < 4; i++) { const radius = 20 + i * 15 + (elapsed * 20) % 60; ctx.save(); ctx.globalAlpha = alpha * (1 - (i / 4)); ctx.strokeStyle = '#00aaff'; ctx.shadowColor = '#00aaff'; ctx.shadowBlur = 10; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(sx, sy, radius, 0, Math.PI * 2); ctx.stroke(); ctx.restore(); } });
+    pixelExplosionAnimations.forEach(anim => { const elapsed = (Date.now() - anim.startTime) / 1000; const progress = Math.min(1, elapsed / 5); const alpha = 1 - progress; const { sx, sy } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH); for (let i = 0; i < 20; i++) { const angle = (i / 20) * Math.PI * 2; const dist = elapsed * 40; const px = sx + Math.cos(angle) * dist; const py = sy + Math.sin(angle) * dist; ctx.save(); ctx.globalAlpha = alpha; ctx.fillStyle = ['#00ff00', '#ff00ff', '#00ffff'][i % 3]; ctx.fillRect(px - 3, py - 3, 6, 6); ctx.restore(); } });
+    glitchAnimations.forEach(anim => { const elapsed = (Date.now() - anim.startTime) / 1000; const progress = Math.min(1, elapsed / 5); const alpha = 1 - progress; const { sx, sy } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH); ctx.save(); ctx.globalAlpha = alpha; for (let i = 0; i < 8; i++) { const offsetX = (Math.random() - 0.5) * 20; const offsetY = (Math.random() - 0.5) * 20; ctx.fillStyle = ['#ff0000', '#00ff00', '#0000ff'][i % 3]; ctx.globalAlpha = alpha * Math.random(); ctx.fillRect(sx + offsetX - 15, sy + offsetY + i * 3, 30, 3); } ctx.restore(); });
+    sandstormAnimations.forEach(anim => { const elapsed = (Date.now() - anim.startTime) / 1000; const progress = Math.min(1, elapsed / 5); const alpha = 1 - progress; const { sx, sy } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH); for (let i = 0; i < 30; i++) { const angle = (i / 30) * Math.PI * 2 + elapsed * 2; const radius = 20 + elapsed * 15; const x = sx + Math.cos(angle) * radius; const y = sy + Math.sin(angle) * radius; ctx.save(); ctx.globalAlpha = alpha * 0.6; ctx.fillStyle = '#d2b48c'; ctx.beginPath(); ctx.arc(x, y, 2 + Math.sin(elapsed * 5 + i) * 1, 0, Math.PI * 2); ctx.fill(); ctx.restore(); } });
+    clockAnimations.forEach(anim => { const elapsed = (Date.now() - anim.startTime) / 1000; const progress = Math.min(1, elapsed / 5); const alpha = 1 - progress; const rotation = elapsed * 2; const { sx, sy } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH); ctx.save(); ctx.translate(sx, sy); ctx.rotate(rotation); ctx.globalAlpha = alpha; ctx.strokeStyle = '#8b4513'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, 0, 30, 0, Math.PI * 2); ctx.stroke(); ctx.fillStyle = '#ffd700'; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, -20); ctx.stroke(); ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(Math.cos(elapsed * 6) * 15, Math.sin(elapsed * 6) * 15); ctx.stroke(); ctx.restore(); });
+    gearAnimations.forEach(anim => { const elapsed = (Date.now() - anim.startTime) / 1000; const progress = Math.min(1, elapsed / 5); const alpha = 1 - progress; const { sx, sy } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH); anim.gears.forEach((g, i) => { ctx.save(); ctx.translate(sx + g.offsetX, sy + g.offsetY); ctx.rotate(elapsed * g.rotationSpeed); ctx.globalAlpha = alpha; ctx.strokeStyle = g.color; ctx.lineWidth = 2; const radius = g.size / 2; for (let t = 0; t < g.teeth; t++) { const angle = (t / g.teeth) * Math.PI * 2; ctx.beginPath(); ctx.moveTo(Math.cos(angle) * radius, Math.sin(angle) * radius); ctx.lineTo(Math.cos(angle) * (radius + 5), Math.sin(angle) * (radius + 5)); ctx.stroke(); } ctx.beginPath(); ctx.arc(0, 0, radius, 0, Math.PI * 2); ctx.stroke(); ctx.restore(); }); });
+    dnaHelixAnimations.forEach(anim => { const elapsed = (Date.now() - anim.startTime) / 1000; const progress = Math.min(1, elapsed / 5); const alpha = 1 - progress; const { sx, sy } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH); ctx.save(); ctx.translate(sx, sy); ctx.rotate(anim.rotation + elapsed); anim.points.forEach(p => { const x = Math.cos(p.angle + elapsed * 2) * 20; const y = p.height - elapsed * 10; ctx.globalAlpha = alpha; ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(x, y, p.size, 0, Math.PI * 2); ctx.fill(); }); ctx.restore(); });
+    shieldAnimations.forEach(anim => { const elapsed = (Date.now() - anim.startTime) / 1000; const progress = Math.min(1, elapsed / 5); const alpha = 1 - progress; const { sx, sy } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH); ctx.save(); ctx.globalAlpha = alpha * 0.6; ctx.strokeStyle = '#4488ff'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(sx, sy, 40 + Math.sin(elapsed * 4) * 5, 0, Math.PI * 2); ctx.stroke(); ctx.restore(); });
+    energyBallAnimations.forEach(anim => { const elapsed = (Date.now() - anim.startTime) / 1000; const progress = Math.min(1, elapsed / 5); const alpha = 1 - progress; const { sx, sy } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH); const pulse = 1 + Math.sin(elapsed * 8) * 0.2; ctx.save(); ctx.globalAlpha = alpha; ctx.fillStyle = '#ffff00'; ctx.shadowColor = '#ffff00'; ctx.shadowBlur = 20; ctx.beginPath(); ctx.arc(sx, sy, 15 * pulse, 0, Math.PI * 2); ctx.fill(); ctx.restore(); });
+    teleportAnimations.forEach(anim => { const elapsed = (Date.now() - anim.startTime) / 1000; const progress = Math.min(1, elapsed / 5); const alpha = 1 - progress; const { sx, sy } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH); for (let i = 0; i < 12; i++) { const angle = (i / 12) * Math.PI * 2 + elapsed * 3; const radius = 30 - elapsed * 6; ctx.save(); ctx.globalAlpha = alpha * (1 - progress); ctx.fillStyle = '#aa00ff'; ctx.beginPath(); ctx.arc(sx + Math.cos(angle) * radius, sy + Math.sin(angle) * radius, 3, 0, Math.PI * 2); ctx.fill(); ctx.restore(); } });
+    peachBlossomAnimations.forEach(anim => { const elapsed = (Date.now() - anim.startTime) / 1000; const progress = Math.min(1, elapsed / 5); const alpha = 1 - progress; const { sx, sy } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH); for (let i = 0; i < 15; i++) { const angle = (i / 15) * Math.PI * 2 + elapsed; const radius = elapsed * 20; ctx.save(); ctx.globalAlpha = alpha; ctx.fillStyle = '#ffb6c1'; ctx.beginPath(); ctx.arc(sx + Math.cos(angle) * radius, sy + Math.sin(angle) * radius - elapsed * 15, 4, 0, Math.PI * 2); ctx.fill(); ctx.restore(); } });
+    hydrangeaAnimations.forEach(anim => { const elapsed = (Date.now() - anim.startTime) / 1000; const progress = Math.min(1, elapsed / 5); const alpha = 1 - progress; const { sx, sy } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH); for (let i = 0; i < 10; i++) { for (let j = 0; j < 6; j++) { const angle = (j / 6) * Math.PI * 2; const radius = i * 4 + Math.sin(elapsed * 2 + i) * 2; ctx.save(); ctx.globalAlpha = alpha; ctx.fillStyle = '#6495ed'; ctx.beginPath(); ctx.arc(sx + Math.cos(angle) * radius, sy + Math.sin(angle) * radius, 5, 0, Math.PI * 2); ctx.fill(); ctx.restore(); } } });
+    plumeBlossomAnimations.forEach(anim => { const elapsed = (Date.now() - anim.startTime) / 1000; const progress = Math.min(1, elapsed / 5); const alpha = 1 - progress; const { sx, sy } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH); for (let i = 0; i < 20; i++) { const angle = (i / 20) * Math.PI * 2; const radius = elapsed * 25; const drift = Math.sin(elapsed * 2 + i) * 10; ctx.save(); ctx.globalAlpha = alpha; ctx.fillStyle = '#ffc0cb'; ctx.beginPath(); ctx.arc(sx + Math.cos(angle) * radius + drift, sy + Math.sin(angle) * radius - elapsed * 20, 4, 0, Math.PI * 2); ctx.fill(); ctx.restore(); } });
+    lotusAnimations.forEach(anim => { const elapsed = (Date.now() - anim.startTime) / 1000; const progress = Math.min(1, elapsed / 5); const alpha = 1 - progress; const { sx, sy } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH); for (let i = 0; i < 8; i++) { const angle = (i / 8) * Math.PI * 2 + elapsed * 0.5; const radius = 15 + Math.sin(elapsed * 2 + i) * 5; ctx.save(); ctx.globalAlpha = alpha; ctx.fillStyle = i % 2 === 0 ? '#ffd1dc' : '#ffb6c1'; ctx.beginPath(); ctx.arc(sx + Math.cos(angle) * radius, sy + Math.sin(angle) * radius, 6, 0, Math.PI * 2); ctx.fill(); ctx.restore(); } });
+    bambooAnimations.forEach(anim => { const elapsed = (Date.now() - anim.startTime) / 1000; const progress = Math.min(1, elapsed / 5); const alpha = 1 - progress; const sway = Math.sin(elapsed * 2) * 5; const { sx, sy } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH); ctx.save(); ctx.globalAlpha = alpha; ctx.strokeStyle = '#228b22'; ctx.lineWidth = 5; for (let i = 0; i < 3; i++) { const height = 60 + i * 10; ctx.beginPath(); ctx.moveTo(sx + sway * (i / 3), sy + 30); ctx.quadraticCurveTo(sx + sway, sy, sx + sway * (i / 3), sy - height); ctx.stroke(); } ctx.restore(); });
+    lanternAnimations.forEach(anim => { const elapsed = (Date.now() - anim.startTime) / 1000; const progress = Math.min(1, elapsed / 5); const alpha = 1 - progress; const sway = Math.sin(elapsed * 3) * 10; const glow = 0.5 + Math.sin(elapsed * 5) * 0.5; const { sx, sy } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH); ctx.save(); ctx.translate(sx + sway, sy); ctx.globalAlpha = alpha; ctx.fillStyle = '#ff4444'; ctx.shadowColor = '#ff4444'; ctx.shadowBlur = 20 * glow; ctx.beginPath(); ctx.ellipse(0, 0, 15, 20, 0, 0, Math.PI * 2); ctx.fill(); ctx.fillStyle = '#ffaa00'; ctx.beginPath(); ctx.ellipse(0, 0, 10, 15, 0, 0, Math.PI * 2); ctx.fill(); ctx.restore(); });
+    koinoboriAnimations.forEach(anim => { const elapsed = (Date.now() - anim.startTime) / 1000; const progress = Math.min(1, elapsed / 5); const alpha = 1 - progress; const wave = Math.sin(elapsed * 4); const { sx, sy } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH); const colors = ['#ff0000', '#0000ff', '#00ff00']; colors.forEach((col, i) => { ctx.save(); ctx.translate(sx, sy - i * 15); ctx.globalAlpha = alpha; ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(0, 0); ctx.quadraticCurveTo(20, wave * 5, 40, 0); ctx.lineTo(40, 10); ctx.quadraticCurveTo(20, wave * 5 + 10, 0, 10); ctx.closePath(); ctx.fill(); ctx.restore(); }); });
+    milkyWayAnimations.forEach(anim => { const elapsed = (Date.now() - anim.startTime) / 1000; const progress = Math.min(1, elapsed / 5); const alpha = 1 - progress; const { sx, sy } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH); ctx.save(); ctx.globalAlpha = alpha; for (let i = 0; i < 100; i++) { const angle = (i / 100) * Math.PI * 2 + elapsed * 0.1; const radius = 10 + (i % 30) * 2; const starX = sx + Math.cos(angle) * radius; const starY = sy + Math.sin(angle) * radius; const twinkle = 0.5 + Math.sin(elapsed * 3 + i) * 0.5; ctx.fillStyle = '#ffffff'; ctx.globalAlpha = alpha * twinkle * 0.7; ctx.beginPath(); ctx.arc(starX, starY, 1 + (i % 3), 0, Math.PI * 2); ctx.fill(); } ctx.restore(); });
+    sunAnimations.forEach(anim => { const elapsed = (Date.now() - anim.startTime) / 1000; const progress = Math.min(1, elapsed / 5); const alpha = 1 - progress; const pulse = 1 + Math.sin(elapsed * 3) * 0.1; const { sx, sy } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH); ctx.save(); ctx.globalAlpha = alpha; ctx.fillStyle = '#ffaa00'; ctx.shadowColor = '#ffaa00'; ctx.shadowBlur = 30 * pulse; ctx.beginPath(); ctx.arc(sx, sy, 30 * pulse, 0, Math.PI * 2); ctx.fill(); for (let i = 0; i < 8; i++) { const angle = (i / 8) * Math.PI * 2 + elapsed; const length = 40 + Math.sin(elapsed * 4 + i) * 10; ctx.strokeStyle = '#ffcc00'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(sx + Math.cos(angle) * 30, sy + Math.sin(angle) * 30); ctx.lineTo(sx + Math.cos(angle) * length, sy + Math.sin(angle) * length); ctx.stroke(); } ctx.restore(); });
+    planetAnimations.forEach(anim => { const elapsed = (Date.now() - anim.startTime) / 1000; const progress = Math.min(1, elapsed / 5); const alpha = 1 - progress; const rotation = elapsed * 2; const { sx, sy } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH); ctx.save(); ctx.globalAlpha = alpha; ctx.fillStyle = '#8888ff'; ctx.beginPath(); ctx.arc(sx, sy, 20, 0, Math.PI * 2); ctx.fill(); ctx.save(); ctx.translate(sx, sy); ctx.rotate(rotation); ctx.strokeStyle = '#aaaaff'; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(0, 0, 35, 10, 0, 0, Math.PI * 2); ctx.stroke(); ctx.restore(); ctx.fillStyle = '#6666dd'; ctx.beginPath(); ctx.arc(sx - 5, sy - 5, 5, 0, Math.PI * 2); ctx.fill(); ctx.restore(); });
+    galaxyAnimations.forEach(anim => { const elapsed = (Date.now() - anim.startTime) / 1000; const progress = Math.min(1, elapsed / 5); const alpha = 1 - progress; const rotation = elapsed * 0.5; const { sx, sy } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH); ctx.save(); ctx.globalAlpha = alpha; for (let arm = 0; arm < 4; arm++) { const armAngle = (arm / 4) * Math.PI * 2 + rotation; for (let i = 0; i < 15; i++) { const dist = i * 3; const angle = armAngle + (i * 0.3); const starX = sx + Math.cos(angle) * dist; const starY = sy + Math.sin(angle) * dist; ctx.fillStyle = '#ffffff'; ctx.globalAlpha = alpha * (1 - i / 15); ctx.beginPath(); ctx.arc(starX, starY, 1 + Math.random(), 0, Math.PI * 2); ctx.fill(); } } ctx.fillStyle = '#ffeeaa'; ctx.globalAlpha = alpha; ctx.beginPath(); ctx.arc(sx, sy, 5, 0, Math.PI * 2); ctx.fill(); ctx.restore(); });
+    cometAnimations.forEach(anim => { const elapsed = (Date.now() - anim.startTime) / 1000; const progress = Math.min(1, elapsed / 5); const alpha = 1 - progress; const { sx, sy } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH); const cometX = sx + elapsed * 50; const cometY = sy - elapsed * 30; ctx.save(); ctx.globalAlpha = alpha; ctx.fillStyle = '#aaddff'; ctx.shadowColor = '#aaddff'; ctx.shadowBlur = 15; ctx.beginPath(); ctx.arc(cometX, cometY, 5, 0, Math.PI * 2); ctx.fill(); for (let i = 0; i < 20; i++) { const trailX = cometX - i * 5; const trailY = cometY + i * 3; ctx.globalAlpha = alpha * (1 - i / 20); ctx.beginPath(); ctx.arc(trailX, trailY, 3, 0, Math.PI * 2); ctx.fill(); } ctx.restore(); });
+    blackHoleAnimations.forEach(anim => { const elapsed = (Date.now() - anim.startTime) / 1000; const progress = Math.min(1, elapsed / 5); const alpha = 1 - progress; const { sx, sy } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH); for (let r = 0; r < 4; r++) { const radius = 30 + r * 15 - (elapsed * 10) % 60; if (radius > 0) { ctx.save(); ctx.globalAlpha = alpha * (1 - r / 4) * 0.5; ctx.strokeStyle = '#4400ff'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(sx, sy, radius, 0, Math.PI * 2); ctx.stroke(); ctx.restore(); } } ctx.save(); ctx.globalAlpha = alpha; ctx.fillStyle = '#000000'; ctx.shadowColor = '#4400ff'; ctx.shadowBlur = 30; ctx.beginPath(); ctx.arc(sx, sy, 25, 0, Math.PI * 2); ctx.fill(); ctx.restore(); });
+    supernovaAnimations.forEach(anim => { const elapsed = (Date.now() - anim.startTime) / 1000; const progress = Math.min(1, elapsed / 5); const alpha = 1 - progress; const { sx, sy } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH); ctx.save(); for (let i = 0; i < 30; i++) { const angle = (i / 30) * Math.PI * 2; const dist = elapsed * 60; const px = sx + Math.cos(angle) * dist; const py = sy + Math.sin(angle) * dist; ctx.globalAlpha = alpha * (1 - progress); ctx.fillStyle = i % 2 === 0 ? '#ffaa00' : '#ff4400'; ctx.shadowColor = '#ffaa00'; ctx.shadowBlur = 15; ctx.beginPath(); ctx.arc(px, py, 4 - progress * 2, 0, Math.PI * 2); ctx.fill(); } ctx.globalAlpha = alpha; ctx.fillStyle = '#ffffff'; ctx.shadowColor = '#ffffff'; ctx.shadowBlur = 40; ctx.beginPath(); ctx.arc(sx, sy, 15 * (1 + progress), 0, Math.PI * 2); ctx.fill(); ctx.restore(); });
+    warpAnimations.forEach(anim => { const elapsed = (Date.now() - anim.startTime) / 1000; const progress = Math.min(1, elapsed / 5); const alpha = 1 - progress; const { sx, sy } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH); ctx.save(); for (let i = 0; i < 5; i++) { const radius = 20 + i * 10 + elapsed * 30; ctx.globalAlpha = alpha * (1 - i / 5); ctx.strokeStyle = '#00ffff'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(sx, sy, radius, 0, Math.PI * 2); ctx.stroke(); } ctx.restore(); });
+    ufoAnimations.forEach(anim => {
+      const elapsed = (Date.now() - anim.startTime) / 1000;
+      const progress = Math.min(1, elapsed / 4);
+      const alpha = 1 - progress;
+      const wobble = Math.sin(elapsed * 3) * 5;
+      const rotation = elapsed * 0.5;
+      const { sx, sy } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH);
+      const descendProgress = Math.min(1, elapsed / 2);
+      const drawY = sy - 100 * (1 - descendProgress) + wobble;
+      
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.translate(sx, drawY);
+      ctx.rotate(rotation);
+      
+      // UFO本体
+      ctx.fillStyle = '#888888';
+      ctx.beginPath();
+      ctx.ellipse(0, 0, 25, 10, 0, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // 窓
+      ctx.fillStyle = '#aaffaa';
+      ctx.shadowColor = '#aaffaa';
+      ctx.shadowBlur = 15;
+      ctx.beginPath();
+      ctx.arc(0, -5, 10, 0, Math.PI, true);
+      ctx.fill();
+      
+      ctx.restore();
+      
+      // ビーム
+      if (elapsed > 1 && elapsed < 3) {
+        ctx.save();
+        ctx.globalAlpha = alpha * 0.4;
+        ctx.fillStyle = '#aaffaa';
+        ctx.beginPath();
+        ctx.moveTo(sx - 15, drawY + 5);
+        ctx.lineTo(sx + 15, drawY + 5);
+        ctx.lineTo(sx + 25, drawY + 60);
+        ctx.lineTo(sx - 25, drawY + 60);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+      }
+    });
+    alienAnimations.forEach(anim => {
+      const elapsed = (Date.now() - anim.startTime) / 1000;
+      const progress = Math.min(1, elapsed / 4);
+      const alpha = 1 - progress;
+      const pulse = Math.sin(elapsed * 4) * 0.1 + 1;
+      const { sx, sy } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH);
+      
+      // スケールは経過時間から計算
+      const currentScale = Math.min(1, elapsed / 1.5);
+      
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.translate(sx, sy);
+      ctx.scale(currentScale * pulse, currentScale * pulse);
+      
+      // 触手を描画
+      ctx.strokeStyle = '#90ee90';
+      ctx.lineWidth = 2;
+      for (let i = 0; i < 5; i++) {
+        const angle = (i / 5) * Math.PI * 2 + elapsed;
+        const wave = Math.sin(elapsed * 3 + i) * 5;
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.quadraticCurveTo(
+          Math.cos(angle) * 10 + wave,
+          Math.sin(angle) * 10,
+          Math.cos(angle) * 20,
+          Math.sin(angle) * 20 + 15
+        );
+        ctx.stroke();
+      }
+      
+      // 頭部
+      ctx.fillStyle = '#7cfc00';
+      ctx.beginPath();
+      ctx.ellipse(0, -5, 15, 18, 0, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // 目
+      ctx.fillStyle = '#000';
+      ctx.beginPath();
+      ctx.ellipse(-6, -8, 4, 6, 0, 0, Math.PI * 2);
+      ctx.ellipse(6, -8, 4, 6, 0, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // 目の光
+      ctx.fillStyle = '#fff';
+      ctx.beginPath();
+      ctx.arc(-5, -10, 2, 0, Math.PI * 2);
+      ctx.arc(7, -10, 2, 0, Math.PI * 2);
+      ctx.fill();
+      
+      ctx.restore();
+    });
+    robotAnimations.forEach(anim => { const elapsed = (Date.now() - anim.startTime) / 1000; const progress = Math.min(1, elapsed / 5); const alpha = 1 - progress; const { sx, sy } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH); const buildProgress = Math.min(1, elapsed / 2); ctx.save(); ctx.globalAlpha = alpha; ctx.fillStyle = '#888888'; if (buildProgress > 0.25) { ctx.fillRect(sx - 15, sy - 10, 30, 20 * buildProgress); } if (buildProgress > 0.5) { ctx.fillRect(sx - 20, sy + 10, 10, 15 * buildProgress); ctx.fillRect(sx + 10, sy + 10, 10, 15 * buildProgress); } if (buildProgress > 0.75) { ctx.fillStyle = '#ff0000'; ctx.beginPath(); ctx.arc(sx - 8, sy - 5, 3, 0, Math.PI * 2); ctx.arc(sx + 8, sy - 5, 3, 0, Math.PI * 2); ctx.fill(); } for (let i = 0; i < 5; i++) { if (Math.random() > 0.7) { const angle = Math.random() * Math.PI * 2; const dist = Math.random() * 30; ctx.fillStyle = '#ffff00'; ctx.globalAlpha = alpha * Math.random(); ctx.beginPath(); ctx.arc(sx + Math.cos(angle) * dist, sy + Math.sin(angle) * dist, 2, 0, Math.PI * 2); ctx.fill(); } } ctx.restore(); });
+    mechanicalAnimations.forEach(anim => { const elapsed = (Date.now() - anim.startTime) / 1000; const progress = Math.min(1, elapsed / 5); const alpha = 1 - progress; const { sx, sy } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH); for (let i = 0; i < 6; i++) { const angle = (i / 6) * Math.PI * 2 + elapsed * 2; const radius = 20 + Math.sin(elapsed * 3 + i) * 5; ctx.save(); ctx.globalAlpha = alpha; ctx.strokeStyle = '#666666'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(sx + Math.cos(angle) * radius, sy + Math.sin(angle) * radius, 8, 0, Math.PI * 2); ctx.stroke(); ctx.restore(); } });
+    factoryAnimations.forEach(anim => { const elapsed = (Date.now() - anim.startTime) / 1000; const progress = Math.min(1, elapsed / 5); const alpha = 1 - progress; const { sx, sy } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH); for (let i = 0; i < 15; i++) { const yOffset = (elapsed * 30 + i * 10) % 60; ctx.save(); ctx.globalAlpha = alpha * 0.5 * (1 - yOffset / 60); ctx.fillStyle = '#555555'; ctx.beginPath(); ctx.arc(sx + (i % 3 - 1) * 15, sy - yOffset, 3, 0, Math.PI * 2); ctx.fill(); ctx.restore(); } });
+    rainbowBridgeAnimations.forEach(anim => { const elapsed = (Date.now() - anim.startTime) / 1000; const progress = Math.min(1, elapsed / 5); const alpha = 1 - progress; const { sx, sy } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH); const colors = ['#ff0000', '#ff7f00', '#ffff00', '#00ff00', '#0000ff', '#4b0082', '#9400d3']; colors.forEach((col, i) => { ctx.save(); ctx.globalAlpha = alpha * 0.5; ctx.strokeStyle = col; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(sx, sy, 30 + i * 5, Math.PI, 0); ctx.stroke(); ctx.restore(); }); });
+    cloudAnimations.forEach(anim => { const elapsed = (Date.now() - anim.startTime) / 1000; const progress = Math.min(1, elapsed / 5); const alpha = 1 - progress; const drift = elapsed * 10; const { sx, sy } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH); ctx.save(); ctx.fillStyle = '#ffffff'; ctx.globalAlpha = alpha * 0.7; ctx.beginPath(); ctx.arc(sx - 10 + drift, sy, 15, 0, Math.PI * 2); ctx.arc(sx + 10 + drift, sy, 15, 0, Math.PI * 2); ctx.arc(sx + drift, sy - 5, 18, 0, Math.PI * 2); ctx.fill(); ctx.restore(); });
+    fogAnimations.forEach(anim => { const elapsed = (Date.now() - anim.startTime) / 1000; const progress = Math.min(1, elapsed / 5); const alpha = 1 - progress; const drift = elapsed * 10; const { sx, sy } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH); ctx.save(); for (let i = 0; i < 4; i++) { const xOffset = ((i * 20 + drift) % 80) - 40; const yOffset = (i - 1.5) * 10; ctx.globalAlpha = alpha * 0.3; ctx.fillStyle = '#cccccc'; ctx.beginPath(); ctx.ellipse(sx + xOffset, sy + yOffset, 25, 12, 0, 0, Math.PI * 2); ctx.fill(); } ctx.restore(); });
+    stormAnimations.forEach(anim => { const elapsed = (Date.now() - anim.startTime) / 1000; const progress = Math.min(1, elapsed / 5); const alpha = 1 - progress; const { sx, sy } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH); ctx.save(); ctx.globalAlpha = alpha * 0.6; ctx.fillStyle = '#555555'; for (let i = 0; i < 3; i++) { ctx.beginPath(); ctx.ellipse(sx + (i - 1) * 15, sy - 20, 20, 12, 0, 0, Math.PI * 2); ctx.fill(); } for (let i = 0; i < 20; i++) { const rx = sx + (Math.random() - 0.5) * 60; const ry = sy + (elapsed * 60 + i * 3) % 60 - 20; ctx.strokeStyle = '#4488ff'; ctx.lineWidth = 2; ctx.globalAlpha = alpha * 0.8; ctx.beginPath(); ctx.moveTo(rx, ry); ctx.lineTo(rx - 2, ry + 8); ctx.stroke(); } if (Math.random() > 0.9) { const lx = sx + (Math.random() - 0.5) * 40; ctx.strokeStyle = '#ffff00'; ctx.lineWidth = 3; ctx.globalAlpha = alpha; ctx.beginPath(); ctx.moveTo(lx, sy - 20); ctx.lineTo(lx - 5, sy + 10); ctx.lineTo(lx + 3, sy + 10); ctx.lineTo(lx - 8, sy + 30); ctx.stroke(); } ctx.restore(); });
+    tsunamiAnimations.forEach(anim => { const elapsed = (Date.now() - anim.startTime) / 1000; const progress = Math.min(1, elapsed / 5); const alpha = 1 - progress; const waveProgress = elapsed * 30; const { sx, sy } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH); ctx.save(); ctx.globalAlpha = alpha; ctx.fillStyle = '#0066cc'; const waveHeight = 40 + Math.sin(elapsed * 3) * 10; ctx.beginPath(); ctx.moveTo(sx - 50, sy); for (let x = -50; x <= 50; x += 5) { const y = sy - waveHeight + Math.sin((x + waveProgress) / 8) * 15; ctx.lineTo(sx + x, y); } ctx.lineTo(sx + 50, sy + 20); ctx.lineTo(sx - 50, sy + 20); ctx.closePath(); ctx.fill(); ctx.fillStyle = '#ffffff'; for (let i = 0; i < 12; i++) { const fx = sx - 40 + (i * 7 + waveProgress) % 80; const fy = sy - waveHeight + Math.sin((fx + waveProgress) / 8) * 15 - 5; ctx.globalAlpha = alpha * 0.7; ctx.beginPath(); ctx.arc(fx, fy, 3, 0, Math.PI * 2); ctx.fill(); } ctx.restore(); });
+    earthquakeAnimations.forEach(anim => { const elapsed = (Date.now() - anim.startTime) / 1000; const progress = Math.min(1, elapsed / 4); const alpha = 1 - progress; const shake = Math.sin(elapsed * 40) * (1 - progress) * 5; const { sx, sy } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH); ctx.save(); ctx.globalAlpha = alpha; ctx.strokeStyle = '#8b4513'; ctx.lineWidth = 3; for (let i = 0; i < 5; i++) { ctx.beginPath(); ctx.moveTo(sx - 30 + shake, sy + i * 8); ctx.lineTo(sx + 30 + shake, sy + i * 8 + Math.sin(elapsed * 5 + i) * 2); ctx.stroke(); } ctx.fillStyle = '#666666'; for (let i = 0; i < 8; i++) { const angle = (i / 8) * Math.PI * 2; const dist = 20 + elapsed * 10; const px = sx + Math.cos(angle + elapsed * 2) * dist + shake; const py = sy + Math.sin(angle + elapsed * 2) * dist; ctx.globalAlpha = alpha * (1 - progress); ctx.beginPath(); ctx.arc(px, py, 3, 0, Math.PI * 2); ctx.fill(); } ctx.restore(); });
+    volcanoAnimations.forEach(anim => { const elapsed = (Date.now() - anim.startTime) / 1000; const progress = Math.min(1, elapsed / 5); const alpha = 1 - progress; const { sx, sy } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH); ctx.save(); ctx.globalAlpha = alpha; ctx.fillStyle = '#8b4513'; ctx.beginPath(); ctx.moveTo(sx - 30, sy + 20); ctx.lineTo(sx, sy - 20); ctx.lineTo(sx + 30, sy + 20); ctx.closePath(); ctx.fill(); for (let i = 0; i < 10; i++) { const angle = Math.PI / 2 + (Math.random() - 0.5) * Math.PI / 3; const speed = 2 + Math.random() * 3; const t = (elapsed + i * 0.1) % 2; const px = sx + Math.cos(angle) * speed * t * 20; const py = sy - 20 + Math.sin(angle) * speed * t * 20 - t * t * 20; ctx.fillStyle = t < 1 ? '#ff4400' : '#666666'; ctx.globalAlpha = alpha * (1 - t / 2); ctx.beginPath(); ctx.arc(px, py, 3, 0, Math.PI * 2); ctx.fill(); } ctx.restore(); });
+    oceanAnimations.forEach(anim => { const elapsed = (Date.now() - anim.startTime) / 1000; const progress = Math.min(1, elapsed / 5); const alpha = 1 - progress; const { sx, sy } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH); ctx.save(); ctx.globalAlpha = alpha; for (let i = 0; i < 5; i++) { const waveY = sy + Math.sin(elapsed * 2 + i) * 5 + i * 8; ctx.strokeStyle = '#0088ff'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(sx - 40, waveY); for (let x = -40; x <= 40; x += 5) { const y = waveY + Math.sin((x + elapsed * 30) / 10) * 3; ctx.lineTo(sx + x, y); } ctx.stroke(); } for (let i = 0; i < 8; i++) { const bubbleY = sy + 20 - (elapsed * 20 + i * 5) % 60; const bubbleX = sx + Math.sin(elapsed + i) * 20; ctx.fillStyle = '#ffffff'; ctx.globalAlpha = alpha * 0.5; ctx.beginPath(); ctx.arc(bubbleX, bubbleY, 3, 0, Math.PI * 2); ctx.fill(); } ctx.restore(); });
+    waterfallAnimations.forEach(anim => { const elapsed = (Date.now() - anim.startTime) / 1000; const progress = Math.min(1, elapsed / 5); const alpha = 1 - progress; const { sx, sy } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH); ctx.save(); ctx.globalAlpha = alpha * 0.7; ctx.strokeStyle = '#4db8ff'; ctx.lineWidth = 6; for (let i = 0; i < 5; i++) { const xOffset = (i - 2) * 8; ctx.beginPath(); ctx.moveTo(sx + xOffset, sy - 30); ctx.lineTo(sx + xOffset + Math.sin(elapsed * 3 + i) * 3, sy + 30); ctx.stroke(); } ctx.fillStyle = '#ffffff'; for (let i = 0; i < 15; i++) { const dropY = (sy - 30) + ((elapsed * 60 + i * 4) % 60); const dropX = sx + (i % 5 - 2) * 8; ctx.globalAlpha = alpha * 0.5; ctx.beginPath(); ctx.arc(dropX, dropY, 2, 0, Math.PI * 2); ctx.fill(); } ctx.restore(); });
+    onsenAnimations.forEach(anim => { const elapsed = (Date.now() - anim.startTime) / 1000; const progress = Math.min(1, elapsed / 5); const alpha = 1 - progress; const { sx, sy } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH); ctx.save(); ctx.globalAlpha = alpha * 0.7; ctx.strokeStyle = '#4db8ff'; ctx.lineWidth = 4; ctx.beginPath(); ctx.ellipse(sx, sy, 35, 20, 0, 0, Math.PI * 2); ctx.stroke(); for (let i = 0; i < 12; i++) { const steamY = sy - (elapsed * 30 + i * 5) % 50; const steamX = sx + Math.sin(elapsed * 2 + i) * 10; ctx.fillStyle = '#ffffff'; ctx.globalAlpha = alpha * (1 - ((elapsed * 30 + i * 5) % 50) / 50); ctx.beginPath(); ctx.arc(steamX, steamY, 3, 0, Math.PI * 2); ctx.fill(); } ctx.restore(); });
+    campfireAnimations.forEach(anim => { const elapsed = (Date.now() - anim.startTime) / 1000; const progress = Math.min(1, elapsed / 5); const alpha = 1 - progress; const { sx, sy } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH); ctx.save(); ctx.fillStyle = '#8b4513'; ctx.globalAlpha = alpha; for (let i = 0; i < 5; i++) { const angle = (i / 5) * Math.PI / 3 - Math.PI / 6; ctx.beginPath(); ctx.moveTo(sx, sy + 20); ctx.lineTo(sx + Math.sin(angle) * 15, sy); ctx.lineTo(sx + Math.sin(angle) * 12, sy + 20); ctx.closePath(); ctx.fill(); } for (let i = 0; i < 8; i++) { const fy = sy - (elapsed * 40 + i * 6) % 50; const fx = sx + Math.sin(elapsed * 3 + i) * 8; const flamePhase = (elapsed * 40 + i * 6) % 50 / 50; ctx.fillStyle = flamePhase < 0.5 ? '#ff6600' : '#ffaa00'; ctx.globalAlpha = alpha * (1 - flamePhase); ctx.beginPath(); ctx.arc(fx, fy, 4 + Math.sin(elapsed * 5 + i) * 2, 0, Math.PI * 2); ctx.fill(); } ctx.restore(); });
+    treasureChestAnimations.forEach(anim => { const elapsed = (Date.now() - anim.startTime) / 1000; const progress = Math.min(1, elapsed / 5); const alpha = 1 - progress; const { sx, sy } = mapToScreen(anim.mapX, anim.mapY, viewW, viewH); const openProgress = Math.min(1, elapsed / 1.5); ctx.save(); ctx.globalAlpha = alpha; ctx.fillStyle = '#8b4513'; ctx.fillRect(sx - 20, sy - 10, 40, 20); ctx.fillStyle = '#ffd700'; ctx.fillRect(sx - 18, sy - 8, 36, 3); if (openProgress > 0.3) { ctx.save(); ctx.translate(sx, sy - 10); ctx.rotate(-openProgress * Math.PI / 3); ctx.fillStyle = '#8b4513'; ctx.fillRect(-20, 0, 40, 5); ctx.restore(); for (let i = 0; i < 6; i++) { const angle = (i / 6) * Math.PI * 2 + elapsed * 2; const dist = 15 + openProgress * 10; ctx.fillStyle = ['#ffff00', '#ffffff', '#ff00ff'][i % 3]; ctx.globalAlpha = alpha * openProgress; ctx.beginPath(); ctx.arc(sx + Math.cos(angle) * dist, sy - 10 + Math.sin(angle) * dist, 3, 0, Math.PI * 2); ctx.fill(); } } ctx.restore(); });
+
     // 花火アニメーションの描画（マップ座標をスクリーン座標に変換）
     if (fireworks.length > 0) {
       const now = Date.now();
@@ -4825,10 +5356,13 @@ export default function Home() {
     if (obj.Animation && obj.Animation.trim()) {
       const anim = obj.Animation.toLowerCase();
       if ([
-        'fireworks', 'sparkle', 'beartrap', 'birthday', 'cherryblossom', 'meteor', 'coin', 'slot', 'fishquiz', 'yojijukugo', 'englishquiz', 'musclequiz', 'cat', 'omikuji',
+        'fireworks', 'sparkle', 'beartrap', 'birthday', 'cherryblossom', 'meteor', 'coin', 'slot', 'fishquiz', 'yojijukugo', 'englishquiz', 'musclequiz', 'moviequiz', 'ramenquiz', 'heritagequiz', 'songquiz', 'sweetsquiz', 'cat', 'omikuji',
         'balloon', 'aurora', 'butterfly', 'shootingstar', 'autumnleaves', 'snow', 'confetti', 'rainbow', 'rain', 'magiccircle',
         'flame', 'thunder', 'wave', 'wind', 'smoke', 'tornado', 'gem', 'startrail', 'lightparticle', 'spiral',
         'bird', 'ghost', 'bee', 'firefly', 'explosion', 'target', 'anger', 'petal', 'sunflower', 'rose',
+        'bubble', 'musicnote', 'heart', 'constellation', 'electric', 'ice', 'sakura', 'dandelion', 'crown', 'dragonbreath', 'moonbeam', 'prism', 'portal', 'aurabeam', 'chainlightning', 'neonsign', 'laserbeam', 'hologram', 'cybercircle', 'pixelexplosion',
+        'glitch', 'sandstorm', 'clock', 'gear', 'dnahelix', 'shield', 'energyball', 'teleport', 'peachblossom', 'hydrangea', 'plumeblossom', 'lotus', 'bamboo', 'lantern', 'koinobori', 'milkyway', 'sun', 'planet', 'galaxy', 'comet',
+        'blackhole', 'supernova', 'warp', 'ufo', 'alien', 'robot', 'mechanical', 'factory', 'rainbowbridge', 'cloud', 'fog', 'storm', 'tsunami', 'earthquake', 'volcano', 'ocean', 'waterfall', 'onsen', 'campfire', 'treasurechest',
         'random'
       ].includes(anim)) {
         return anim;
@@ -5775,6 +6309,204 @@ export default function Home() {
     }, 800);
   };
 
+  // 映画クイズアニメーション開始
+  const startMovieQuizAnimation = (objOrX: Obj | number, y?: number) => {
+    if (totalCoins < 100) {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      let startX: number, startY: number;
+      if (typeof objOrX === 'number' && y !== undefined) {
+        startX = objOrX;
+        startY = y;
+      } else if (typeof objOrX === 'object') {
+        const rect = canvas.getBoundingClientRect();
+        const gridX = (objOrX.x || 0) + Math.floor((objOrX.w || 1) / 2);
+        const gridY = (objOrX.y || 0) + Math.floor((objOrX.h || 1) / 2);
+        startX = (gridX - cam.tx) * cam.scale + rect.width / 2;
+        startY = (gridY - cam.ty) * cam.scale + rect.height / 2;
+      } else { return; }
+      setMovieQuiz({ x: startX, y: startY, question: MOVIE_QUESTIONS[0], choices: [], state: 'insufficient_coins', selectedAnswer: null, startTime: Date.now(), reward: 0, consecutiveCount: movieQuizConsecutiveCorrect });
+      return;
+    }
+    const newTotal = totalCoins - 100;
+    setTotalCoins(newTotal);
+    localStorage.setItem('totalCoins', newTotal.toString());
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    let startX: number, startY: number;
+    if (typeof objOrX === 'number' && y !== undefined) {
+      startX = objOrX;
+      startY = y;
+    } else if (typeof objOrX === 'object') {
+      const rect = canvas.getBoundingClientRect();
+      const gridX = (objOrX.x || 0) + Math.floor((objOrX.w || 1) / 2);
+      const gridY = (objOrX.y || 0) + Math.floor((objOrX.h || 1) / 2);
+      startX = (gridX - cam.tx) * cam.scale + rect.width / 2;
+      startY = (gridY - cam.ty) * cam.scale + rect.height / 2;
+    } else { return; }
+    const asked = new Set(JSON.parse(localStorage.getItem("movieQuizAsked") || "[]"));
+    const wrong = new Set(JSON.parse(localStorage.getItem("movieQuizWrong") || "[]"));
+    const unasked = MOVIE_QUESTIONS.filter((q) => !asked.has(q.id));
+    const wrongQuestions = MOVIE_QUESTIONS.filter((q) => wrong.has(q.id));
+    let pool: typeof MOVIE_QUESTIONS = [];
+    if (unasked.length > 0) { pool = unasked; }
+    else if (wrongQuestions.length > 0) { pool = wrongQuestions; }
+    else { localStorage.removeItem("movieQuizAsked"); localStorage.removeItem("movieQuizWrong"); pool = MOVIE_QUESTIONS; }
+    const randomQuestion = pool[Math.floor(Math.random() * pool.length)];
+    const shuffledChoices = [randomQuestion.correct, randomQuestion.wrong1, randomQuestion.wrong2].sort(() => Math.random() - 0.5);
+    setMovieQuiz({ x: startX, y: startY, question: randomQuestion, choices: shuffledChoices, state: 'showing', selectedAnswer: null, startTime: Date.now(), reward: 0, consecutiveCount: movieQuizConsecutiveCorrect });
+    setTimeout(() => { setMovieQuiz(prev => prev ? { ...prev, state: 'answering' } : null); }, 800);
+  };
+
+  // ラーメンクイズアニメーション開始
+  const startRamenQuizAnimation = (objOrX: Obj | number, y?: number) => {
+    if (totalCoins < 100) {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      let startX: number, startY: number;
+      if (typeof objOrX === 'number' && y !== undefined) {
+        startX = objOrX;
+        startY = y;
+      } else if (typeof objOrX === 'object') {
+        const rect = canvas.getBoundingClientRect();
+        const gridX = (objOrX.x || 0) + Math.floor((objOrX.w || 1) / 2);
+        const gridY = (objOrX.y || 0) + Math.floor((objOrX.h || 1) / 2);
+        startX = (gridX - cam.tx) * cam.scale + rect.width / 2;
+        startY = (gridY - cam.ty) * cam.scale + rect.height / 2;
+      } else { return; }
+      setRamenQuiz({ x: startX, y: startY, question: RAMEN_QUESTIONS[0], choices: [], state: 'insufficient_coins', selectedAnswer: null, startTime: Date.now(), reward: 0, consecutiveCount: ramenQuizConsecutiveCorrect });
+      return;
+    }
+    const newTotal = totalCoins - 100;
+    setTotalCoins(newTotal);
+    localStorage.setItem('totalCoins', newTotal.toString());
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    let startX: number, startY: number;
+    if (typeof objOrX === 'number' && y !== undefined) {
+      startX = objOrX;
+      startY = y;
+    } else if (typeof objOrX === 'object') {
+      const rect = canvas.getBoundingClientRect();
+      const gridX = (objOrX.x || 0) + Math.floor((objOrX.w || 1) / 2);
+      const gridY = (objOrX.y || 0) + Math.floor((objOrX.h || 1) / 2);
+      startX = (gridX - cam.tx) * cam.scale + rect.width / 2;
+      startY = (gridY - cam.ty) * cam.scale + rect.height / 2;
+    } else { return; }
+    const asked = new Set(JSON.parse(localStorage.getItem("ramenQuizAsked") || "[]"));
+    const wrong = new Set(JSON.parse(localStorage.getItem("ramenQuizWrong") || "[]"));
+    const unasked = RAMEN_QUESTIONS.filter((q) => !asked.has(q.id));
+    const wrongQuestions = RAMEN_QUESTIONS.filter((q) => wrong.has(q.id));
+    let pool: typeof RAMEN_QUESTIONS = [];
+    if (unasked.length > 0) { pool = unasked; }
+    else if (wrongQuestions.length > 0) { pool = wrongQuestions; }
+    else { localStorage.removeItem("ramenQuizAsked"); localStorage.removeItem("ramenQuizWrong"); pool = RAMEN_QUESTIONS; }
+    const randomQuestion = pool[Math.floor(Math.random() * pool.length)];
+    const shuffledChoices = [randomQuestion.correct, randomQuestion.wrong1, randomQuestion.wrong2].sort(() => Math.random() - 0.5);
+    setRamenQuiz({ x: startX, y: startY, question: randomQuestion, choices: shuffledChoices, state: 'showing', selectedAnswer: null, startTime: Date.now(), reward: 0, consecutiveCount: ramenQuizConsecutiveCorrect });
+    setTimeout(() => { setRamenQuiz(prev => prev ? { ...prev, state: 'answering' } : null); }, 800);
+  };
+
+  // 世界遺産クイズアニメーション開始
+  const startHeritageQuizAnimation = (objOrX: Obj | number, y?: number) => {
+    if (totalCoins < 100) {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      let startX: number, startY: number;
+      if (typeof objOrX === 'number' && y !== undefined) {
+        startX = objOrX;
+        startY = y;
+      } else if (typeof objOrX === 'object') {
+        const rect = canvas.getBoundingClientRect();
+        const gridX = (objOrX.x || 0) + Math.floor((objOrX.w || 1) / 2);
+        const gridY = (objOrX.y || 0) + Math.floor((objOrX.h || 1) / 2);
+        startX = (gridX - cam.tx) * cam.scale + rect.width / 2;
+        startY = (gridY - cam.ty) * cam.scale + rect.height / 2;
+      } else { return; }
+      setHeritageQuiz({ x: startX, y: startY, question: HERITAGE_QUESTIONS[0], choices: [], state: 'insufficient_coins', selectedAnswer: null, startTime: Date.now(), reward: 0, consecutiveCount: heritageQuizConsecutiveCorrect });
+      return;
+    }
+    const newTotal = totalCoins - 100;
+    setTotalCoins(newTotal);
+    localStorage.setItem('totalCoins', newTotal.toString());
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    let startX: number, startY: number;
+    if (typeof objOrX === 'number' && y !== undefined) {
+      startX = objOrX;
+      startY = y;
+    } else if (typeof objOrX === 'object') {
+      const rect = canvas.getBoundingClientRect();
+      const gridX = (objOrX.x || 0) + Math.floor((objOrX.w || 1) / 2);
+      const gridY = (objOrX.y || 0) + Math.floor((objOrX.h || 1) / 2);
+      startX = (gridX - cam.tx) * cam.scale + rect.width / 2;
+      startY = (gridY - cam.ty) * cam.scale + rect.height / 2;
+    } else { return; }
+    const asked = new Set(JSON.parse(localStorage.getItem("heritageQuizAsked") || "[]"));
+    const wrong = new Set(JSON.parse(localStorage.getItem("heritageQuizWrong") || "[]"));
+    const unasked = HERITAGE_QUESTIONS.filter((q) => !asked.has(q.id));
+    const wrongQuestions = HERITAGE_QUESTIONS.filter((q) => wrong.has(q.id));
+    let pool: typeof HERITAGE_QUESTIONS = [];
+    if (unasked.length > 0) { pool = unasked; }
+    else if (wrongQuestions.length > 0) { pool = wrongQuestions; }
+    else { localStorage.removeItem("heritageQuizAsked"); localStorage.removeItem("heritageQuizWrong"); pool = HERITAGE_QUESTIONS; }
+    const randomQuestion = pool[Math.floor(Math.random() * pool.length)];
+    const shuffledChoices = [randomQuestion.correct, randomQuestion.wrong1, randomQuestion.wrong2].sort(() => Math.random() - 0.5);
+    setHeritageQuiz({ x: startX, y: startY, question: randomQuestion, choices: shuffledChoices, state: 'showing', selectedAnswer: null, startTime: Date.now(), reward: 0, consecutiveCount: heritageQuizConsecutiveCorrect });
+    setTimeout(() => { setHeritageQuiz(prev => prev ? { ...prev, state: 'answering' } : null); }, 800);
+  };
+
+
+
+  // スイーツクイズアニメーション開始
+  const startSweetsQuizAnimation = (objOrX: Obj | number, y?: number) => {
+    if (totalCoins < 100) {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      let startX: number, startY: number;
+      if (typeof objOrX === 'number' && y !== undefined) {
+        startX = objOrX;
+        startY = y;
+      } else if (typeof objOrX === 'object') {
+        const rect = canvas.getBoundingClientRect();
+        const gridX = (objOrX.x || 0) + Math.floor((objOrX.w || 1) / 2);
+        const gridY = (objOrX.y || 0) + Math.floor((objOrX.h || 1) / 2);
+        startX = (gridX - cam.tx) * cam.scale + rect.width / 2;
+        startY = (gridY - cam.ty) * cam.scale + rect.height / 2;
+      } else { return; }
+      setSweetsQuiz({ x: startX, y: startY, question: SWEETS_QUESTIONS[0], choices: [], state: 'insufficient_coins', selectedAnswer: null, startTime: Date.now(), reward: 0, consecutiveCount: sweetsQuizConsecutiveCorrect });
+      return;
+    }
+    const newTotal = totalCoins - 100;
+    setTotalCoins(newTotal);
+    localStorage.setItem('totalCoins', newTotal.toString());
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    let startX: number, startY: number;
+    if (typeof objOrX === 'number' && y !== undefined) {
+      startX = objOrX;
+      startY = y;
+    } else if (typeof objOrX === 'object') {
+      const rect = canvas.getBoundingClientRect();
+      const gridX = (objOrX.x || 0) + Math.floor((objOrX.w || 1) / 2);
+      const gridY = (objOrX.y || 0) + Math.floor((objOrX.h || 1) / 2);
+      startX = (gridX - cam.tx) * cam.scale + rect.width / 2;
+      startY = (gridY - cam.ty) * cam.scale + rect.height / 2;
+    } else { return; }
+    const asked = new Set(JSON.parse(localStorage.getItem("sweetsQuizAsked") || "[]"));
+    const wrong = new Set(JSON.parse(localStorage.getItem("sweetsQuizWrong") || "[]"));
+    const unasked = SWEETS_QUESTIONS.filter((q) => !asked.has(q.id));
+    const wrongQuestions = SWEETS_QUESTIONS.filter((q) => wrong.has(q.id));
+    let pool: typeof SWEETS_QUESTIONS = [];
+    if (unasked.length > 0) { pool = unasked; }
+    else if (wrongQuestions.length > 0) { pool = wrongQuestions; }
+    else { localStorage.removeItem("sweetsQuizAsked"); localStorage.removeItem("sweetsQuizWrong"); pool = SWEETS_QUESTIONS; }
+    const randomQuestion = pool[Math.floor(Math.random() * pool.length)];
+    const shuffledChoices = [randomQuestion.correct, randomQuestion.wrong1, randomQuestion.wrong2].sort(() => Math.random() - 0.5);
+    setSweetsQuiz({ x: startX, y: startY, question: randomQuestion, choices: shuffledChoices, state: 'showing', selectedAnswer: null, startTime: Date.now(), reward: 0, consecutiveCount: sweetsQuizConsecutiveCorrect });
+    setTimeout(() => { setSweetsQuiz(prev => prev ? { ...prev, state: 'answering' } : null); }, 800);
+  };
+
   // バルーンアニメーション開始
   const startBalloonAnimation = (x: number, y: number) => {
     const balloons: BalloonAnimation['balloons'] = [];
@@ -6441,6 +7173,284 @@ export default function Home() {
     const sparkles: RoseAnimation['sparkles'] = [];
     setRoseAnimations(prev => [...prev, { x: centerX, y: centerY, mapX: objMapX, mapY: objMapY, petals, sparkles, startTime: Date.now(), targetObj: obj }]);
   };
+
+  // ハートアニメーション開始
+  const startHeartAnimation = (obj: Obj) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const viewW = rect.width;
+    const viewH = rect.height;
+    const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell;
+    const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell;
+    const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH);
+    
+    const hearts: HeartAnimation['hearts'] = [];
+    for (let i = 0; i < 15; i++) {
+      const angle = (Math.random() - 0.5) * Math.PI * 0.5;
+      const speed = Math.random() * 3 + 2;
+      hearts.push({
+        offsetX: 0, offsetY: 0, vx: Math.sin(angle) * speed, vy: -Math.abs(Math.cos(angle) * speed) - 1,
+        size: Math.random() * 25 + 15, opacity: 1, rotation: (Math.random() - 0.5) * 0.3, life: 1,
+        pulse: Math.random() * Math.PI * 2, color: ['#ff1493', '#ff69b4', '#ff85c0', '#ffc0cb'][Math.floor(Math.random() * 4)]
+      });
+    }
+    setHeartAnimations(prev => [...prev, { x: centerX, y: centerY, mapX: objMapX, mapY: objMapY, hearts, startTime: Date.now(), targetObj: obj }]);
+  };
+
+  // バブルアニメーション開始
+  const startBubbleAnimation = (obj: Obj) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const viewW = rect.width;
+    const viewH = rect.height;
+    const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell;
+    const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell;
+    const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH);
+    
+    const bubbles: BubbleAnimation['bubbles'] = [];
+    for (let i = 0; i < 20; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = Math.random() * 1.5 + 0.5;
+      bubbles.push({
+        offsetX: 0, offsetY: 0, vx: Math.cos(angle) * speed * 0.3, vy: -Math.abs(Math.sin(angle) * speed) - 2,
+        size: Math.random() * 30 + 10, opacity: Math.random() * 0.4 + 0.3, life: 1,
+        rainbowPhase: Math.random() * Math.PI * 2
+      });
+    }
+    setBubbleAnimations(prev => [...prev, { x: centerX, y: centerY, mapX: objMapX, mapY: objMapY, bubbles, startTime: Date.now(), targetObj: obj }]);
+  };
+
+  // 音符アニメーション開始
+  const startMusicNoteAnimation = (obj: Obj) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const viewW = rect.width;
+    const viewH = rect.height;
+    const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell;
+    const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell;
+    const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH);
+    
+    const notes: MusicNoteAnimation['notes'] = [];
+    const noteSymbols: Array<'♩' | '♪' | '♫' | '♬'> = ['♪', '♫', '♬', '♩'];
+    for (let i = 0; i < 12; i++) {
+      const angle = (Math.random() - 0.5) * Math.PI;
+      const speed = Math.random() * 2 + 1;
+      notes.push({
+        offsetX: 0, offsetY: 0, vy: -Math.abs(Math.cos(angle) * speed) - 1.5,
+        size: Math.random() * 20 + 15, opacity: 1, rotation: (Math.random() - 0.5) * 0.5, life: 1,
+        noteType: noteSymbols[Math.floor(Math.random() * noteSymbols.length)]
+      });
+    }
+    setMusicNoteAnimations(prev => [...prev, { x: centerX, y: centerY, mapX: objMapX, mapY: objMapY, notes, startTime: Date.now(), targetObj: obj }]);
+  };
+
+  // 桜アニメーション開始
+  const startSakuraAnimation = (obj: Obj) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const viewW = rect.width;
+    const viewH = rect.height;
+    const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell;
+    const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell;
+    const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH);
+    
+    const petals: SakuraAnimation['petals'] = [];
+    for (let i = 0; i < 30; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = Math.random() * 2 + 0.5;
+      petals.push({
+        offsetX: Math.cos(angle) * 50, offsetY: Math.sin(angle) * 50,
+        vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed + 1,
+        rotation: Math.random() * Math.PI * 2, rotationSpeed: (Math.random() - 0.5) * 0.1,
+        size: Math.random() * 12 + 8, opacity: Math.random() * 0.5 + 0.5, life: 1
+      });
+    }
+    setSakuraAnimations(prev => [...prev, { x: centerX, y: centerY, mapX: objMapX, mapY: objMapY, petals, startTime: Date.now(), targetObj: obj }]);
+  };
+
+  // ポータルアニメーション開始
+  const startPortalAnimation = (obj: Obj) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const viewW = rect.width;
+    const viewH = rect.height;
+    const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell;
+    const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell;
+    const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH);
+    
+    const particles: PortalAnimation['particles'] = [];
+    for (let i = 0; i < 40; i++) {
+      const angle = (i / 40) * Math.PI * 2;
+      const radius = Math.random() * 60 + 20;
+      particles.push({
+        angle: angle, radius: radius, speed: (Math.random() - 0.5) * 0.05,
+        size: Math.random() * 4 + 2,
+        color: ['#9b59b6', '#8e44ad', '#3498db', '#2ecc71'][Math.floor(Math.random() * 4)]
+      });
+    }
+    setPortalAnimations(prev => [...prev, { x: centerX, y: centerY, mapX: objMapX, mapY: objMapY, particles, rotation: 0, startTime: Date.now(), targetObj: obj, rings: [], innerGlow: 1, life: 1 }]);
+  };
+
+  // ホログラムアニメーション開始
+  const startHologramAnimation = (obj: Obj) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const viewW = rect.width;
+    const viewH = rect.height;
+    const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell;
+    const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell;
+    const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH);
+    
+    const scanlines: HologramAnimation['scanlines'] = [];
+    for (let i = 0; i < 8; i++) {
+      scanlines.push({
+        offsetY: i * 15, speed: Math.random() * 2 + 1, opacity: Math.random() * 0.3 + 0.2
+      });
+    }
+    setHologramAnimations(prev => [...prev, { x: centerX, y: centerY, mapX: objMapX, mapY: objMapY, scanlines, glitch: 0, color: '#00ffff', opacity: 1, startTime: Date.now(), life: 1, targetObj: obj }]);
+  };
+
+  // 電気アニメーション開始
+  const startElectricAnimation = (obj: Obj) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const viewW = rect.width;
+    const viewH = rect.height;
+    const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell;
+    const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell;
+    const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH);
+    
+    const bolts: ElectricAnimation['bolts'] = [];
+    for (let i = 0; i < 6; i++) {
+      const angle = (i / 6) * Math.PI * 2;
+      const segments: { x: number; y: number }[] = [{ x: 0, y: 0 }];
+      let currentX = 0;
+      let currentY = 0;
+      for (let j = 0; j < 10; j++) {
+        currentX += Math.cos(angle) * 10 + (Math.random() - 0.5) * 15;
+        currentY += Math.sin(angle) * 10 + (Math.random() - 0.5) * 15;
+        segments.push({ x: currentX, y: currentY });
+      }
+      bolts.push({ segments, alpha: Math.random() * 0.6 + 0.4, thickness: Math.random() * 3 + 1, life: 1 });
+    }
+    const sparks: ElectricAnimation['sparks'] = [];
+    setElectricAnimations(prev => [...prev, { x: centerX, y: centerY, mapX: objMapX, mapY: objMapY, bolts, sparks, startTime: Date.now(), targetObj: obj }]);
+  };
+
+  // 氷アニメーション開始
+  const startIceAnimation = (obj: Obj) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const viewW = rect.width;
+    const viewH = rect.height;
+    const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell;
+    const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell;
+    const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH);
+    
+    const crystals: IceAnimation['crystals'] = [];
+    for (let i = 0; i < 20; i++) {
+      const angle = (i / 20) * Math.PI * 2;
+      const distance = Math.random() * 40 + 10;
+      crystals.push({
+        offsetX: Math.cos(angle) * distance, offsetY: Math.sin(angle) * distance,
+        size: Math.random() * 15 + 8, rotation: Math.random() * Math.PI * 2,
+        opacity: Math.random() * 0.5 + 0.5, life: 1
+      });
+    }
+    const frost = { radius: 0, alpha: 0.5 };
+    setIceAnimations(prev => [...prev, { x: centerX, y: centerY, mapX: objMapX, mapY: objMapY, crystals, frost, startTime: Date.now(), targetObj: obj }]);
+  };
+
+  // 星座アニメーション開始
+  const startConstellationAnimation = (obj: Obj) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const viewW = rect.width;
+    const viewH = rect.height;
+    const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell;
+    const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell;
+    const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH);
+    
+    const stars: ConstellationAnimation['stars'] = [];
+    for (let i = 0; i < 12; i++) {
+      const angle = (i / 12) * Math.PI * 2;
+      const distance = Math.random() * 60 + 30;
+      stars.push({
+        offsetX: Math.cos(angle) * distance, offsetY: Math.sin(angle) * distance,
+        size: Math.random() * 4 + 2, twinkle: Math.random() * 0.6 + 0.4,
+        connections: []
+      });
+    }
+    // connectionsを設定
+    for (let i = 0; i < stars.length - 1; i++) {
+      if (Math.random() > 0.4) {
+        stars[i].connections.push(i + 1);
+      }
+    }
+    setConstellationAnimations(prev => [...prev, { x: centerX, y: centerY, mapX: objMapX, mapY: objMapY, stars, lineAlpha: 0.3, startTime: Date.now(), life: 1, targetObj: obj }]);
+  };
+
+  // 残りのアニメーション開始関数（簡易実装）
+  const startDandelionAnimation = (obj: Obj) => { const canvas = canvasRef.current; if (!canvas) return; const rect = canvas.getBoundingClientRect(); const viewW = rect.width; const viewH = rect.height; const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell; const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell; const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH); const seeds: DandelionAnimation['seeds'] = []; for (let i = 0; i < 25; i++) { const angle = Math.random() * Math.PI * 2; seeds.push({ offsetX: 0, offsetY: 0, vx: Math.cos(angle) * (Math.random() * 2 + 0.5), vy: -Math.abs(Math.sin(angle) * 2) - 1, size: Math.random() * 4 + 2, opacity: Math.random() * 0.6 + 0.4, rotation: Math.random() * Math.PI * 2, life: 1 }); } setDandelionAnimations(prev => [...prev, { x: centerX, y: centerY, mapX: objMapX, mapY: objMapY, seeds, startTime: Date.now(), targetObj: obj }]); };
+  const startCrownAnimation = (obj: Obj) => { const canvas = canvasRef.current; if (!canvas) return; const rect = canvas.getBoundingClientRect(); const viewW = rect.width; const viewH = rect.height; const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell; const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell; const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH); const crown = { rotation: 0, size: 1, glow: 1, opacity: 1 }; const jewels: CrownAnimation['jewels'] = []; setCrownAnimations(prev => [...prev, { x: centerX, y: centerY, mapX: objMapX, mapY: objMapY, crown, jewels, life: 1, startTime: Date.now(), targetObj: obj }]); };
+  const startDragonBreathAnimation = (obj: Obj) => { const canvas = canvasRef.current; if (!canvas) return; const rect = canvas.getBoundingClientRect(); const viewW = rect.width; const viewH = rect.height; const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell; const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell; const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH); const flames: DragonBreathAnimation['flames'] = []; for (let i = 0; i < 30; i++) { const hue = Math.random() * 60; flames.push({ offsetX: 0, offsetY: 0, vx: (Math.random() - 0.5) * 4, vy: (Math.random() - 0.5) * 4, size: Math.random() * 20 + 10, opacity: Math.random() * 0.7 + 0.3, rotation: Math.random() * Math.PI * 2, color: `hsl(${hue}, 100%, 50%)`, life: 1 }); } const smoke: DragonBreathAnimation['smoke'] = []; setDragonBreathAnimations(prev => [...prev, { x: centerX, y: centerY, mapX: objMapX, mapY: objMapY, flames, smoke, startTime: Date.now(), targetObj: obj }]); };
+  const startMoonbeamAnimation = (obj: Obj) => { const canvas = canvasRef.current; if (!canvas) return; const rect = canvas.getBoundingClientRect(); const viewW = rect.width; const viewH = rect.height; const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell; const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell; const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH); const beams: MoonbeamAnimation['beams'] = []; for (let i = 0; i < 8; i++) { beams.push({ offsetX: (i - 4) * 15, offsetY: -100, width: Math.random() * 4 + 2, height: 100, opacity: Math.random() * 0.5 + 0.3, shimmer: Math.random() }); } const particles: MoonbeamAnimation['particles'] = []; setMoonbeamAnimations(prev => [...prev, { x: centerX, y: centerY, mapX: objMapX, mapY: objMapY, beams, particles, life: 1, startTime: Date.now(), targetObj: obj }]); };
+  const startPrismAnimation = (obj: Obj) => { const canvas = canvasRef.current; if (!canvas) return; const rect = canvas.getBoundingClientRect(); const viewW = rect.width; const viewH = rect.height; const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell; const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell; const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH); const rays: PrismAnimation['rays'] = []; for (let i = 0; i < 7; i++) { rays.push({ angle: (i / 7) * Math.PI * 2, length: 0, color: `hsl(${i * 51}, 100%, 60%)`, opacity: 0.8 }); } setPrismAnimations(prev => [...prev, { x: centerX, y: centerY, mapX: objMapX, mapY: objMapY, rays, sparkles: [], rotation: 0, life: 1, startTime: Date.now(), targetObj: obj }]); };
+  const startAuraBeamAnimation = (obj: Obj) => { const canvas = canvasRef.current; if (!canvas) return; const rect = canvas.getBoundingClientRect(); const viewW = rect.width; const viewH = rect.height; const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell; const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell; const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH); const layers: AuraBeamAnimation['layers'] = []; const particles: AuraBeamAnimation['particles'] = []; setAuraBeamAnimations(prev => [...prev, { x: centerX, y: centerY, mapX: objMapX, mapY: objMapY, layers, particles, pulse: 0, life: 1, startTime: Date.now(), targetObj: obj }]); };
+  const startChainLightningAnimation = (obj: Obj) => { const canvas = canvasRef.current; if (!canvas) return; const rect = canvas.getBoundingClientRect(); const viewW = rect.width; const viewH = rect.height; const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell; const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell; const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH); setChainLightningAnimations(prev => [...prev, { x: centerX, y: centerY, mapX: objMapX, mapY: objMapY, chains: [], duration: 5, startTime: Date.now() }]); };
+  const startNeonSignAnimation = (obj: Obj) => { const canvas = canvasRef.current; if (!canvas) return; const rect = canvas.getBoundingClientRect(); const viewW = rect.width; const viewH = rect.height; const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell; const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell; const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH); setNeonSignAnimations(prev => [...prev, { x: centerX, y: centerY, mapX: objMapX, mapY: objMapY, text: 'NEON', flicker: 1, color: '#ff00ff', glowIntensity: 1, life: 1, startTime: Date.now(), targetObj: obj }]); };
+  const startLaserBeamAnimation = (obj: Obj) => { const canvas = canvasRef.current; if (!canvas) return; const rect = canvas.getBoundingClientRect(); const viewW = rect.width; const viewH = rect.height; const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell; const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell; const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH); const particles: LaserBeamAnimation['particles'] = []; setLaserBeamAnimations(prev => [...prev, { x: centerX, y: centerY, mapX: objMapX, mapY: objMapY, startX: 0, startY: 0, endX: 100, endY: 0, thickness: 3, color: '#ff0000', opacity: 0.9, particles, life: 1, startTime: Date.now() }]); };
+  const startCyberCircleAnimation = (obj: Obj) => { const canvas = canvasRef.current; if (!canvas) return; const rect = canvas.getBoundingClientRect(); const viewW = rect.width; const viewH = rect.height; const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell; const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell; const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH); const circles: CyberCircleAnimation['circles'] = []; const dataStreams: CyberCircleAnimation['dataStreams'] = []; setCyberCircleAnimations(prev => [...prev, { x: centerX, y: centerY, mapX: objMapX, mapY: objMapY, circles, dataStreams, life: 1, startTime: Date.now(), targetObj: obj }]); };
+  const startPixelExplosionAnimation = (obj: Obj) => { const canvas = canvasRef.current; if (!canvas) return; const rect = canvas.getBoundingClientRect(); const viewW = rect.width; const viewH = rect.height; const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell; const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell; const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH); const pixels: PixelExplosionAnimation['pixels'] = []; for (let i = 0; i < 50; i++) { const angle = Math.random() * Math.PI * 2; const speed = Math.random() * 5 + 2; pixels.push({ offsetX: 0, offsetY: 0, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed, size: Math.random() * 6 + 4, color: `hsl(${Math.random() * 360}, 100%, 60%)`, life: 1 }); } setPixelExplosionAnimations(prev => [...prev, { x: centerX, y: centerY, mapX: objMapX, mapY: objMapY, pixels, startTime: Date.now(), targetObj: obj }]); };
+  const startGlitchAnimation = (obj: Obj) => { const canvas = canvasRef.current; if (!canvas) return; const rect = canvas.getBoundingClientRect(); const viewW = rect.width; const viewH = rect.height; const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell; const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell; const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH); const strips: GlitchAnimation['strips'] = []; setGlitchAnimations(prev => [...prev, { x: centerX, y: centerY, mapX: objMapX, mapY: objMapY, strips, life: 1, startTime: Date.now(), targetObj: obj }]); };
+  const startSandstormAnimation = (obj: Obj) => { const canvas = canvasRef.current; if (!canvas) return; const rect = canvas.getBoundingClientRect(); const viewW = rect.width; const viewH = rect.height; const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell; const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell; const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH); const particles: SandstormAnimation['particles'] = []; for (let i = 0; i < 40; i++) { particles.push({ x: (Math.random() - 0.5) * 100, y: (Math.random() - 0.5) * 100, vx: Math.random() * 4 + 2, vy: (Math.random() - 0.5) * 2, size: Math.random() * 3 + 1, opacity: Math.random() * 0.5 + 0.2, life: 1 }); } setSandstormAnimations(prev => [...prev, { x: centerX, y: centerY, mapX: objMapX, mapY: objMapY, particles, duration: 5, startTime: Date.now() }]); };
+  const startClockAnimation = (obj: Obj) => { const canvas = canvasRef.current; if (!canvas) return; const rect = canvas.getBoundingClientRect(); const viewW = rect.width; const viewH = rect.height; const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell; const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell; const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH); setClockAnimations(prev => [...prev, { x: centerX, y: centerY, mapX: objMapX, mapY: objMapY, hourHand: { angle: 0, length: 30 }, minuteHand: { angle: 0, length: 40 }, secondHand: { angle: 0, length: 45 }, numbers: Array.from({ length: 12 }, (_, i) => ({ angle: (i * 30 - 90) * Math.PI / 180, value: i === 0 ? 12 : i })), glow: 0, startTime: Date.now(), life: 1, targetObj: obj }]); };
+  const startGearAnimation = (obj: Obj) => { const canvas = canvasRef.current; if (!canvas) return; const rect = canvas.getBoundingClientRect(); const viewW = rect.width; const viewH = rect.height; const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell; const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell; const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH); const gears: GearAnimation['gears'] = []; for (let i = 0; i < 3; i++) { gears.push({ offsetX: (i - 1) * 40, offsetY: 0, size: 40 + i * 10, rotation: 0, rotationSpeed: (i % 2 === 0 ? 1 : -1) * 0.02, teeth: 8 + i * 2, color: i === 0 ? '#FFD700' : i === 1 ? '#C0C0C0' : '#CD7F32' }); } setGearAnimations(prev => [...prev, { x: centerX, y: centerY, mapX: objMapX, mapY: objMapY, gears, startTime: Date.now(), life: 1, targetObj: obj }]); };
+  const startDNAHelixAnimation = (obj: Obj) => { const canvas = canvasRef.current; if (!canvas) return; const rect = canvas.getBoundingClientRect(); const viewW = rect.width; const viewH = rect.height; const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell; const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell; const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH); const points: DNAHelixAnimation['points'] = []; for (let i = 0; i < 20; i++) { points.push({ angle: i * 18, height: i * 5, side: i % 2 === 0 ? 'left' : 'right', size: 4, color: i % 2 === 0 ? '#00FFFF' : '#FF00FF' }); } setDNAHelixAnimations(prev => [...prev, { x: centerX, y: centerY, mapX: objMapX, mapY: objMapY, points, rotation: 0, startTime: Date.now(), life: 1, targetObj: obj }]); };
+  const startShieldAnimation = (obj: Obj) => { const canvas = canvasRef.current; if (!canvas) return; const rect = canvas.getBoundingClientRect(); const viewW = rect.width; const viewH = rect.height; const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell; const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell; const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH); const hexagons: ShieldAnimation['hexagons'] = []; for (let i = 0; i < 6; i++) { const angle = (i * 60) * Math.PI / 180; hexagons.push({ offsetX: Math.cos(angle) * 30, offsetY: Math.sin(angle) * 30, size: 20, opacity: 0.5, flash: 0 }); } setShieldAnimations(prev => [...prev, { x: centerX, y: centerY, mapX: objMapX, mapY: objMapY, hexagons, barrier: { radius: 50, opacity: 0.3, color: '#00AAFF' }, startTime: Date.now(), life: 1, targetObj: obj }]); };
+  const startEnergyBallAnimation = (obj: Obj) => { const canvas = canvasRef.current; if (!canvas) return; const rect = canvas.getBoundingClientRect(); const viewW = rect.width; const viewH = rect.height; const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell; const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell; const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH); const electricity: EnergyBallAnimation['electricity'] = []; for (let i = 0; i < 8; i++) { electricity.push({ angle: i * 45, length: 30, alpha: 1 }); } const particles: EnergyBallAnimation['particles'] = []; for (let i = 0; i < 20; i++) { particles.push({ angle: Math.random() * 360, radius: 20 + Math.random() * 10, size: Math.random() * 3 + 1 }); } setEnergyBallAnimations(prev => [...prev, { x: centerX, y: centerY, mapX: objMapX, mapY: objMapY, core: { size: 30, rotation: 0, color: '#FFFF00', glow: 1 }, electricity, particles, startTime: Date.now(), life: 1, targetObj: obj }]); };
+  const startTeleportAnimation = (obj: Obj) => { const canvas = canvasRef.current; if (!canvas) return; const rect = canvas.getBoundingClientRect(); const viewW = rect.width; const viewH = rect.height; const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell; const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell; const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH); const particles: TeleportAnimation['particles'] = []; for (let i = 0; i < 30; i++) { const angle = Math.random() * Math.PI * 2; particles.push({ offsetX: Math.cos(angle) * 20, offsetY: Math.sin(angle) * 20, vy: -Math.random() * 5 - 2, size: Math.random() * 4 + 2, opacity: 1, life: 1 }); } setTeleportAnimations(prev => [...prev, { x: centerX, y: centerY, mapX: objMapX, mapY: objMapY, phase: 'disappear', particles, ringExpansion: 0, startTime: Date.now(), targetObj: obj }]); };
+  const startPeachBlossomAnimation = (obj: Obj) => { const canvas = canvasRef.current; if (!canvas) return; const rect = canvas.getBoundingClientRect(); const viewW = rect.width; const viewH = rect.height; const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell; const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell; const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH); const petals: PeachBlossomAnimation['petals'] = []; for (let i = 0; i < 20; i++) { const angle = Math.random() * Math.PI * 2; petals.push({ offsetX: Math.cos(angle) * 30, offsetY: Math.sin(angle) * 30, vx: Math.cos(angle), vy: Math.sin(angle) + 1, rotation: Math.random() * Math.PI * 2, rotationSpeed: (Math.random() - 0.5) * 0.1, size: Math.random() * 10 + 6, opacity: Math.random() * 0.6 + 0.4, life: 1 }); } setPeachBlossomAnimations(prev => [...prev, { x: centerX, y: centerY, mapX: objMapX, mapY: objMapY, petals, startTime: Date.now(), targetObj: obj }]); };
+  const startHydrangeaAnimation = (obj: Obj) => { const canvas = canvasRef.current; if (!canvas) return; const rect = canvas.getBoundingClientRect(); const viewW = rect.width; const viewH = rect.height; const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell; const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell; const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH); const flowers: HydrangeaAnimation['flowers'] = []; for (let i = 0; i < 30; i++) { const angle = (i / 30) * Math.PI * 2; flowers.push({ offsetX: Math.cos(angle) * 25, offsetY: Math.sin(angle) * 25, size: Math.random() * 8 + 4, color: ['#6495ed', '#9370db', '#dda0dd'][Math.floor(Math.random() * 3)], opacity: Math.random() * 0.5 + 0.5, growth: 0, life: 1 }); } setHydrangeaAnimations(prev => [...prev, { x: centerX, y: centerY, mapX: objMapX, mapY: objMapY, flowers, startTime: Date.now(), targetObj: obj }]); };
+  const startPlumeBlossomAnimation = (obj: Obj) => { const canvas = canvasRef.current; if (!canvas) return; const rect = canvas.getBoundingClientRect(); const viewW = rect.width; const viewH = rect.height; const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell; const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell; const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH); const flowers: PlumeBlossomAnimation['flowers'] = []; for (let i = 0; i < 5; i++) { const angle = (i / 5) * Math.PI * 2; flowers.push({ offsetX: Math.cos(angle) * 15, offsetY: Math.sin(angle) * 15, size: 20, rotation: 0, opacity: 1, life: 1 }); } const petals: PlumeBlossomAnimation['petals'] = []; for (let i = 0; i < 25; i++) { const angle = Math.random() * Math.PI * 2; petals.push({ offsetX: Math.cos(angle) * 20, offsetY: -Math.abs(Math.sin(angle) * 40), vx: Math.cos(angle) * 0.5, vy: Math.sin(angle) * 0.5 + 1.5, rotation: Math.random() * Math.PI * 2, size: Math.random() * 8 + 5, opacity: Math.random() * 0.6 + 0.4, life: 1 }); } setPlumeBlossomAnimations(prev => [...prev, { x: centerX, y: centerY, mapX: objMapX, mapY: objMapY, flowers, petals, startTime: Date.now(), targetObj: obj }]); };
+  const startLotusAnimation = (obj: Obj) => { const canvas = canvasRef.current; if (!canvas) return; const rect = canvas.getBoundingClientRect(); const viewW = rect.width; const viewH = rect.height; const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell; const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell; const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH); const petals: LotusAnimation['petals'] = []; for (let i = 0; i < 8; i++) { petals.push({ angle: (i / 8) * Math.PI * 2, openProgress: 0, size: 30, color: ['#FFB6C1', '#FFC0CB'][i % 2] }); } setLotusAnimations(prev => [...prev, { x: centerX, y: centerY, mapX: objMapX, mapY: objMapY, petals, center: { size: 15, glow: 0 }, ripples: [], startTime: Date.now(), life: 1, targetObj: obj }]); };
+  const startBambooAnimation = (obj: Obj) => { const canvas = canvasRef.current; if (!canvas) return; const rect = canvas.getBoundingClientRect(); const viewW = rect.width; const viewH = rect.height; const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell; const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell; const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH); const stalks: BambooAnimation['stalks'] = []; for (let i = 0; i < 5; i++) { stalks.push({ offsetX: (i - 2) * 15, height: 80 + Math.random() * 40, sway: 0, swaySpeed: 0.02 + Math.random() * 0.01, opacity: 0.8 + Math.random() * 0.2 }); } const leaves: BambooAnimation['leaves'] = []; for (let i = 0; i < 15; i++) { leaves.push({ offsetX: (Math.random() - 0.5) * 50, offsetY: -Math.random() * 100, rotation: (Math.random() - 0.5) * 0.3, size: Math.random() * 10 + 5, opacity: 0.6 + Math.random() * 0.4 }); } setBambooAnimations(prev => [...prev, { x: centerX, y: centerY, mapX: objMapX, mapY: objMapY, stalks, leaves, startTime: Date.now(), life: 1, targetObj: obj }]); };
+  const startLanternAnimation = (obj: Obj) => { const canvas = canvasRef.current; if (!canvas) return; const rect = canvas.getBoundingClientRect(); const viewW = rect.width; const viewH = rect.height; const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell; const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell; const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH); const lanterns: LanternAnimation['lanterns'] = []; for (let i = 0; i < 3; i++) { lanterns.push({ offsetX: (i - 1) * 40, offsetY: -20, sway: 0, glowIntensity: 0.8, color: ['#FF6B6B', '#FFD93D', '#6BCB77'][i], size: 30 }); } setLanternAnimations(prev => [...prev, { x: centerX, y: centerY, mapX: objMapX, mapY: objMapY, lanterns, startTime: Date.now(), life: 1, targetObj: obj }]); };
+  const startKoinoboriAnimation = (obj: Obj) => { const canvas = canvasRef.current; if (!canvas) return; const rect = canvas.getBoundingClientRect(); const viewW = rect.width; const viewH = rect.height; const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell; const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell; const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH); const koi: KoinoboriAnimation['koi'] = []; for (let i = 0; i < 3; i++) { koi.push({ offsetX: 0, offsetY: (i - 1) * 25, size: 60 - i * 10, color: ['#FF4444', '#4444FF', '#FFAA44'][i], wavePhase: i * Math.PI / 3, rotation: 0 }); } setKoinoboriAnimations(prev => [...prev, { x: centerX, y: centerY, mapX: objMapX, mapY: objMapY, koi, wind: 0, startTime: Date.now(), life: 1, targetObj: obj }]); };
+  const startMilkyWayAnimation = (obj: Obj) => { const canvas = canvasRef.current; if (!canvas) return; const rect = canvas.getBoundingClientRect(); const viewW = rect.width; const viewH = rect.height; const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell; const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell; const stars: MilkyWayAnimation['stars'] = []; for (let i = 0; i < 100; i++) { const angle = (i / 100) * Math.PI * 2; const distance = Math.random() * 80 + 20; stars.push({ x: objMapX + Math.cos(angle) * distance, y: objMapY + Math.sin(angle) * distance * 0.3, size: Math.random() * 2 + 0.5, twinkle: Math.random(), color: ['#FFFFFF', '#FFEECC', '#CCDDFF'][Math.floor(Math.random() * 3)], opacity: Math.random() * 0.7 + 0.3 }); } const stardust: MilkyWayAnimation['stardust'] = []; setMilkyWayAnimations(prev => [...prev, { mapX: objMapX, mapY: objMapY, stars, stardust, startTime: Date.now(), duration: 10 }]); };
+  const startSunAnimation = (obj: Obj) => { const canvas = canvasRef.current; if (!canvas) return; const rect = canvas.getBoundingClientRect(); const viewW = rect.width; const viewH = rect.height; const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell; const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell; const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH); const rays: SunAnimation['rays'] = []; for (let i = 0; i < 12; i++) { rays.push({ angle: (i / 12) * Math.PI * 2, length: 40, opacity: 0.8 }); } const flares: SunAnimation['flares'] = []; for (let i = 0; i < 8; i++) { flares.push({ offsetX: (Math.random() - 0.5) * 60, offsetY: (Math.random() - 0.5) * 60, size: Math.random() * 10 + 5, opacity: Math.random() * 0.5 + 0.3, life: 1 }); } setSunAnimations(prev => [...prev, { x: centerX, y: centerY, mapX: objMapX, mapY: objMapY, core: { size: 30, glow: 1, rotation: 0 }, rays, flares, startTime: Date.now(), life: 1, targetObj: obj }]); };
+  const startPlanetAnimation = (obj: Obj) => { const canvas = canvasRef.current; if (!canvas) return; const rect = canvas.getBoundingClientRect(); const viewW = rect.width; const viewH = rect.height; const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell; const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell; const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH); const moons: PlanetAnimation['moons'] = []; for (let i = 0; i < 2; i++) { moons.push({ angle: i * Math.PI, radius: 60 + i * 10, size: 8 + i * 2, speed: 0.02 - i * 0.005 }); } setPlanetAnimations(prev => [...prev, { x: centerX, y: centerY, mapX: objMapX, mapY: objMapY, planet: { size: 40, rotation: 0, color: ['#FF8844', '#4488FF', '#88FF44'][Math.floor(Math.random() * 3)], rings: Math.random() > 0.5 }, moons, atmosphere: { size: 50, opacity: 0.2 }, startTime: Date.now(), life: 1, targetObj: obj }]); };
+  const startGalaxyAnimation = (obj: Obj) => { const canvas = canvasRef.current; if (!canvas) return; const rect = canvas.getBoundingClientRect(); const viewW = rect.width; const viewH = rect.height; const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell; const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell; const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH); const arms: GalaxyAnimation['arms'] = []; for (let i = 0; i < 4; i++) { const stars: GalaxyAnimation['arms'][0]['stars'] = []; for (let j = 0; j < 20; j++) { stars.push({ distance: j * 5, size: Math.random() * 2 + 1, color: ['#FFFFFF', '#FFEECC', '#CCDDFF'][Math.floor(Math.random() * 3)], twinkle: Math.random() }); } arms.push({ angle: (i / 4) * Math.PI * 2, stars }); } setGalaxyAnimations(prev => [...prev, { x: centerX, y: centerY, mapX: objMapX, mapY: objMapY, arms, rotation: 0, core: { size: 20, glow: 1 }, startTime: Date.now(), life: 1, targetObj: obj }]); };
+  const startCometAnimation = (obj: Obj) => { const canvas = canvasRef.current; if (!canvas) return; const rect = canvas.getBoundingClientRect(); const viewW = rect.width; const viewH = rect.height; const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell; const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell; const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH); const tail: CometAnimation['tail'] = []; for (let i = 0; i < 20; i++) { tail.push({ offsetX: -i * 10, offsetY: 0, size: 20 - i, opacity: 1 - i * 0.05 }); } setCometAnimations(prev => [...prev, { mapX: objMapX, mapY: objMapY, x: centerX + 200, y: centerY - 100, vx: -5, vy: 2, size: 20, tail, glow: 1, startTime: Date.now(), life: 1 }]); };
+  const startBlackHoleAnimation = (obj: Obj) => { const canvas = canvasRef.current; if (!canvas) return; const rect = canvas.getBoundingClientRect(); const viewW = rect.width; const viewH = rect.height; const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell; const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell; const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH); const particles: BlackHoleAnimation['particles'] = []; for (let i = 0; i < 30; i++) { particles.push({ angle: Math.random() * Math.PI * 2, radius: 40 + Math.random() * 40, speed: 0.05 + Math.random() * 0.05, size: Math.random() * 3 + 1, opacity: Math.random() * 0.8 + 0.2 }); } setBlackHoleAnimations(prev => [...prev, { x: centerX, y: centerY, mapX: objMapX, mapY: objMapY, eventHorizon: { radius: 30, rotation: 0 }, particles, distortion: 1, startTime: Date.now(), life: 1, targetObj: obj }]); };
+  const startSupernovaAnimation = (obj: Obj) => { const canvas = canvasRef.current; if (!canvas) return; const rect = canvas.getBoundingClientRect(); const viewW = rect.width; const viewH = rect.height; const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell; const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell; const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH); const debris: SupernovaAnimation['debris'] = []; for (let i = 0; i < 40; i++) { const angle = Math.random() * Math.PI * 2; debris.push({ angle, distance: 0, speed: Math.random() * 3 + 1, size: Math.random() * 4 + 2, color: ['#FFAA00', '#FF4400', '#FFDD00'][Math.floor(Math.random() * 3)], opacity: 1 }); } setSupernovaAnimations(prev => [...prev, { x: centerX, y: centerY, mapX: objMapX, mapY: objMapY, shockwave: { radius: 0, opacity: 1 }, debris, flash: 1, startTime: Date.now(), life: 1, targetObj: obj }]); };
+  const startWarpAnimation = (obj: Obj) => { const canvas = canvasRef.current; if (!canvas) return; const rect = canvas.getBoundingClientRect(); const viewW = rect.width; const viewH = rect.height; const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell; const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell; const lines: WarpAnimation['lines'] = []; for (let i = 0; i < 50; i++) { lines.push({ x: Math.random() * 400 - 200, y: Math.random() * 400 - 200, vx: Math.random() * 20 + 10, vy: (Math.random() - 0.5) * 10, length: Math.random() * 30 + 20, opacity: Math.random() * 0.8 + 0.2, life: 1 }); } setWarpAnimations(prev => [...prev, { mapX: objMapX, mapY: objMapY, lines, startTime: Date.now(), duration: 3 }]); };
+  const startUFOAnimation = (obj: Obj) => { const canvas = canvasRef.current; if (!canvas) return; const rect = canvas.getBoundingClientRect(); const viewW = rect.width; const viewH = rect.height; const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell; const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell; const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH); const lights: UFOAnimation['lights'] = []; for (let i = 0; i < 8; i++) { lights.push({ angle: (i / 8) * Math.PI * 2, color: ['#FF0000', '#00FF00', '#0000FF'][i % 3], blink: Math.random() }); } setUFOAnimations(prev => [...prev, { x: centerX, y: centerY, mapX: objMapX, mapY: objMapY, ufo: { size: 50, rotation: 0, tilt: 0 }, lights, beam: { width: 40, height: 100, opacity: 0 }, startTime: Date.now(), life: 1, targetObj: obj }]); };
+  const startAlienAnimation = (obj: Obj) => { const canvas = canvasRef.current; if (!canvas) return; const rect = canvas.getBoundingClientRect(); const viewW = rect.width; const viewH = rect.height; const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell; const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell; const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH); const particles: AlienAnimation['particles'] = []; for (let i = 0; i < 20; i++) { const angle = Math.random() * Math.PI * 2; particles.push({ offsetX: Math.cos(angle) * 30, offsetY: Math.sin(angle) * 30, size: Math.random() * 4 + 2, color: ['#00FF00', '#FFFF00'][Math.floor(Math.random() * 2)], opacity: Math.random() * 0.8 + 0.2, life: 1 }); } setAlienAnimations(prev => [...prev, { x: centerX, y: centerY, mapX: objMapX, mapY: objMapY, alien: { size: 40, eyeBlink: 0, antennaWave: 0 }, particles, startTime: Date.now(), life: 1, targetObj: obj }]); };
+  const startRobotAnimation = (obj: Obj) => { const canvas = canvasRef.current; if (!canvas) return; const rect = canvas.getBoundingClientRect(); const viewW = rect.width; const viewH = rect.height; const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell; const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell; const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH); const sparks: RobotAnimation['sparks'] = []; for (let i = 0; i < 15; i++) { sparks.push({ offsetX: (Math.random() - 0.5) * 40, offsetY: -Math.random() * 20, vx: (Math.random() - 0.5) * 3, vy: -Math.random() * 5 - 2, size: Math.random() * 3 + 1, life: 1 }); } setRobotAnimations(prev => [...prev, { x: centerX, y: centerY, mapX: objMapX, mapY: objMapY, robot: { size: 50, rotation: 0, eyeGlow: 1 }, sparks, startTime: Date.now(), life: 1, targetObj: obj }]); };
+  const startMechanicalAnimation = (obj: Obj) => { const canvas = canvasRef.current; if (!canvas) return; const rect = canvas.getBoundingClientRect(); const viewW = rect.width; const viewH = rect.height; const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell; const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell; const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH); const parts: MechanicalAnimation['parts'] = []; for (let i = 0; i < 6; i++) { parts.push({ offsetX: (i % 3 - 1) * 30, offsetY: Math.floor(i / 3) * 30, size: 20, rotation: 0, type: ['gear', 'piston', 'lever'][i % 3] as 'gear' | 'piston' | 'lever', movement: 0 }); } const steam: MechanicalAnimation['steam'] = []; setMechanicalAnimations(prev => [...prev, { x: centerX, y: centerY, mapX: objMapX, mapY: objMapY, parts, steam, startTime: Date.now(), life: 1, targetObj: obj }]); };
+  const startFactoryAnimation = (obj: Obj) => { const canvas = canvasRef.current; if (!canvas) return; const rect = canvas.getBoundingClientRect(); const viewW = rect.width; const viewH = rect.height; const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell; const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell; const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH); const smoke: FactoryAnimation['smoke'] = []; const lights: FactoryAnimation['lights'] = []; for (let i = 0; i < 4; i++) { lights.push({ x: (i - 1.5) * 20, y: -30, blink: Math.random(), color: i % 2 === 0 ? '#FF0000' : '#00FF00' }); } setFactoryAnimations(prev => [...prev, { x: centerX, y: centerY, mapX: objMapX, mapY: objMapY, conveyor: { speed: 1, items: [] }, smoke, lights, startTime: Date.now(), life: 1, targetObj: obj }]); };
+  const startRainbowBridgeAnimation = (obj: Obj) => { const canvas = canvasRef.current; if (!canvas) return; const rect = canvas.getBoundingClientRect(); const viewW = rect.width; const viewH = rect.height; const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell; const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell; const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH); const sparkles: RainbowBridgeAnimation['sparkles'] = []; for (let i = 0; i < 30; i++) { const angle = -Math.PI + (i / 30) * Math.PI; sparkles.push({ angle, radius: 100, size: Math.random() * 3 + 2, color: ['#FF0000', '#FF7F00', '#FFFF00', '#00FF00', '#0000FF', '#4B0082', '#9400D3'][i % 7], twinkle: Math.random() }); } setRainbowBridgeAnimations(prev => [...prev, { x: centerX, y: centerY, mapX: objMapX, mapY: objMapY, arc: { startAngle: -Math.PI, endAngle: 0, radius: 100, width: 20 }, sparkles, startTime: Date.now(), life: 1, targetObj: obj }]); };
+  const startCloudAnimation = (obj: Obj) => { const canvas = canvasRef.current; if (!canvas) return; const rect = canvas.getBoundingClientRect(); const viewW = rect.width; const viewH = rect.height; const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell; const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell; const clouds: CloudAnimation['clouds'] = []; for (let i = 0; i < 5; i++) { clouds.push({ x: objMapX + (i - 2) * 50, y: objMapY + Math.random() * 20 - 10, vx: 0.5 + Math.random() * 0.5, size: Math.random() * 60 + 40, opacity: Math.random() * 0.4 + 0.3, puffiness: Math.random() }); } setCloudAnimations(prev => [...prev, { mapX: objMapX, mapY: objMapY, clouds, startTime: Date.now(), duration: 10 }]); };
+  const startFogAnimation = (obj: Obj) => { const canvas = canvasRef.current; if (!canvas) return; const rect = canvas.getBoundingClientRect(); const viewW = rect.width; const viewH = rect.height; const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell; const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell; const layers: FogAnimation['layers'] = []; for (let i = 0; i < 3; i++) { layers.push({ y: objMapY + i * 30, opacity: 0.3 + Math.random() * 0.2, speed: 0.2 + i * 0.1, density: 0.5 + Math.random() * 0.3 }); } setFogAnimations(prev => [...prev, { mapX: objMapX, mapY: objMapY, layers, startTime: Date.now(), duration: 10 }]); };
+  const startStormAnimation = (obj: Obj) => { const canvas = canvasRef.current; if (!canvas) return; const rect = canvas.getBoundingClientRect(); const viewW = rect.width; const viewH = rect.height; const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell; const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell; const rain: StormAnimation['rain'] = []; const lightning: StormAnimation['lightning'] = []; setStormAnimations(prev => [...prev, { mapX: objMapX, mapY: objMapY, rain, lightning, wind: 0, darkness: 0, startTime: Date.now(), duration: 8 }]); };
+  const startTsunamiAnimation = (obj: Obj) => { const canvas = canvasRef.current; if (!canvas) return; const rect = canvas.getBoundingClientRect(); const viewW = rect.width; const viewH = rect.height; const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell; const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell; const foam: TsunamiAnimation['wave']['foam'] = []; const splashes: TsunamiAnimation['splashes'] = []; setTsunamiAnimations(prev => [...prev, { mapX: objMapX, mapY: objMapY, wave: { x: -200, height: 0, speed: 5, foam }, splashes, startTime: Date.now(), life: 1 }]); };
+  const startEarthquakeAnimation = (obj: Obj) => { const canvas = canvasRef.current; if (!canvas) return; const rect = canvas.getBoundingClientRect(); const viewW = rect.width; const viewH = rect.height; const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell; const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell; const cracks: EarthquakeAnimation['cracks'] = []; const debris: EarthquakeAnimation['debris'] = []; setEarthquakeAnimations(prev => [...prev, { mapX: objMapX, mapY: objMapY, shakeIntensity: 0, cracks, debris, startTime: Date.now(), duration: 5 }]); };
+  const startVolcanoAnimation = (obj: Obj) => { const canvas = canvasRef.current; if (!canvas) return; const rect = canvas.getBoundingClientRect(); const viewW = rect.width; const viewH = rect.height; const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell; const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell; const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH); const lava: VolcanoAnimation['lava'] = []; const smoke: VolcanoAnimation['smoke'] = []; const ash: VolcanoAnimation['ash'] = []; setVolcanoAnimations(prev => [...prev, { x: centerX, y: centerY, mapX: objMapX, mapY: objMapY, lava, smoke, ash, startTime: Date.now(), targetObj: obj }]); };
+  const startOceanAnimation = (obj: Obj) => { const canvas = canvasRef.current; if (!canvas) return; const rect = canvas.getBoundingClientRect(); const viewW = rect.width; const viewH = rect.height; const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell; const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell; const waves: OceanAnimation['waves'] = []; const bubbles: OceanAnimation['bubbles'] = []; setOceanAnimations(prev => [...prev, { mapX: objMapX, mapY: objMapY, waves, bubbles, startTime: Date.now(), duration: 10 }]); };
+  const startWaterfallAnimation = (obj: Obj) => { const canvas = canvasRef.current; if (!canvas) return; const rect = canvas.getBoundingClientRect(); const viewW = rect.width; const viewH = rect.height; const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell; const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell; const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH); const water: WaterfallAnimation['water'] = []; const mist: WaterfallAnimation['mist'] = []; const splash: WaterfallAnimation['splash'] = { particles: [] }; setWaterfallAnimations(prev => [...prev, { x: centerX, y: centerY, mapX: objMapX, mapY: objMapY, water, mist, splash, startTime: Date.now(), life: 1, targetObj: obj }]); };
+  const startOnsenAnimation = (obj: Obj) => { const canvas = canvasRef.current; if (!canvas) return; const rect = canvas.getBoundingClientRect(); const viewW = rect.width; const viewH = rect.height; const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell; const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell; const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH); const steam: OnsenAnimation['steam'] = []; const bubbles: OnsenAnimation['bubbles'] = []; const ripples: OnsenAnimation['ripples'] = []; setOnsenAnimations(prev => [...prev, { x: centerX, y: centerY, mapX: objMapX, mapY: objMapY, steam, bubbles, ripples, startTime: Date.now(), life: 1, targetObj: obj }]); };
+  const startCampfireAnimation = (obj: Obj) => { const canvas = canvasRef.current; if (!canvas) return; const rect = canvas.getBoundingClientRect(); const viewW = rect.width; const viewH = rect.height; const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell; const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell; const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH); const flames: CampfireAnimation['flames'] = []; const sparks: CampfireAnimation['sparks'] = []; setCampfireAnimations(prev => [...prev, { x: centerX, y: centerY, mapX: objMapX, mapY: objMapY, flames, sparks, glow: { radius: 50, intensity: 1 }, startTime: Date.now(), life: 1, targetObj: obj }]); };
+  const startTreasureChestAnimation = (obj: Obj) => { const canvas = canvasRef.current; if (!canvas) return; const rect = canvas.getBoundingClientRect(); const viewW = rect.width; const viewH = rect.height; const objMapX = (num(obj.x, 0) + num(obj.w, 1) / 2) * cfg.cell; const objMapY = (num(obj.y, 0) + num(obj.h, 1) / 2) * cfg.cell; const { sx: centerX, sy: centerY } = mapToScreen(objMapX, objMapY, viewW, viewH); const treasures: TreasureChestAnimation['treasures'] = []; setTreasureChestAnimations(prev => [...prev, { x: centerX, y: centerY, mapX: objMapX, mapY: objMapY, lid: { openProgress: 0, angle: 0 }, treasures, glow: { intensity: 0, color: '#FFD700' }, startTime: Date.now(), life: 1, targetObj: obj }]); };
 
   // 兵士アニメーション開始関数
   const startSoldierAnimation = (bearTrap: Obj) => {
@@ -7761,6 +8771,229 @@ export default function Home() {
     roseAnimationRef.current = requestAnimationFrame(animate);
     return () => { if (roseAnimationRef.current) cancelAnimationFrame(roseAnimationRef.current); };
   }, [roseAnimations, requestDraw]);
+
+  // 新しいアニメーションループ（60個）
+  useEffect(() => {
+    if (bubbleAnimations.length === 0) return;
+    const animate = () => {
+      const updated = bubbleAnimations.map(anim => ({
+        ...anim,
+        bubbles: anim.bubbles.map(p => ({
+          ...p,
+          offsetY: p.offsetY + p.vy,
+          offsetX: p.offsetX + Math.sin(Date.now() / 300 + p.rainbowPhase) * 0.5,
+          life: p.life - 0.016,
+        })).filter(p => p.life > 0)
+      })).filter(a => a.bubbles.length > 0);
+      setBubbleAnimations(updated);
+      requestDraw();
+      if (updated.length > 0) requestAnimationFrame(animate);
+    };
+    requestAnimationFrame(animate);
+  }, [bubbleAnimations, requestDraw]);
+
+  useEffect(() => {
+    if (musicNoteAnimations.length === 0) return;
+    const animate = () => {
+      const updated = musicNoteAnimations.map(anim => ({
+        ...anim,
+        notes: anim.notes.map(n => ({
+          ...n,
+          offsetY: n.offsetY + n.vy,
+          life: n.life - 0.016,
+        })).filter(n => n.life > 0)
+      })).filter(a => a.notes.length > 0);
+      setMusicNoteAnimations(updated);
+      requestDraw();
+      if (updated.length > 0) requestAnimationFrame(animate);
+    };
+    requestAnimationFrame(animate);
+  }, [musicNoteAnimations, requestDraw]);
+
+  useEffect(() => {
+    if (heartAnimations.length === 0) return;
+    const animate = () => {
+      const updated = heartAnimations.map(anim => ({
+        ...anim,
+        hearts: anim.hearts.map(h => ({
+          ...h,
+          offsetY: h.offsetY + h.vy,
+          pulse: Math.sin(Date.now() / 200),
+          life: h.life - 0.016,
+        })).filter(h => h.life > 0)
+      })).filter(a => a.hearts.length > 0);
+      setHeartAnimations(updated);
+      requestDraw();
+      if (updated.length > 0) requestAnimationFrame(animate);
+    };
+    requestAnimationFrame(animate);
+  }, [heartAnimations, requestDraw]);
+
+  useEffect(() => {
+    if (sakuraAnimations.length === 0) return;
+    const animate = () => {
+      const updated = sakuraAnimations.map(anim => ({
+        ...anim,
+        petals: anim.petals.map((p, idx) => ({
+          ...p,
+          offsetX: p.offsetX + Math.sin(Date.now() / 300 + idx) * 0.3,
+          offsetY: p.offsetY + p.vy,
+          rotation: p.rotation + p.rotationSpeed,
+          life: p.life - 0.016,
+        })).filter(p => p.life > 0)
+      })).filter(a => a.petals.length > 0);
+      setSakuraAnimations(updated);
+      requestDraw();
+      if (updated.length > 0) requestAnimationFrame(animate);
+    };
+    requestAnimationFrame(animate);
+  }, [sakuraAnimations, requestDraw]);
+
+  useEffect(() => {
+    if (portalAnimations.length === 0) return;
+    const animate = () => {
+      const now = Date.now();
+      const updated = portalAnimations.filter(a => (now - a.startTime) < 5000);
+      if (updated.length !== portalAnimations.length) setPortalAnimations(updated);
+      requestDraw();
+      if (updated.length > 0) requestAnimationFrame(animate);
+    };
+    requestAnimationFrame(animate);
+  }, [portalAnimations, requestDraw]);
+
+  useEffect(() => {
+    if (hologramAnimations.length === 0) return;
+    const animate = () => {
+      const now = Date.now();
+      const updated = hologramAnimations.filter(a => (now - a.startTime) < 5000);
+      if (updated.length !== hologramAnimations.length) setHologramAnimations(updated);
+      requestDraw();
+      if (updated.length > 0) requestAnimationFrame(animate);
+    };
+    requestAnimationFrame(animate);
+  }, [hologramAnimations, requestDraw]);
+
+  useEffect(() => {
+    if (electricAnimations.length === 0) return;
+    const animate = () => {
+      const now = Date.now();
+      const updated = electricAnimations.filter(a => (now - a.startTime) < 5000);
+      if (updated.length !== electricAnimations.length) setElectricAnimations(updated);
+      requestDraw();
+      if (updated.length > 0) requestAnimationFrame(animate);
+    };
+    requestAnimationFrame(animate);
+  }, [electricAnimations, requestDraw]);
+
+  useEffect(() => {
+    if (iceAnimations.length === 0) return;
+    const animate = () => {
+      const now = Date.now();
+      const updated = iceAnimations.filter(a => (now - a.startTime) < 5000);
+      if (updated.length !== iceAnimations.length) setIceAnimations(updated);
+      requestDraw();
+      if (updated.length > 0) requestAnimationFrame(animate);
+    };
+    requestAnimationFrame(animate);
+  }, [iceAnimations, requestDraw]);
+
+  useEffect(() => {
+    if (constellationAnimations.length === 0) return;
+    const animate = () => {
+      const now = Date.now();
+      const updated = constellationAnimations.filter(a => (now - a.startTime) < 5000);
+      if (updated.length !== constellationAnimations.length) setConstellationAnimations(updated);
+      requestDraw();
+      if (updated.length > 0) requestAnimationFrame(animate);
+    };
+    requestAnimationFrame(animate);
+  }, [constellationAnimations, requestDraw]);
+
+  useEffect(() => {
+    if (dandelionAnimations.length === 0) return;
+    const animate = () => {
+      const now = Date.now();
+      const updated = dandelionAnimations.filter(a => (now - a.startTime) < 5000);
+      if (updated.length !== dandelionAnimations.length) setDandelionAnimations(updated);
+      requestDraw();
+      if (updated.length > 0) requestAnimationFrame(animate);
+    };
+    requestAnimationFrame(animate);
+  }, [dandelionAnimations, requestDraw]);
+
+  useEffect(() => {
+    if (crownAnimations.length === 0) return;
+    const animate = () => {
+      const now = Date.now();
+      const updated = crownAnimations.filter(a => (now - a.startTime) < 5000);
+      if (updated.length !== crownAnimations.length) setCrownAnimations(updated);
+      requestDraw();
+      if (updated.length > 0) requestAnimationFrame(animate);
+    };
+    requestAnimationFrame(animate);
+  }, [crownAnimations, requestDraw]);
+
+  useEffect(() => {
+    if (prismAnimations.length === 0) return;
+    const animate = () => {
+      const now = Date.now();
+      const updated = prismAnimations.filter(a => (now - a.startTime) < 5000);
+      if (updated.length !== prismAnimations.length) setPrismAnimations(updated);
+      requestDraw();
+      if (updated.length > 0) requestAnimationFrame(animate);
+    };
+    requestAnimationFrame(animate);
+  }, [prismAnimations, requestDraw]);
+
+  // 残り48個の基本アニメーションループ（5秒で自動削除）
+  useEffect(() => { if (dragonBreathAnimations.length === 0) return; const animate = () => { const now = Date.now(); const updated = dragonBreathAnimations.filter(a => (now - a.startTime) < 5000); if (updated.length !== dragonBreathAnimations.length) setDragonBreathAnimations(updated); requestDraw(); if (updated.length > 0) requestAnimationFrame(animate); }; requestAnimationFrame(animate); }, [dragonBreathAnimations, requestDraw]);
+  useEffect(() => { if (moonbeamAnimations.length === 0) return; const animate = () => { const now = Date.now(); const updated = moonbeamAnimations.filter(a => (now - a.startTime) < 5000); if (updated.length !== moonbeamAnimations.length) setMoonbeamAnimations(updated); requestDraw(); if (updated.length > 0) requestAnimationFrame(animate); }; requestAnimationFrame(animate); }, [moonbeamAnimations, requestDraw]);
+  useEffect(() => { if (auraBeamAnimations.length === 0) return; const animate = () => { const now = Date.now(); const updated = auraBeamAnimations.filter(a => (now - a.startTime) < 5000); if (updated.length !== auraBeamAnimations.length) setAuraBeamAnimations(updated); requestDraw(); if (updated.length > 0) requestAnimationFrame(animate); }; requestAnimationFrame(animate); }, [auraBeamAnimations, requestDraw]);
+  useEffect(() => { if (chainLightningAnimations.length === 0) return; const animate = () => { const now = Date.now(); const updated = chainLightningAnimations.filter(a => (now - a.startTime) < 5000); if (updated.length !== chainLightningAnimations.length) setChainLightningAnimations(updated); requestDraw(); if (updated.length > 0) requestAnimationFrame(animate); }; requestAnimationFrame(animate); }, [chainLightningAnimations, requestDraw]);
+  useEffect(() => { if (neonSignAnimations.length === 0) return; const animate = () => { const now = Date.now(); const updated = neonSignAnimations.filter(a => (now - a.startTime) < 5000); if (updated.length !== neonSignAnimations.length) setNeonSignAnimations(updated); requestDraw(); if (updated.length > 0) requestAnimationFrame(animate); }; requestAnimationFrame(animate); }, [neonSignAnimations, requestDraw]);
+  useEffect(() => { if (laserBeamAnimations.length === 0) return; const animate = () => { const now = Date.now(); const updated = laserBeamAnimations.filter(a => (now - a.startTime) < 5000); if (updated.length !== laserBeamAnimations.length) setLaserBeamAnimations(updated); requestDraw(); if (updated.length > 0) requestAnimationFrame(animate); }; requestAnimationFrame(animate); }, [laserBeamAnimations, requestDraw]);
+  useEffect(() => { if (cyberCircleAnimations.length === 0) return; const animate = () => { const now = Date.now(); const updated = cyberCircleAnimations.filter(a => (now - a.startTime) < 5000); if (updated.length !== cyberCircleAnimations.length) setCyberCircleAnimations(updated); requestDraw(); if (updated.length > 0) requestAnimationFrame(animate); }; requestAnimationFrame(animate); }, [cyberCircleAnimations, requestDraw]);
+  useEffect(() => { if (pixelExplosionAnimations.length === 0) return; const animate = () => { const now = Date.now(); const updated = pixelExplosionAnimations.filter(a => (now - a.startTime) < 5000); if (updated.length !== pixelExplosionAnimations.length) setPixelExplosionAnimations(updated); requestDraw(); if (updated.length > 0) requestAnimationFrame(animate); }; requestAnimationFrame(animate); }, [pixelExplosionAnimations, requestDraw]);
+  useEffect(() => { if (glitchAnimations.length === 0) return; const animate = () => { const now = Date.now(); const updated = glitchAnimations.filter(a => (now - a.startTime) < 5000); if (updated.length !== glitchAnimations.length) setGlitchAnimations(updated); requestDraw(); if (updated.length > 0) requestAnimationFrame(animate); }; requestAnimationFrame(animate); }, [glitchAnimations, requestDraw]);
+  useEffect(() => { if (sandstormAnimations.length === 0) return; const animate = () => { const now = Date.now(); const updated = sandstormAnimations.filter(a => (now - a.startTime) < 5000); if (updated.length !== sandstormAnimations.length) setSandstormAnimations(updated); requestDraw(); if (updated.length > 0) requestAnimationFrame(animate); }; requestAnimationFrame(animate); }, [sandstormAnimations, requestDraw]);
+  useEffect(() => { if (clockAnimations.length === 0) return; const animate = () => { const now = Date.now(); const updated = clockAnimations.filter(a => (now - a.startTime) < 5000); if (updated.length !== clockAnimations.length) setClockAnimations(updated); requestDraw(); if (updated.length > 0) requestAnimationFrame(animate); }; requestAnimationFrame(animate); }, [clockAnimations, requestDraw]);
+  useEffect(() => { if (gearAnimations.length === 0) return; const animate = () => { const now = Date.now(); const updated = gearAnimations.filter(a => (now - a.startTime) < 5000); if (updated.length !== gearAnimations.length) setGearAnimations(updated); requestDraw(); if (updated.length > 0) requestAnimationFrame(animate); }; requestAnimationFrame(animate); }, [gearAnimations, requestDraw]);
+  useEffect(() => { if (dnaHelixAnimations.length === 0) return; const animate = () => { const now = Date.now(); const updated = dnaHelixAnimations.filter(a => (now - a.startTime) < 5000); if (updated.length !== dnaHelixAnimations.length) setDNAHelixAnimations(updated); requestDraw(); if (updated.length > 0) requestAnimationFrame(animate); }; requestAnimationFrame(animate); }, [dnaHelixAnimations, requestDraw]);
+  useEffect(() => { if (shieldAnimations.length === 0) return; const animate = () => { const now = Date.now(); const updated = shieldAnimations.filter(a => (now - a.startTime) < 5000); if (updated.length !== shieldAnimations.length) setShieldAnimations(updated); requestDraw(); if (updated.length > 0) requestAnimationFrame(animate); }; requestAnimationFrame(animate); }, [shieldAnimations, requestDraw]);
+  useEffect(() => { if (energyBallAnimations.length === 0) return; const animate = () => { const now = Date.now(); const updated = energyBallAnimations.filter(a => (now - a.startTime) < 5000); if (updated.length !== energyBallAnimations.length) setEnergyBallAnimations(updated); requestDraw(); if (updated.length > 0) requestAnimationFrame(animate); }; requestAnimationFrame(animate); }, [energyBallAnimations, requestDraw]);
+  useEffect(() => { if (teleportAnimations.length === 0) return; const animate = () => { const now = Date.now(); const updated = teleportAnimations.filter(a => (now - a.startTime) < 5000); if (updated.length !== teleportAnimations.length) setTeleportAnimations(updated); requestDraw(); if (updated.length > 0) requestAnimationFrame(animate); }; requestAnimationFrame(animate); }, [teleportAnimations, requestDraw]);
+  useEffect(() => { if (peachBlossomAnimations.length === 0) return; const animate = () => { const now = Date.now(); const updated = peachBlossomAnimations.filter(a => (now - a.startTime) < 5000); if (updated.length !== peachBlossomAnimations.length) setPeachBlossomAnimations(updated); requestDraw(); if (updated.length > 0) requestAnimationFrame(animate); }; requestAnimationFrame(animate); }, [peachBlossomAnimations, requestDraw]);
+  useEffect(() => { if (hydrangeaAnimations.length === 0) return; const animate = () => { const now = Date.now(); const updated = hydrangeaAnimations.filter(a => (now - a.startTime) < 5000); if (updated.length !== hydrangeaAnimations.length) setHydrangeaAnimations(updated); requestDraw(); if (updated.length > 0) requestAnimationFrame(animate); }; requestAnimationFrame(animate); }, [hydrangeaAnimations, requestDraw]);
+  useEffect(() => { if (plumeBlossomAnimations.length === 0) return; const animate = () => { const now = Date.now(); const updated = plumeBlossomAnimations.filter(a => (now - a.startTime) < 5000); if (updated.length !== plumeBlossomAnimations.length) setPlumeBlossomAnimations(updated); requestDraw(); if (updated.length > 0) requestAnimationFrame(animate); }; requestAnimationFrame(animate); }, [plumeBlossomAnimations, requestDraw]);
+  useEffect(() => { if (lotusAnimations.length === 0) return; const animate = () => { const now = Date.now(); const updated = lotusAnimations.filter(a => (now - a.startTime) < 5000); if (updated.length !== lotusAnimations.length) setLotusAnimations(updated); requestDraw(); if (updated.length > 0) requestAnimationFrame(animate); }; requestAnimationFrame(animate); }, [lotusAnimations, requestDraw]);
+  useEffect(() => { if (bambooAnimations.length === 0) return; const animate = () => { const now = Date.now(); const updated = bambooAnimations.filter(a => (now - a.startTime) < 5000); if (updated.length !== bambooAnimations.length) setBambooAnimations(updated); requestDraw(); if (updated.length > 0) requestAnimationFrame(animate); }; requestAnimationFrame(animate); }, [bambooAnimations, requestDraw]);
+  useEffect(() => { if (lanternAnimations.length === 0) return; const animate = () => { const now = Date.now(); const updated = lanternAnimations.filter(a => (now - a.startTime) < 5000); if (updated.length !== lanternAnimations.length) setLanternAnimations(updated); requestDraw(); if (updated.length > 0) requestAnimationFrame(animate); }; requestAnimationFrame(animate); }, [lanternAnimations, requestDraw]);
+  useEffect(() => { if (koinoboriAnimations.length === 0) return; const animate = () => { const now = Date.now(); const updated = koinoboriAnimations.filter(a => (now - a.startTime) < 5000); if (updated.length !== koinoboriAnimations.length) setKoinoboriAnimations(updated); requestDraw(); if (updated.length > 0) requestAnimationFrame(animate); }; requestAnimationFrame(animate); }, [koinoboriAnimations, requestDraw]);
+  useEffect(() => { if (milkyWayAnimations.length === 0) return; const animate = () => { const now = Date.now(); const updated = milkyWayAnimations.filter(a => (now - a.startTime) < 5000); if (updated.length !== milkyWayAnimations.length) setMilkyWayAnimations(updated); requestDraw(); if (updated.length > 0) requestAnimationFrame(animate); }; requestAnimationFrame(animate); }, [milkyWayAnimations, requestDraw]);
+  useEffect(() => { if (sunAnimations.length === 0) return; const animate = () => { const now = Date.now(); const updated = sunAnimations.filter(a => (now - a.startTime) < 5000); if (updated.length !== sunAnimations.length) setSunAnimations(updated); requestDraw(); if (updated.length > 0) requestAnimationFrame(animate); }; requestAnimationFrame(animate); }, [sunAnimations, requestDraw]);
+  useEffect(() => { if (planetAnimations.length === 0) return; const animate = () => { const now = Date.now(); const updated = planetAnimations.filter(a => (now - a.startTime) < 5000); if (updated.length !== planetAnimations.length) setPlanetAnimations(updated); requestDraw(); if (updated.length > 0) requestAnimationFrame(animate); }; requestAnimationFrame(animate); }, [planetAnimations, requestDraw]);
+  useEffect(() => { if (galaxyAnimations.length === 0) return; const animate = () => { const now = Date.now(); const updated = galaxyAnimations.filter(a => (now - a.startTime) < 5000); if (updated.length !== galaxyAnimations.length) setGalaxyAnimations(updated); requestDraw(); if (updated.length > 0) requestAnimationFrame(animate); }; requestAnimationFrame(animate); }, [galaxyAnimations, requestDraw]);
+  useEffect(() => { if (cometAnimations.length === 0) return; const animate = () => { const now = Date.now(); const updated = cometAnimations.filter(a => (now - a.startTime) < 5000); if (updated.length !== cometAnimations.length) setCometAnimations(updated); requestDraw(); if (updated.length > 0) requestAnimationFrame(animate); }; requestAnimationFrame(animate); }, [cometAnimations, requestDraw]);
+  useEffect(() => { if (blackHoleAnimations.length === 0) return; const animate = () => { const now = Date.now(); const updated = blackHoleAnimations.filter(a => (now - a.startTime) < 5000); if (updated.length !== blackHoleAnimations.length) setBlackHoleAnimations(updated); requestDraw(); if (updated.length > 0) requestAnimationFrame(animate); }; requestAnimationFrame(animate); }, [blackHoleAnimations, requestDraw]);
+  useEffect(() => { if (supernovaAnimations.length === 0) return; const animate = () => { const now = Date.now(); const updated = supernovaAnimations.filter(a => (now - a.startTime) < 5000); if (updated.length !== supernovaAnimations.length) setSupernovaAnimations(updated); requestDraw(); if (updated.length > 0) requestAnimationFrame(animate); }; requestAnimationFrame(animate); }, [supernovaAnimations, requestDraw]);
+  useEffect(() => { if (warpAnimations.length === 0) return; const animate = () => { const now = Date.now(); const updated = warpAnimations.filter(a => (now - a.startTime) < 5000); if (updated.length !== warpAnimations.length) setWarpAnimations(updated); requestDraw(); if (updated.length > 0) requestAnimationFrame(animate); }; requestAnimationFrame(animate); }, [warpAnimations, requestDraw]);
+  useEffect(() => { if (ufoAnimations.length === 0) return; const animate = () => { const now = Date.now(); const updated = ufoAnimations.filter(a => (now - a.startTime) < 4000); if (updated.length !== ufoAnimations.length) setUFOAnimations(updated); requestDraw(); if (updated.length > 0) requestAnimationFrame(animate); }; requestAnimationFrame(animate); }, [ufoAnimations, requestDraw]);
+  useEffect(() => { if (alienAnimations.length === 0) return; const animate = () => { const now = Date.now(); const updated = alienAnimations.filter(a => (now - a.startTime) < 4000); if (updated.length !== alienAnimations.length) setAlienAnimations(updated); requestDraw(); if (updated.length > 0) requestAnimationFrame(animate); }; requestAnimationFrame(animate); }, [alienAnimations, requestDraw]);
+  useEffect(() => { if (robotAnimations.length === 0) return; const animate = () => { const now = Date.now(); const updated = robotAnimations.filter(a => (now - a.startTime) < 5000); if (updated.length !== robotAnimations.length) setRobotAnimations(updated); requestDraw(); if (updated.length > 0) requestAnimationFrame(animate); }; requestAnimationFrame(animate); }, [robotAnimations, requestDraw]);
+  useEffect(() => { if (mechanicalAnimations.length === 0) return; const animate = () => { const now = Date.now(); const updated = mechanicalAnimations.filter(a => (now - a.startTime) < 5000); if (updated.length !== mechanicalAnimations.length) setMechanicalAnimations(updated); requestDraw(); if (updated.length > 0) requestAnimationFrame(animate); }; requestAnimationFrame(animate); }, [mechanicalAnimations, requestDraw]);
+  useEffect(() => { if (factoryAnimations.length === 0) return; const animate = () => { const now = Date.now(); const updated = factoryAnimations.filter(a => (now - a.startTime) < 5000); if (updated.length !== factoryAnimations.length) setFactoryAnimations(updated); requestDraw(); if (updated.length > 0) requestAnimationFrame(animate); }; requestAnimationFrame(animate); }, [factoryAnimations, requestDraw]);
+  useEffect(() => { if (rainbowBridgeAnimations.length === 0) return; const animate = () => { const now = Date.now(); const updated = rainbowBridgeAnimations.filter(a => (now - a.startTime) < 5000); if (updated.length !== rainbowBridgeAnimations.length) setRainbowBridgeAnimations(updated); requestDraw(); if (updated.length > 0) requestAnimationFrame(animate); }; requestAnimationFrame(animate); }, [rainbowBridgeAnimations, requestDraw]);
+  useEffect(() => { if (cloudAnimations.length === 0) return; const animate = () => { const now = Date.now(); const updated = cloudAnimations.filter(a => (now - a.startTime) < 5000); if (updated.length !== cloudAnimations.length) setCloudAnimations(updated); requestDraw(); if (updated.length > 0) requestAnimationFrame(animate); }; requestAnimationFrame(animate); }, [cloudAnimations, requestDraw]);
+  useEffect(() => { if (fogAnimations.length === 0) return; const animate = () => { const now = Date.now(); const updated = fogAnimations.filter(a => (now - a.startTime) < 5000); if (updated.length !== fogAnimations.length) setFogAnimations(updated); requestDraw(); if (updated.length > 0) requestAnimationFrame(animate); }; requestAnimationFrame(animate); }, [fogAnimations, requestDraw]);
+  useEffect(() => { if (stormAnimations.length === 0) return; const animate = () => { const now = Date.now(); const updated = stormAnimations.filter(a => (now - a.startTime) < 5000); if (updated.length !== stormAnimations.length) setStormAnimations(updated); requestDraw(); if (updated.length > 0) requestAnimationFrame(animate); }; requestAnimationFrame(animate); }, [stormAnimations, requestDraw]);
+  useEffect(() => { if (tsunamiAnimations.length === 0) return; const animate = () => { const now = Date.now(); const updated = tsunamiAnimations.filter(a => (now - a.startTime) < 5000); if (updated.length !== tsunamiAnimations.length) setTsunamiAnimations(updated); requestDraw(); if (updated.length > 0) requestAnimationFrame(animate); }; requestAnimationFrame(animate); }, [tsunamiAnimations, requestDraw]);
+  useEffect(() => { if (earthquakeAnimations.length === 0) return; const animate = () => { const now = Date.now(); const updated = earthquakeAnimations.filter(a => (now - a.startTime) < 4000); if (updated.length !== earthquakeAnimations.length) setEarthquakeAnimations(updated); requestDraw(); if (updated.length > 0) requestAnimationFrame(animate); }; requestAnimationFrame(animate); }, [earthquakeAnimations, requestDraw]);
+  useEffect(() => { if (volcanoAnimations.length === 0) return; const animate = () => { const now = Date.now(); const updated = volcanoAnimations.filter(a => (now - a.startTime) < 5000); if (updated.length !== volcanoAnimations.length) setVolcanoAnimations(updated); requestDraw(); if (updated.length > 0) requestAnimationFrame(animate); }; requestAnimationFrame(animate); }, [volcanoAnimations, requestDraw]);
+  useEffect(() => { if (oceanAnimations.length === 0) return; const animate = () => { const now = Date.now(); const updated = oceanAnimations.filter(a => (now - a.startTime) < 5000); if (updated.length !== oceanAnimations.length) setOceanAnimations(updated); requestDraw(); if (updated.length > 0) requestAnimationFrame(animate); }; requestAnimationFrame(animate); }, [oceanAnimations, requestDraw]);
+  useEffect(() => { if (waterfallAnimations.length === 0) return; const animate = () => { const now = Date.now(); const updated = waterfallAnimations.filter(a => (now - a.startTime) < 5000); if (updated.length !== waterfallAnimations.length) setWaterfallAnimations(updated); requestDraw(); if (updated.length > 0) requestAnimationFrame(animate); }; requestAnimationFrame(animate); }, [waterfallAnimations, requestDraw]);
+  useEffect(() => { if (onsenAnimations.length === 0) return; const animate = () => { const now = Date.now(); const updated = onsenAnimations.filter(a => (now - a.startTime) < 5000); if (updated.length !== onsenAnimations.length) setOnsenAnimations(updated); requestDraw(); if (updated.length > 0) requestAnimationFrame(animate); }; requestAnimationFrame(animate); }, [onsenAnimations, requestDraw]);
+  useEffect(() => { if (campfireAnimations.length === 0) return; const animate = () => { const now = Date.now(); const updated = campfireAnimations.filter(a => (now - a.startTime) < 5000); if (updated.length !== campfireAnimations.length) setCampfireAnimations(updated); requestDraw(); if (updated.length > 0) requestAnimationFrame(animate); }; requestAnimationFrame(animate); }, [campfireAnimations, requestDraw]);
+  useEffect(() => { if (treasureChestAnimations.length === 0) return; const animate = () => { const now = Date.now(); const updated = treasureChestAnimations.filter(a => (now - a.startTime) < 5000); if (updated.length !== treasureChestAnimations.length) setTreasureChestAnimations(updated); requestDraw(); if (updated.length > 0) requestAnimationFrame(animate); }; requestAnimationFrame(animate); }, [treasureChestAnimations, requestDraw]);
 
   // 花火アニメーションループ
   useEffect(() => {
@@ -9091,10 +10324,11 @@ export default function Home() {
       let actualAnimationType = animationType;
       if (animationType === 'random') {
         const allAnimations = [
-          'fireworks', 'sparkle', 'beartrap', 'birthday', 'cherryblossom', 'meteor', 'coin', 'slot', 'fishquiz', 'yojijukugo', 'englishquiz', 'musclequiz', 'cat', 'omikuji',
+          'fireworks', 'sparkle', 'beartrap', 'birthday', 'cherryblossom', 'meteor', 'coin', 'slot', 'fishquiz', 'yojijukugo', 'englishquiz', 'musclequiz', 'moviequiz', 'ramenquiz', 'heritagequiz', 'songquiz', 'sweetsquiz', 'cat', 'omikuji',
           'balloon', 'aurora', 'butterfly', 'shootingstar', 'autumnleaves', 'snow', 'confetti', 'rainbow', 'rain', 'magiccircle',
           'flame', 'thunder', 'wave', 'wind', 'smoke', 'tornado', 'gem', 'startrail', 'lightparticle', 'spiral',
-          'bird', 'ghost', 'bee', 'firefly', 'explosion', 'target', 'anger', 'petal', 'sunflower', 'rose'
+          'bird', 'ghost', 'bee', 'firefly', 'explosion', 'target', 'anger', 'petal', 'sunflower', 'rose',
+          'bubble', 'musicnote', 'heart', 'constellation', 'electric', 'ice', 'sakura', 'dandelion', 'crown', 'portal', 'hologram', 'prism'
         ];
         actualAnimationType = allAnimations[Math.floor(Math.random() * allAnimations.length)];
       }
@@ -9148,6 +10382,202 @@ export default function Home() {
       } else if (actualAnimationType === 'musclequiz') {
         // 筋肉クイズアニメーション
         startMuscleQuizAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'moviequiz') {
+        // 映画クイズアニメーション
+        startMovieQuizAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'ramenquiz') {
+        // ラーメンクイズアニメーション
+        startRamenQuizAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'heritagequiz') {
+        // 世界遺産クイズアニメーション
+        startHeritageQuizAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'sweetsquiz') {
+        // スイーツクイズアニメーション
+        startSweetsQuizAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'bubble') {
+        startBubbleAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'musicnote') {
+        startMusicNoteAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'heart') {
+        startHeartAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'constellation') {
+        startConstellationAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'electric') {
+        startElectricAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'ice') {
+        startIceAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'sakura') {
+        startSakuraAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'dandelion') {
+        startDandelionAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'crown') {
+        startCrownAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'portal') {
+        startPortalAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'hologram') {
+        startHologramAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'prism') {
+        startPrismAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'dragonbreath') {
+        startDragonBreathAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'moonbeam') {
+        startMoonbeamAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'aurabeam') {
+        startAuraBeamAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'chainlightning') {
+        startChainLightningAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'neonsign') {
+        startNeonSignAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'laserbeam') {
+        startLaserBeamAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'cybercircle') {
+        startCyberCircleAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'pixelexplosion') {
+        startPixelExplosionAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'glitch') {
+        startGlitchAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'sandstorm') {
+        startSandstormAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'clock') {
+        startClockAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'gear') {
+        startGearAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'dnahelix') {
+        startDNAHelixAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'shield') {
+        startShieldAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'energyball') {
+        startEnergyBallAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'teleport') {
+        startTeleportAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'peachblossom') {
+        startPeachBlossomAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'hydrangea') {
+        startHydrangeaAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'plumeblossom') {
+        startPlumeBlossomAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'lotus') {
+        startLotusAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'bamboo') {
+        startBambooAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'lantern') {
+        startLanternAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'koinobori') {
+        startKoinoboriAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'milkyway') {
+        startMilkyWayAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'sun') {
+        startSunAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'planet') {
+        startPlanetAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'galaxy') {
+        startGalaxyAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'comet') {
+        startCometAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'blackhole') {
+        startBlackHoleAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'supernova') {
+        startSupernovaAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'warp') {
+        startWarpAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'ufo') {
+        startUFOAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'alien') {
+        startAlienAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'robot') {
+        startRobotAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'mechanical') {
+        startMechanicalAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'factory') {
+        startFactoryAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'rainbowbridge') {
+        startRainbowBridgeAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'cloud') {
+        startCloudAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'fog') {
+        startFogAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'storm') {
+        startStormAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'tsunami') {
+        startTsunamiAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'earthquake') {
+        startEarthquakeAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'volcano') {
+        startVolcanoAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'ocean') {
+        startOceanAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'waterfall') {
+        startWaterfallAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'onsen') {
+        startOnsenAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'campfire') {
+        startCampfireAnimation(hit);
+        setSelectedId(hit?.id ? String(hit.id) : null);
+      } else if (actualAnimationType === 'treasurechest') {
+        startTreasureChestAnimation(hit);
         setSelectedId(hit?.id ? String(hit.id) : null);
       } else if (actualAnimationType === 'cat') {
         // 猫アニメーション：画面内に見えている都市をターゲットに
@@ -12468,6 +13898,11 @@ export default function Home() {
                       <option value="yojijukugo">🔤 四字熟語クイズ</option>
                       <option value="englishquiz">📖 英単語クイズ</option>
                       <option value="musclequiz">💪 筋肉クイズ</option>
+                      <option value="moviequiz">🎬 映画クイズ</option>
+                      <option value="ramenquiz">🍜 ラーメンクイズ</option>
+                      <option value="heritagequiz">🏛️ 世界遺産クイズ</option>
+
+                      <option value="sweetsquiz">🍰 スイーツクイズ</option>
                       <option value="cat">🐱 猫</option>
                       <option value="omikuji">🎎 おみくじ</option>
                       <option value="balloon">🎈 バルーン</option>
@@ -12500,6 +13935,66 @@ export default function Home() {
                       <option value="petal">🌺 花びら</option>
                       <option value="sunflower">🌻 ひまわり</option>
                       <option value="rose">🌹 バラ</option>
+                      <option value="bubble">🫧 バブル</option>
+                      <option value="musicnote">🎵 音符</option>
+                      <option value="heart">❤️ ハート</option>
+                      <option value="constellation">⭐ 星座</option>
+                      <option value="electric">⚡ 電撃</option>
+                      <option value="ice">🧊 氷</option>
+                      <option value="sakura">🌸 桜</option>
+                      <option value="dandelion">🌼 たんぽぽ</option>
+                      <option value="crown">👑 王冠</option>
+                      <option value="portal">🌀 ポータル</option>
+                      <option value="hologram">👻 ホログラム</option>
+                      <option value="prism">💎 プリズム</option>
+                      <option value="dragonbreath">🐉 竜の息</option>
+                      <option value="moonbeam">🌙 月光</option>
+                      <option value="aurabeam">✨ オーラビーム</option>
+                      <option value="chainlightning">⚡ 連鎖雷</option>
+                      <option value="neonsign">🔆 ネオンサイン</option>
+                      <option value="laserbeam">🔴 レーザー</option>
+                      <option value="cybercircle">🔵 サイバーサークル</option>
+                      <option value="pixelexplosion">💥 ピクセル爆発</option>
+                      <option value="glitch">📺 グリッチ</option>
+                      <option value="sandstorm">🏜️ 砂嵐</option>
+                      <option value="clock">🕐 時計</option>
+                      <option value="gear">⚙️ 歯車</option>
+                      <option value="dnahelix">🧬 DNA螺旋</option>
+                      <option value="shield">🛡️ シールド</option>
+                      <option value="energyball">⚡ エネルギー球</option>
+                      <option value="teleport">✨ テレポート</option>
+                      <option value="peachblossom">🌸 桃の花</option>
+                      <option value="hydrangea">💙 紫陽花</option>
+                      <option value="plumeblossom">🌺 梅の花</option>
+                      <option value="lotus">🪷 蓮の花</option>
+                      <option value="bamboo">🎋 竹</option>
+                      <option value="lantern">🏮 提灯</option>
+                      <option value="koinobori">🎏 鯉のぼり</option>
+                      <option value="milkyway">🌌 天の川</option>
+                      <option value="sun">☀️ 太陽</option>
+                      <option value="planet">🪐 惑星</option>
+                      <option value="galaxy">🌌 銀河</option>
+                      <option value="comet">☄️ 彗星</option>
+                      <option value="blackhole">⚫ ブラックホール</option>
+                      <option value="supernova">💥 超新星</option>
+                      <option value="warp">🌀 ワープ</option>
+                      <option value="ufo">🛸 UFO</option>
+                      <option value="alien">👽 エイリアン</option>
+                      <option value="robot">🤖 ロボット</option>
+                      <option value="mechanical">⚙️ メカニカル</option>
+                      <option value="factory">🏭 工場</option>
+                      <option value="rainbowbridge">🌈 虹の橋</option>
+                      <option value="cloud">☁️ 雲</option>
+                      <option value="fog">🌫️ 霧</option>
+                      <option value="storm">⛈️ 嵐</option>
+                      <option value="tsunami">🌊 津波</option>
+                      <option value="earthquake">🌍 地震</option>
+                      <option value="volcano">🌋 火山</option>
+                      <option value="ocean">🌊 海洋</option>
+                      <option value="waterfall">💧 滝</option>
+                      <option value="onsen">♨️ 温泉</option>
+                      <option value="campfire">🔥 キャンプファイア</option>
+                      <option value="treasurechest">📦 宝箱</option>
                     </select>
                     <button
                       onClick={() => {
@@ -12522,11 +14017,15 @@ export default function Home() {
                         const animType = editingObject.Animation.toLowerCase();
                         
                         // クイズ系とスロットはマップ中央で起動
-                        if (['fishquiz', 'yojijukugo', 'englishquiz', 'musclequiz', 'slot'].includes(animType)) {
+                        if (['fishquiz', 'yojijukugo', 'englishquiz', 'musclequiz', 'moviequiz', 'ramenquiz', 'heritagequiz', 'sweetsquiz', 'slot'].includes(animType)) {
                           if (animType === 'fishquiz') startFishQuizAnimation(centerX, centerY);
                           else if (animType === 'yojijukugo') startYojijukugoAnimation(centerX, centerY);
                           else if (animType === 'englishquiz') startEnglishQuizAnimation(centerX, centerY);
                           else if (animType === 'musclequiz') startMuscleQuizAnimation(centerX, centerY);
+                          else if (animType === 'moviequiz') startMovieQuizAnimation(centerX, centerY);
+                          else if (animType === 'ramenquiz') startRamenQuizAnimation(centerX, centerY);
+                          else if (animType === 'heritagequiz') startHeritageQuizAnimation(centerX, centerY);
+                          else if (animType === 'sweetsquiz') startSweetsQuizAnimation(centerX, centerY);
                           else if (animType === 'slot') startSlotAnimation(centerX, centerY);
                           // クイズ・スロットは自動的にモーダルを閉じる（別のUIが開くため）
                           // 5秒後にモーダルを復帰
@@ -12596,6 +14095,66 @@ export default function Home() {
                           else if (animType === 'petal') startPetalAnimation(tempObj);
                           else if (animType === 'sunflower') startSunflowerAnimation(tempObj);
                           else if (animType === 'rose') startRoseAnimation(tempObj);
+                          else if (animType === 'bubble') startBubbleAnimation(tempObj);
+                          else if (animType === 'musicnote') startMusicNoteAnimation(tempObj);
+                          else if (animType === 'heart') startHeartAnimation(tempObj);
+                          else if (animType === 'constellation') startConstellationAnimation(tempObj);
+                          else if (animType === 'electric') startElectricAnimation(tempObj);
+                          else if (animType === 'ice') startIceAnimation(tempObj);
+                          else if (animType === 'sakura') startSakuraAnimation(tempObj);
+                          else if (animType === 'dandelion') startDandelionAnimation(tempObj);
+                          else if (animType === 'crown') startCrownAnimation(tempObj);
+                          else if (animType === 'portal') startPortalAnimation(tempObj);
+                          else if (animType === 'hologram') startHologramAnimation(tempObj);
+                          else if (animType === 'prism') startPrismAnimation(tempObj);
+                          else if (animType === 'dragonbreath') startDragonBreathAnimation(tempObj);
+                          else if (animType === 'moonbeam') startMoonbeamAnimation(tempObj);
+                          else if (animType === 'aurabeam') startAuraBeamAnimation(tempObj);
+                          else if (animType === 'chainlightning') startChainLightningAnimation(tempObj);
+                          else if (animType === 'neonsign') startNeonSignAnimation(tempObj);
+                          else if (animType === 'laserbeam') startLaserBeamAnimation(tempObj);
+                          else if (animType === 'cybercircle') startCyberCircleAnimation(tempObj);
+                          else if (animType === 'pixelexplosion') startPixelExplosionAnimation(tempObj);
+                          else if (animType === 'glitch') startGlitchAnimation(tempObj);
+                          else if (animType === 'sandstorm') startSandstormAnimation(tempObj);
+                          else if (animType === 'clock') startClockAnimation(tempObj);
+                          else if (animType === 'gear') startGearAnimation(tempObj);
+                          else if (animType === 'dnahelix') startDNAHelixAnimation(tempObj);
+                          else if (animType === 'shield') startShieldAnimation(tempObj);
+                          else if (animType === 'energyball') startEnergyBallAnimation(tempObj);
+                          else if (animType === 'teleport') startTeleportAnimation(tempObj);
+                          else if (animType === 'peachblossom') startPeachBlossomAnimation(tempObj);
+                          else if (animType === 'hydrangea') startHydrangeaAnimation(tempObj);
+                          else if (animType === 'plumeblossom') startPlumeBlossomAnimation(tempObj);
+                          else if (animType === 'lotus') startLotusAnimation(tempObj);
+                          else if (animType === 'bamboo') startBambooAnimation(tempObj);
+                          else if (animType === 'lantern') startLanternAnimation(tempObj);
+                          else if (animType === 'koinobori') startKoinoboriAnimation(tempObj);
+                          else if (animType === 'milkyway') startMilkyWayAnimation(tempObj);
+                          else if (animType === 'sun') startSunAnimation(tempObj);
+                          else if (animType === 'planet') startPlanetAnimation(tempObj);
+                          else if (animType === 'galaxy') startGalaxyAnimation(tempObj);
+                          else if (animType === 'comet') startCometAnimation(tempObj);
+                          else if (animType === 'blackhole') startBlackHoleAnimation(tempObj);
+                          else if (animType === 'supernova') startSupernovaAnimation(tempObj);
+                          else if (animType === 'warp') startWarpAnimation(tempObj);
+                          else if (animType === 'ufo') startUFOAnimation(tempObj);
+                          else if (animType === 'alien') startAlienAnimation(tempObj);
+                          else if (animType === 'robot') startRobotAnimation(tempObj);
+                          else if (animType === 'mechanical') startMechanicalAnimation(tempObj);
+                          else if (animType === 'factory') startFactoryAnimation(tempObj);
+                          else if (animType === 'rainbowbridge') startRainbowBridgeAnimation(tempObj);
+                          else if (animType === 'cloud') startCloudAnimation(tempObj);
+                          else if (animType === 'fog') startFogAnimation(tempObj);
+                          else if (animType === 'storm') startStormAnimation(tempObj);
+                          else if (animType === 'tsunami') startTsunamiAnimation(tempObj);
+                          else if (animType === 'earthquake') startEarthquakeAnimation(tempObj);
+                          else if (animType === 'volcano') startVolcanoAnimation(tempObj);
+                          else if (animType === 'ocean') startOceanAnimation(tempObj);
+                          else if (animType === 'waterfall') startWaterfallAnimation(tempObj);
+                          else if (animType === 'onsen') startOnsenAnimation(tempObj);
+                          else if (animType === 'campfire') startCampfireAnimation(tempObj);
+                          else if (animType === 'treasurechest') startTreasureChestAnimation(tempObj);
                           else if (animType === 'random') {
                             // ランダムの場合は再度クリック
                             const allAnims = [
@@ -15323,59 +16882,249 @@ export default function Home() {
         </div>
       )}
 
+      {/* 映画クイズモーダル */}
+      {movieQuiz && (
+        <MovieQuizUI
+          quiz={movieQuiz}
+          consecutiveCorrect={movieQuizConsecutiveCorrect}
+          onClose={() => {
+            const refundTotal = totalCoins + 100;
+            setTotalCoins(refundTotal);
+            localStorage.setItem('totalCoins', refundTotal.toString());
+            setMovieQuiz(null);
+          }}
+          onChoiceClick={(choice) => {
+            const isCorrect = choice === movieQuiz.question.correct;
+            if (isCorrect) {
+              const newConsecutive = movieQuizConsecutiveCorrect + 1;
+              const multiplier = Math.min(newConsecutive, 1000);
+              const reward = 100 * multiplier;
+              setMovieQuizConsecutiveCorrect(newConsecutive);
+              const newTotal = totalCoins + reward;
+              setTotalCoins(newTotal);
+              localStorage.setItem('totalCoins', newTotal.toString());
+              const asked = new Set(JSON.parse(localStorage.getItem("movieQuizAsked") || "[]"));
+              asked.add(movieQuiz.question.id);
+              localStorage.setItem("movieQuizAsked", JSON.stringify([...asked]));
+              const wrong = new Set(JSON.parse(localStorage.getItem("movieQuizWrong") || "[]"));
+              wrong.delete(movieQuiz.question.id);
+              localStorage.setItem("movieQuizWrong", JSON.stringify([...wrong]));
+              setMovieQuiz({ ...movieQuiz, selectedAnswer: choice, state: 'correct', reward: reward, consecutiveCount: newConsecutive });
+            } else {
+              setMovieQuizConsecutiveCorrect(0);
+              const wrong = new Set(JSON.parse(localStorage.getItem("movieQuizWrong") || "[]"));
+              wrong.add(movieQuiz.question.id);
+              localStorage.setItem("movieQuizWrong", JSON.stringify([...wrong]));
+              setMovieQuiz({ ...movieQuiz, selectedAnswer: choice, state: 'wrong', reward: 0, consecutiveCount: 0 });
+            }
+          }}
+          onNextQuestion={() => {
+            setMovieQuiz(null);
+            setTimeout(() => {
+              const canvas = canvasRef.current;
+              if (canvas) {
+                const rect = canvas.getBoundingClientRect();
+                startMovieQuizAnimation(rect.width / 2, rect.height / 2);
+              }
+            }, 100);
+          }}
+        />
+      )}
+
+      {/* ラーメンクイズモーダル */}
+      {ramenQuiz && (
+        <RamenQuizUI
+          quiz={ramenQuiz}
+          consecutiveCorrect={ramenQuizConsecutiveCorrect}
+          onClose={() => {
+            const refundTotal = totalCoins + 100;
+            setTotalCoins(refundTotal);
+            localStorage.setItem('totalCoins', refundTotal.toString());
+            setRamenQuiz(null);
+          }}
+          onChoiceClick={(choice) => {
+            const isCorrect = choice === ramenQuiz.question.correct;
+            if (isCorrect) {
+              const newConsecutive = ramenQuizConsecutiveCorrect + 1;
+              const multiplier = Math.min(newConsecutive, 1000);
+              const reward = 100 * multiplier;
+              setRamenQuizConsecutiveCorrect(newConsecutive);
+              const newTotal = totalCoins + reward;
+              setTotalCoins(newTotal);
+              localStorage.setItem('totalCoins', newTotal.toString());
+              const asked = new Set(JSON.parse(localStorage.getItem("ramenQuizAsked") || "[]"));
+              asked.add(ramenQuiz.question.id);
+              localStorage.setItem("ramenQuizAsked", JSON.stringify([...asked]));
+              const wrong = new Set(JSON.parse(localStorage.getItem("ramenQuizWrong") || "[]"));
+              wrong.delete(ramenQuiz.question.id);
+              localStorage.setItem("ramenQuizWrong", JSON.stringify([...wrong]));
+              setRamenQuiz({ ...ramenQuiz, selectedAnswer: choice, state: 'correct', reward: reward, consecutiveCount: newConsecutive });
+            } else {
+              setRamenQuizConsecutiveCorrect(0);
+              const wrong = new Set(JSON.parse(localStorage.getItem("ramenQuizWrong") || "[]"));
+              wrong.add(ramenQuiz.question.id);
+              localStorage.setItem("ramenQuizWrong", JSON.stringify([...wrong]));
+              setRamenQuiz({ ...ramenQuiz, selectedAnswer: choice, state: 'wrong', reward: 0, consecutiveCount: 0 });
+            }
+          }}
+          onNextQuestion={() => {
+            setRamenQuiz(null);
+            setTimeout(() => {
+              const canvas = canvasRef.current;
+              if (canvas) {
+                const rect = canvas.getBoundingClientRect();
+                startRamenQuizAnimation(rect.width / 2, rect.height / 2);
+              }
+            }, 100);
+          }}
+        />
+      )}
+
+      {/* 世界遺産クイズモーダル */}
+      {heritageQuiz && (
+        <HeritageQuizUI
+          quiz={heritageQuiz}
+          consecutiveCorrect={heritageQuizConsecutiveCorrect}
+          onClose={() => {
+            const refundTotal = totalCoins + 100;
+            setTotalCoins(refundTotal);
+            localStorage.setItem('totalCoins', refundTotal.toString());
+            setHeritageQuiz(null);
+          }}
+          onChoiceClick={(choice) => {
+            const isCorrect = choice === heritageQuiz.question.correct;
+            if (isCorrect) {
+              const newConsecutive = heritageQuizConsecutiveCorrect + 1;
+              const multiplier = Math.min(newConsecutive, 1000);
+              const reward = 100 * multiplier;
+              setHeritageQuizConsecutiveCorrect(newConsecutive);
+              const newTotal = totalCoins + reward;
+              setTotalCoins(newTotal);
+              localStorage.setItem('totalCoins', newTotal.toString());
+              const asked = new Set(JSON.parse(localStorage.getItem("heritageQuizAsked") || "[]"));
+              asked.add(heritageQuiz.question.id);
+              localStorage.setItem("heritageQuizAsked", JSON.stringify([...asked]));
+              const wrong = new Set(JSON.parse(localStorage.getItem("heritageQuizWrong") || "[]"));
+              wrong.delete(heritageQuiz.question.id);
+              localStorage.setItem("heritageQuizWrong", JSON.stringify([...wrong]));
+              setHeritageQuiz({ ...heritageQuiz, selectedAnswer: choice, state: 'correct', reward: reward, consecutiveCount: newConsecutive });
+            } else {
+              setHeritageQuizConsecutiveCorrect(0);
+              const wrong = new Set(JSON.parse(localStorage.getItem("heritageQuizWrong") || "[]"));
+              wrong.add(heritageQuiz.question.id);
+              localStorage.setItem("heritageQuizWrong", JSON.stringify([...wrong]));
+              setHeritageQuiz({ ...heritageQuiz, selectedAnswer: choice, state: 'wrong', reward: 0, consecutiveCount: 0 });
+            }
+          }}
+          onNextQuestion={() => {
+            setHeritageQuiz(null);
+            setTimeout(() => {
+              const canvas = canvasRef.current;
+              if (canvas) {
+                const rect = canvas.getBoundingClientRect();
+                startHeritageQuizAnimation(rect.width / 2, rect.height / 2);
+              }
+            }, 100);
+          }}
+        />
+      )}
+
+      {/* スイーツクイズモーダル */}
+      {sweetsQuiz && (
+        <SweetsQuizUI
+          quiz={sweetsQuiz}
+          consecutiveCorrect={sweetsQuizConsecutiveCorrect}
+          onClose={() => {
+            const refundTotal = totalCoins + 100;
+            setTotalCoins(refundTotal);
+            localStorage.setItem('totalCoins', refundTotal.toString());
+            setSweetsQuiz(null);
+          }}
+          onChoiceClick={(choice) => {
+            const isCorrect = choice === sweetsQuiz.question.correct;
+            if (isCorrect) {
+              const newConsecutive = sweetsQuizConsecutiveCorrect + 1;
+              const multiplier = Math.min(newConsecutive, 1000);
+              const reward = 100 * multiplier;
+              setSweetsQuizConsecutiveCorrect(newConsecutive);
+              const newTotal = totalCoins + reward;
+              setTotalCoins(newTotal);
+              localStorage.setItem('totalCoins', newTotal.toString());
+              const asked = new Set(JSON.parse(localStorage.getItem("sweetsQuizAsked") || "[]"));
+              asked.add(sweetsQuiz.question.id);
+              localStorage.setItem("sweetsQuizAsked", JSON.stringify([...asked]));
+              const wrong = new Set(JSON.parse(localStorage.getItem("sweetsQuizWrong") || "[]"));
+              wrong.delete(sweetsQuiz.question.id);
+              localStorage.setItem("sweetsQuizWrong", JSON.stringify([...wrong]));
+              setSweetsQuiz({ ...sweetsQuiz, selectedAnswer: choice, state: 'correct', reward: reward, consecutiveCount: newConsecutive });
+            } else {
+              setSweetsQuizConsecutiveCorrect(0);
+              const wrong = new Set(JSON.parse(localStorage.getItem("sweetsQuizWrong") || "[]"));
+              wrong.add(sweetsQuiz.question.id);
+              localStorage.setItem("sweetsQuizWrong", JSON.stringify([...wrong]));
+              setSweetsQuiz({ ...sweetsQuiz, selectedAnswer: choice, state: 'wrong', reward: 0, consecutiveCount: 0 });
+            }
+          }}
+          onNextQuestion={() => {
+            setSweetsQuiz(null);
+            setTimeout(() => {
+              const canvas = canvasRef.current;
+              if (canvas) {
+                const rect = canvas.getBoundingClientRect();
+                startSweetsQuizAnimation(rect.width / 2, rect.height / 2);
+              }
+            }, 100);
+          }}
+        />
+      )}
+
       {/* テスト中のインジケーター */}
       {isTestingAnimation && (
         <div 
           onClick={() => setIsTestingAnimation(false)}
           style={{
             position: "fixed",
-            top: "50%",
+            bottom: "60px",
             left: "50%",
-            transform: "translate(-50%, -50%)",
-            background: "rgba(0, 0, 0, 0.85)",
+            transform: "translateX(-50%)",
+            background: "rgba(0, 0, 0, 0.75)",
             color: "#fff",
-            padding: "20px 40px",
-            borderRadius: "12px",
-            fontSize: "20px",
-            fontWeight: "bold",
-            zIndex: 999,
-            boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
+            padding: "8px 20px",
+            borderRadius: "8px",
+            fontSize: "12px",
+            fontWeight: "500",
+            zIndex: 95,
+            boxShadow: "0 2px 12px rgba(0,0,0,0.2)",
             display: "flex",
-            flexDirection: "column",
+            flexDirection: "row",
             alignItems: "center",
-            gap: "8px",
+            gap: "10px",
             animation: "pulse 1.5s infinite",
             userSelect: "none",
             cursor: "pointer",
-            transition: "transform 0.2s, background 0.2s",
+            transition: "all 0.2s",
             textAlign: "center",
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.background = "rgba(0, 0, 0, 0.95)";
-            e.currentTarget.style.transform = "translate(-50%, -50%) scale(1.05)";
+            e.currentTarget.style.background = "rgba(0, 0, 0, 0.85)";
+            e.currentTarget.style.transform = "translateX(-50%) scale(1.05)";
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.background = "rgba(0, 0, 0, 0.85)";
-            e.currentTarget.style.transform = "translate(-50%, -50%) scale(1)";
+            e.currentTarget.style.background = "rgba(0, 0, 0, 0.75)";
+            e.currentTarget.style.transform = "translateX(-50%) scale(1)";
           }}
         >
           <div style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "12px",
-          }}>
-            <div style={{
-              width: "12px",
-              height: "12px",
-              borderRadius: "50%",
-              background: "#4ade80",
-              animation: "blink 1s infinite",
-            }}></div>
-            <div>アニメーションテスト中...</div>
-          </div>
+            width: "8px",
+            height: "8px",
+            borderRadius: "50%",
+            background: "#4ade80",
+            animation: "blink 1s infinite",
+          }}></div>
+          <div>アニメーションテスト中...</div>
           <div style={{
-            fontSize: "14px",
-            opacity: 0.8,
+            fontSize: "10px",
+            opacity: 0.7,
             fontWeight: "normal",
           }}>
             （クリックで戻る）

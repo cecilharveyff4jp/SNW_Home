@@ -3,6 +3,10 @@ import type { FishQuestion } from '../data/fishQuestions';
 import type { YojijukugoQuestion } from '../data/yojijukugoQuestions';
 import type { EnglishQuestion } from '../data/englishQuestions';
 import type { MuscleQuestion } from '../data/muscleQuestions';
+import type { MovieQuestion } from '../data/movieQuestions';
+import type { RamenQuestion } from '../data/ramenQuestions';
+import type { HeritageQuestion } from '../data/heritageQuestions';
+import type { SweetsQuestion } from '../data/sweetsQuestions';
 
 // 兵士アニメーション用
 export type SoldierAnimation = {
@@ -201,6 +205,58 @@ export type MuscleQuizState = {
   startTime: number;
   reward: number;
   consecutiveCount: number; // 連続正解数
+};
+
+// 映画クイズアニメーション用
+export type MovieQuizState = {
+  x: number;
+  y: number;
+  question: MovieQuestion;
+  choices: string[];
+  state: 'showing' | 'answering' | 'correct' | 'wrong' | 'insufficient_coins';
+  selectedAnswer: string | null;
+  startTime: number;
+  reward: number;
+  consecutiveCount: number;
+};
+
+// ラーメンクイズアニメーション用
+export type RamenQuizState = {
+  x: number;
+  y: number;
+  question: RamenQuestion;
+  choices: string[];
+  state: 'showing' | 'answering' | 'correct' | 'wrong' | 'insufficient_coins';
+  selectedAnswer: string | null;
+  startTime: number;
+  reward: number;
+  consecutiveCount: number;
+};
+
+// 世界遺産クイズアニメーション用
+export type HeritageQuizState = {
+  x: number;
+  y: number;
+  question: HeritageQuestion;
+  choices: string[];
+  state: 'showing' | 'answering' | 'correct' | 'wrong' | 'insufficient_coins';
+  selectedAnswer: string | null;
+  startTime: number;
+  reward: number;
+  consecutiveCount: number;
+};
+
+// スイーツクイズアニメーション用
+export type SweetsQuizState = {
+  x: number;
+  y: number;
+  question: SweetsQuestion;
+  choices: string[];
+  state: 'showing' | 'answering' | 'correct' | 'wrong' | 'insufficient_coins';
+  selectedAnswer: string | null;
+  startTime: number;
+  reward: number;
+  consecutiveCount: number;
 };
 
 // 猫アニメーション用
@@ -850,4 +906,1532 @@ export type OmikujiAnimation = {
     color: string;
     size: number;
   }>;
+};
+
+// ============== 新規追加アニメーション60種類以上 ==============
+
+// 1. クリスタルアニメーション（キラキラ光る結晶）
+export type CrystalAnimation = {
+  x: number;
+  y: number;
+  mapX: number;
+  mapY: number;
+  crystals: Array<{
+    offsetX: number;
+    offsetY: number;
+    size: number;
+    rotation: number;
+    rotationSpeed: number;
+    opacity: number;
+    color: string; // ダイヤモンド、ルビー、サファイア等
+    glowIntensity: number;
+    life: number;
+  }>;
+  startTime: number;
+  targetObj: Obj;
+};
+
+// 2. シャボン玉アニメーション（浮遊するシャボン玉）
+export type BubbleAnimation = {
+  mapX: number;
+  mapY: number;
+  x: number;
+  y: number;
+  bubbles: Array<{
+    offsetX: number;
+    offsetY: number;
+    vx: number;
+    vy: number;
+    size: number;
+    opacity: number;
+    rainbowPhase: number; // 虹色の位相
+    life: number;
+  }>;
+  startTime: number;
+};
+
+// 3. 音符アニメーション（音楽記号が踊る）
+export type MusicNoteAnimation = {
+  x: number;
+  y: number;
+  mapX: number;
+  mapY: number;
+  notes: Array<{
+    offsetX: number;
+    offsetY: number;
+    vy: number;
+    noteType: '♩' | '♪' | '♫' | '♬'; // 音符の種類
+    size: number;
+    rotation: number;
+    opacity: number;
+    life: number;
+  }>;
+  startTime: number;
+  targetObj: Obj;
+};
+
+// 4. ハートアニメーション（ハートが舞う）
+export type HeartAnimation = {
+  x: number;
+  y: number;
+  mapX: number;
+  mapY: number;
+  hearts: Array<{
+    offsetX: number;
+    offsetY: number;
+    vx: number;
+    vy: number;
+    size: number;
+    rotation: number;
+    color: string; // ピンク、赤、紫等
+    pulse: number; // 脈動
+    opacity: number;
+    life: number;
+  }>;
+  startTime: number;
+  targetObj: Obj;
+};
+
+// 5. 星座アニメーション（星が線で繋がる）
+export type ConstellationAnimation = {
+  x: number;
+  y: number;
+  mapX: number;
+  mapY: number;
+  stars: Array<{
+    offsetX: number;
+    offsetY: number;
+    size: number;
+    twinkle: number;
+    connections: number[]; // 他の星へのインデックス
+  }>;
+  lineAlpha: number;
+  startTime: number;
+  life: number;
+  targetObj: Obj;
+};
+
+// 6. 電気アニメーション（ビリビリ電撃）
+export type ElectricAnimation = {
+  x: number;
+  y: number;
+  mapX: number;
+  mapY: number;
+  bolts: Array<{
+    segments: Array<{ x: number; y: number }>;
+    thickness: number;
+    alpha: number;
+    life: number;
+  }>;
+  sparks: Array<{
+    offsetX: number;
+    offsetY: number;
+    vx: number;
+    vy: number;
+    size: number;
+    opacity: number;
+    life: number;
+  }>;
+  startTime: number;
+  targetObj: Obj;
+};
+
+// 7. 氷アニメーション（氷の結晶）
+export type IceAnimation = {
+  x: number;
+  y: number;
+  mapX: number;
+  mapY: number;
+  crystals: Array<{
+    offsetX: number;
+    offsetY: number;
+    size: number;
+    rotation: number;
+    opacity: number;
+    life: number;
+  }>;
+  frost: {
+    radius: number;
+    alpha: number;
+  };
+  startTime: number;
+  targetObj: Obj;
+};
+
+// 8. 桜吹雪アニメーション（強化版）
+export type SakuraAnimation = {
+  x: number;
+  y: number;
+  mapX: number;
+  mapY: number;
+  petals: Array<{
+    offsetX: number;
+    offsetY: number;
+    vx: number;
+    vy: number;
+    rotation: number;
+    rotationSpeed: number;
+    size: number;
+    opacity: number;
+    life: number;
+  }>;
+  startTime: number;
+  targetObj: Obj;
+};
+
+// 9. ダンデライオンアニメーション（たんぽぽの綿毛）
+export type DandelionAnimation = {
+  x: number;
+  y: number;
+  mapX: number;
+  mapY: number;
+  seeds: Array<{
+    offsetX: number;
+    offsetY: number;
+    vx: number;
+    vy: number;
+    rotation: number;
+    size: number;
+    opacity: number;
+    life: number;
+  }>;
+  startTime: number;
+  targetObj: Obj;
+};
+
+// 10. クラウンアニメーション（王冠が輝く）
+export type CrownAnimation = {
+  x: number;
+  y: number;
+  mapX: number;
+  mapY: number;
+  crown: {
+    size: number;
+    rotation: number;
+    glow: number;
+    opacity: number;
+  };
+  jewels: Array<{
+    offsetX: number;
+    offsetY: number;
+    sparkle: number;
+    color: string;
+  }>;
+  startTime: number;
+  life: number;
+  targetObj: Obj;
+};
+
+// 11. ドラゴンブレスアニメーション（ドラゴンの炎）
+export type DragonBreathAnimation = {
+  x: number;
+  y: number;
+  mapX: number;
+  mapY: number;
+  flames: Array<{
+    offsetX: number;
+    offsetY: number;
+    vx: number;
+    vy: number;
+    size: number;
+    rotation: number;
+    color: string;
+    opacity: number;
+    life: number;
+  }>;
+  smoke: Array<{
+    offsetX: number;
+    offsetY: number;
+    size: number;
+    opacity: number;
+    life: number;
+  }>;
+  startTime: number;
+  targetObj: Obj;
+};
+
+// 12. 月光アニメーション（月の光が降り注ぐ）
+export type MoonbeamAnimation = {
+  x: number;
+  y: number;
+  mapX: number;
+  mapY: number;
+  beams: Array<{
+    offsetX: number;
+    offsetY: number;
+    width: number;
+    height: number;
+    opacity: number;
+    shimmer: number;
+  }>;
+  particles: Array<{
+    offsetX: number;
+    offsetY: number;
+    vy: number;
+    size: number;
+    opacity: number;
+    life: number;
+  }>;
+  startTime: number;
+  life: number;
+  targetObj: Obj;
+};
+
+// 13. プリズムアニメーション（虹色の光が反射）
+export type PrismAnimation = {
+  x: number;
+  y: number;
+  mapX: number;
+  mapY: number;
+  rays: Array<{
+    angle: number;
+    length: number;
+    color: string;
+    opacity: number;
+  }>;
+  rotation: number;
+  sparkles: Array<{
+    offsetX: number;
+    offsetY: number;
+    size: number;
+    color: string;
+    opacity: number;
+    life: number;
+  }>;
+  startTime: number;
+  life: number;
+  targetObj: Obj;
+};
+
+// 14. ポータルアニメーション（次元の扉）
+export type PortalAnimation = {
+  x: number;
+  y: number;
+  mapX: number;
+  mapY: number;
+  rings: Array<{
+    radius: number;
+    rotation: number;
+    color: string;
+    opacity: number;
+  }>;
+  particles: Array<{
+    angle: number;
+    radius: number;
+    speed: number;
+    size: number;
+    color: string;
+  }>;
+  innerGlow: number;
+  startTime: number;
+  life: number;
+  targetObj: Obj;
+};
+
+// 15. オーラアニメーション（神秘的な輝き）
+export type AuraBeamAnimation = {
+  x: number;
+  y: number;
+  mapX: number;
+  mapY: number;
+  layers: Array<{
+    radius: number;
+    opacity: number;
+    color: string;
+    rotation: number;
+  }>;
+  particles: Array<{
+    angle: number;
+    radius: number;
+    size: number;
+    opacity: number;
+  }>;
+  pulse: number;
+  startTime: number;
+  life: number;
+  targetObj: Obj;
+};
+
+// 16. 稲妻の鎖アニメーション（連鎖する雷）
+export type ChainLightningAnimation = {
+  x: number;
+  y: number;
+  mapX: number;
+  mapY: number;
+  chains: Array<{
+    points: Array<{ x: number; y: number }>;
+    thickness: number;
+    alpha: number;
+    color: string;
+    life: number;
+  }>;
+  startTime: number;
+  duration: number;
+};
+
+// 17. ネオンサインアニメーション（光るネオン）
+export type NeonSignAnimation = {
+  x: number;
+  y: number;
+  mapX: number;
+  mapY: number;
+  text: string;
+  flicker: number;
+  color: string;
+  glowIntensity: number;
+  startTime: number;
+  life: number;
+  targetObj: Obj;
+};
+
+// 18. レーザービームアニメーション（レーザー光線）
+export type LaserBeamAnimation = {
+  x: number;
+  y: number;
+  mapX: number;
+  mapY: number;
+  startX: number;
+  startY: number;
+  endX: number;
+  endY: number;
+  thickness: number;
+  color: string;
+  opacity: number;
+  particles: Array<{
+    x: number;
+    y: number;
+    vx: number;
+    vy: number;
+    size: number;
+    life: number;
+  }>;
+  startTime: number;
+  life: number;
+};
+
+// 19. ホログラムアニメーション（立体映像）
+export type HologramAnimation = {
+  x: number;
+  y: number;
+  mapX: number;
+  mapY: number;
+  scanlines: Array<{
+    offsetY: number;
+    speed: number;
+    opacity: number;
+  }>;
+  glitch: number;
+  color: string;
+  startTime: number;
+  life: number;
+  targetObj: Obj;
+};
+
+// 20. サイバーサークルアニメーション（テクノロジー風）
+export type CyberCircleAnimation = {
+  x: number;
+  y: number;
+  mapX: number;
+  mapY: number;
+  circles: Array<{
+    radius: number;
+    rotation: number;
+    segments: number;
+    opacity: number;
+    color: string;
+  }>;
+  dataStreams: Array<{
+    angle: number;
+    progress: number;
+    speed: number;
+  }>;
+  startTime: number;
+  life: number;
+  targetObj: Obj;
+};
+
+// 21. ピクセル爆発アニメーション（レトロゲーム風）
+export type PixelExplosionAnimation = {
+  x: number;
+  y: number;
+  mapX: number;
+  mapY: number;
+  pixels: Array<{
+    offsetX: number;
+    offsetY: number;
+    vx: number;
+    vy: number;
+    size: number;
+    color: string;
+    life: number;
+  }>;
+  startTime: number;
+  targetObj: Obj;
+};
+
+// 22. グリッチアニメーション（画面バグ風）
+export type GlitchAnimation = {
+  x: number;
+  y: number;
+  mapX: number;
+  mapY: number;
+  strips: Array<{
+    offsetY: number;
+    height: number;
+    offsetX: number;
+    color: string;
+    opacity: number;
+  }>;
+  startTime: number;
+  life: number;
+  targetObj: Obj;
+};
+
+// 23. 砂嵐アニメーション（砂塵が舞う）
+export type SandstormAnimation = {
+  x: number;
+  y: number;
+  mapX: number;
+  mapY: number;
+  particles: Array<{
+    x: number;
+    y: number;
+    vx: number;
+    vy: number;
+    size: number;
+    opacity: number;
+    life: number;
+  }>;
+  startTime: number;
+  duration: number;
+};
+
+// 24. 時計アニメーション（時計の針が回る）
+export type ClockAnimation = {
+  x: number;
+  y: number;
+  mapX: number;
+  mapY: number;
+  hourHand: { angle: number; length: number };
+  minuteHand: { angle: number; length: number };
+  secondHand: { angle: number; length: number };
+  numbers: Array<{ angle: number; value: number }>;
+  glow: number;
+  startTime: number;
+  life: number;
+  targetObj: Obj;
+};
+
+// 25. 歯車アニメーション（歯車が回る）
+export type GearAnimation = {
+  x: number;
+  y: number;
+  mapX: number;
+  mapY: number;
+  gears: Array<{
+    offsetX: number;
+    offsetY: number;
+    size: number;
+    rotation: number;
+    rotationSpeed: number;
+    teeth: number;
+    color: string;
+  }>;
+  startTime: number;
+  life: number;
+  targetObj: Obj;
+};
+
+// 26. DNAらせんアニメーション（遺伝子の二重らせん）
+export type DNAHelixAnimation = {
+  x: number;
+  y: number;
+  mapX: number;
+  mapY: number;
+  points: Array<{
+    angle: number;
+    height: number;
+    side: 'left' | 'right';
+    size: number;
+    color: string;
+  }>;
+  rotation: number;
+  startTime: number;
+  life: number;
+  targetObj: Obj;
+};
+
+// 27. シールドアニメーション（防御バリア）
+export type ShieldAnimation = {
+  x: number;
+  y: number;
+  mapX: number;
+  mapY: number;
+  hexagons: Array<{
+    offsetX: number;
+    offsetY: number;
+    size: number;
+    opacity: number;
+    flash: number;
+  }>;
+  barrier: {
+    radius: number;
+    opacity: number;
+    color: string;
+  };
+  startTime: number;
+  life: number;
+  targetObj: Obj;
+};
+
+// 28. エネルギーボールアニメーション（エネルギー球）
+export type EnergyBallAnimation = {
+  x: number;
+  y: number;
+  mapX: number;
+  mapY: number;
+  core: {
+    size: number;
+    rotation: number;
+    color: string;
+    glow: number;
+  };
+  electricity: Array<{
+    angle: number;
+    length: number;
+    alpha: number;
+  }>;
+  particles: Array<{
+    angle: number;
+    radius: number;
+    size: number;
+  }>;
+  startTime: number;
+  life: number;
+  targetObj: Obj;
+};
+
+// 29. テレポートアニメーション（瞬間移動）
+export type TeleportAnimation = {
+  x: number;
+  y: number;
+  mapX: number;
+  mapY: number;
+  phase: 'disappear' | 'appear';
+  particles: Array<{
+    offsetX: number;
+    offsetY: number;
+    vy: number;
+    size: number;
+    opacity: number;
+    life: number;
+  }>;
+  ringExpansion: number;
+  startTime: number;
+  targetObj: Obj;
+};
+
+// 30. 桃の花アニメーション（桃の花びら）
+export type PeachBlossomAnimation = {
+  x: number;
+  y: number;
+  mapX: number;
+  mapY: number;
+  petals: Array<{
+    offsetX: number;
+    offsetY: number;
+    vx: number;
+    vy: number;
+    rotation: number;
+    rotationSpeed: number;
+    size: number;
+    opacity: number;
+    life: number;
+  }>;
+  startTime: number;
+  targetObj: Obj;
+};
+
+// 31. 紫陽花アニメーション（あじさいの花）
+export type HydrangeaAnimation = {
+  x: number;
+  y: number;
+  mapX: number;
+  mapY: number;
+  flowers: Array<{
+    offsetX: number;
+    offsetY: number;
+    size: number;
+    color: string; // 青、紫、ピンク
+    opacity: number;
+    growth: number;
+    life: number;
+  }>;
+  startTime: number;
+  targetObj: Obj;
+};
+
+// 32. 梅の花アニメーション（梅の花びら）
+export type PlumeBlossomAnimation = {
+  x: number;
+  y: number;
+  mapX: number;
+  mapY: number;
+  flowers: Array<{
+    offsetX: number;
+    offsetY: number;
+    size: number;
+    rotation: number;
+    opacity: number;
+    life: number;
+  }>;
+  petals: Array<{
+    offsetX: number;
+    offsetY: number;
+    vx: number;
+    vy: number;
+    rotation: number;
+    size: number;
+    opacity: number;
+    life: number;
+  }>;
+  startTime: number;
+  targetObj: Obj;
+};
+
+// 33. 蓮の花アニメーション（蓮の花が開く）
+export type LotusAnimation = {
+  x: number;
+  y: number;
+  mapX: number;
+  mapY: number;
+  petals: Array<{
+    angle: number;
+    openProgress: number;
+    size: number;
+    color: string;
+  }>;
+  center: {
+    size: number;
+    glow: number;
+  };
+  ripples: Array<{
+    radius: number;
+    opacity: number;
+  }>;
+  startTime: number;
+  life: number;
+  targetObj: Obj;
+};
+
+// 34. 竹林アニメーション（竹が揺れる）
+export type BambooAnimation = {
+  x: number;
+  y: number;
+  mapX: number;
+  mapY: number;
+  stalks: Array<{
+    offsetX: number;
+    height: number;
+    sway: number;
+    swaySpeed: number;
+    opacity: number;
+  }>;
+  leaves: Array<{
+    offsetX: number;
+    offsetY: number;
+    rotation: number;
+    size: number;
+    opacity: number;
+  }>;
+  startTime: number;
+  life: number;
+  targetObj: Obj;
+};
+
+// 35. 提灯アニメーション（提灯が揺れる）
+export type LanternAnimation = {
+  x: number;
+  y: number;
+  mapX: number;
+  mapY: number;
+  lanterns: Array<{
+    offsetX: number;
+    offsetY: number;
+    sway: number;
+    glowIntensity: number;
+    color: string;
+    size: number;
+  }>;
+  startTime: number;
+  life: number;
+  targetObj: Obj;
+};
+
+// 36. 鯉のぼりアニメーション（鯉のぼりが泳ぐ）
+export type KoinoboriAnimation = {
+  x: number;
+  y: number;
+  mapX: number;
+  mapY: number;
+  koi: Array<{
+    offsetX: number;
+    offsetY: number;
+    size: number;
+    color: string;
+    wavePhase: number;
+    rotation: number;
+  }>;
+  wind: number;
+  startTime: number;
+  life: number;
+  targetObj: Obj;
+};
+
+// 37. 天の川アニメーション（星の川）
+export type MilkyWayAnimation = {
+  mapX: number;
+  mapY: number;
+  stars: Array<{
+    x: number;
+    y: number;
+    size: number;
+    twinkle: number;
+    color: string;
+    opacity: number;
+  }>;
+  stardust: Array<{
+    x: number;
+    y: number;
+    vx: number;
+    size: number;
+    opacity: number;
+    life: number;
+  }>;
+  startTime: number;
+  duration: number;
+};
+
+// 38. 太陽アニメーション（太陽が輝く）
+export type SunAnimation = {
+  x: number;
+  y: number;
+  mapX: number;
+  mapY: number;
+  core: {
+    size: number;
+    glow: number;
+    rotation: number;
+  };
+  rays: Array<{
+    angle: number;
+    length: number;
+    opacity: number;
+  }>;
+  flares: Array<{
+    offsetX: number;
+    offsetY: number;
+    size: number;
+    opacity: number;
+    life: number;
+  }>;
+  startTime: number;
+  life: number;
+  targetObj: Obj;
+};
+
+// 39. 惑星アニメーション（惑星が回る）
+export type PlanetAnimation = {
+  x: number;
+  y: number;
+  mapX: number;
+  mapY: number;
+  planet: {
+    size: number;
+    rotation: number;
+    color: string;
+    rings: boolean;
+  };
+  moons: Array<{
+    angle: number;
+    radius: number;
+    size: number;
+    speed: number;
+  }>;
+  atmosphere: {
+    size: number;
+    opacity: number;
+  };
+  startTime: number;
+  life: number;
+  targetObj: Obj;
+};
+
+// 40. 銀河アニメーション（渦巻き銀河）
+export type GalaxyAnimation = {
+  x: number;
+  y: number;
+  mapX: number;
+  mapY: number;
+  arms: Array<{
+    angle: number;
+    stars: Array<{
+      distance: number;
+      size: number;
+      color: string;
+      twinkle: number;
+    }>;
+  }>;
+  rotation: number;
+  core: {
+    size: number;
+    glow: number;
+  };
+  startTime: number;
+  life: number;
+  targetObj: Obj;
+};
+
+// 41. 彗星アニメーション（彗星が飛ぶ）
+export type CometAnimation = {
+  mapX: number;
+  mapY: number;
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  size: number;
+  tail: Array<{
+    offsetX: number;
+    offsetY: number;
+    size: number;
+    opacity: number;
+  }>;
+  glow: number;
+  startTime: number;
+  life: number;
+};
+
+// 42. ブラックホールアニメーション（重力で吸い込む）
+export type BlackHoleAnimation = {
+  x: number;
+  y: number;
+  mapX: number;
+  mapY: number;
+  eventHorizon: {
+    radius: number;
+    rotation: number;
+  };
+  particles: Array<{
+    angle: number;
+    radius: number;
+    speed: number;
+    size: number;
+    opacity: number;
+  }>;
+  distortion: number;
+  startTime: number;
+  life: number;
+  targetObj: Obj;
+};
+
+// 43. 超新星爆発アニメーション（星が爆発）
+export type SupernovaAnimation = {
+  x: number;
+  y: number;
+  mapX: number;
+  mapY: number;
+  shockwave: {
+    radius: number;
+    opacity: number;
+  };
+  debris: Array<{
+    angle: number;
+    distance: number;
+    speed: number;
+    size: number;
+    color: string;
+    opacity: number;
+  }>;
+  flash: number;
+  startTime: number;
+  life: number;
+  targetObj: Obj;
+};
+
+// 44. ワープアニメーション（ワープ航法）
+export type WarpAnimation = {
+  mapX: number;
+  mapY: number;
+  lines: Array<{
+    x: number;
+    y: number;
+    vx: number;
+    vy: number;
+    length: number;
+    opacity: number;
+    life: number;
+  }>;
+  startTime: number;
+  duration: number;
+};
+
+// 45. UFOアニメーション（UFOが飛ぶ）
+export type UFOAnimation = {
+  x: number;
+  y: number;
+  mapX: number;
+  mapY: number;
+  ufo: {
+    size: number;
+    rotation: number;
+    tilt: number;
+  };
+  lights: Array<{
+    angle: number;
+    color: string;
+    blink: number;
+  }>;
+  beam: {
+    width: number;
+    height: number;
+    opacity: number;
+  };
+  startTime: number;
+  life: number;
+  targetObj: Obj;
+};
+
+// 46. エイリアンアニメーション（宇宙人が登場）
+export type AlienAnimation = {
+  x: number;
+  y: number;
+  mapX: number;
+  mapY: number;
+  alien: {
+    size: number;
+    eyeBlink: number;
+    antennaWave: number;
+  };
+  particles: Array<{
+    offsetX: number;
+    offsetY: number;
+    size: number;
+    color: string;
+    opacity: number;
+    life: number;
+  }>;
+  startTime: number;
+  life: number;
+  targetObj: Obj;
+};
+
+// 47. ロボットアニメーション（ロボットが動く）
+export type RobotAnimation = {
+  x: number;
+  y: number;
+  mapX: number;
+  mapY: number;
+  robot: {
+    size: number;
+    rotation: number;
+    eyeGlow: number;
+  };
+  sparks: Array<{
+    offsetX: number;
+    offsetY: number;
+    vx: number;
+    vy: number;
+    size: number;
+    life: number;
+  }>;
+  startTime: number;
+  life: number;
+  targetObj: Obj;
+};
+
+// 48. メカニカルアニメーション（機械的な動き）
+export type MechanicalAnimation = {
+  x: number;
+  y: number;
+  mapX: number;
+  mapY: number;
+  parts: Array<{
+    offsetX: number;
+    offsetY: number;
+    size: number;
+    rotation: number;
+    type: 'gear' | 'piston' | 'lever';
+    movement: number;
+  }>;
+  steam: Array<{
+    offsetX: number;
+    offsetY: number;
+    vy: number;
+    size: number;
+    opacity: number;
+    life: number;
+  }>;
+  startTime: number;
+  life: number;
+  targetObj: Obj;
+};
+
+// 49. 工場アニメーション（工場が稼働）
+export type FactoryAnimation = {
+  x: number;
+  y: number;
+  mapX: number;
+  mapY: number;
+  conveyor: {
+    speed: number;
+    items: Array<{
+      position: number;
+      type: string;
+    }>;
+  };
+  smoke: Array<{
+    offsetX: number;
+    offsetY: number;
+    vy: number;
+    size: number;
+    opacity: number;
+    life: number;
+  }>;
+  lights: Array<{
+    x: number;
+    y: number;
+    blink: number;
+    color: string;
+  }>;
+  startTime: number;
+  life: number;
+  targetObj: Obj;
+};
+
+// 50. 虹の橋アニメーション（虹の架け橋）
+export type RainbowBridgeAnimation = {
+  x: number;
+  y: number;
+  mapX: number;
+  mapY: number;
+  arc: {
+    startAngle: number;
+    endAngle: number;
+    radius: number;
+    width: number;
+  };
+  sparkles: Array<{
+    angle: number;
+    radius: number;
+    size: number;
+    color: string;
+    twinkle: number;
+  }>;
+  startTime: number;
+  life: number;
+  targetObj: Obj;
+};
+
+// 51. 雲アニメーション（雲が流れる）
+export type CloudAnimation = {
+  mapX: number;
+  mapY: number;
+  clouds: Array<{
+    x: number;
+    y: number;
+    vx: number;
+    size: number;
+    opacity: number;
+    puffiness: number;
+  }>;
+  startTime: number;
+  duration: number;
+};
+
+// 52. 霧アニメーション（霧が立ち込める）
+export type FogAnimation = {
+  mapX: number;
+  mapY: number;
+  layers: Array<{
+    y: number;
+    opacity: number;
+    speed: number;
+    density: number;
+  }>;
+  startTime: number;
+  duration: number;
+};
+
+// 53. 嵐アニメーション（嵐が荒れ狂う）
+export type StormAnimation = {
+  mapX: number;
+  mapY: number;
+  rain: Array<{
+    x: number;
+    y: number;
+    vy: number;
+    length: number;
+    opacity: number;
+  }>;
+  lightning: Array<{
+    segments: Array<{ x: number; y: number }>;
+    alpha: number;
+    life: number;
+  }>;
+  wind: number;
+  darkness: number;
+  startTime: number;
+  duration: number;
+};
+
+// 54. 津波アニメーション（大波が押し寄せる）
+export type TsunamiAnimation = {
+  mapX: number;
+  mapY: number;
+  wave: {
+    x: number;
+    height: number;
+    speed: number;
+    foam: Array<{
+      offsetX: number;
+      offsetY: number;
+      size: number;
+      opacity: number;
+    }>;
+  };
+  splashes: Array<{
+    x: number;
+    y: number;
+    vx: number;
+    vy: number;
+    size: number;
+    life: number;
+  }>;
+  startTime: number;
+  life: number;
+};
+
+// 55. 地震アニメーション（地面が揺れる）
+export type EarthquakeAnimation = {
+  mapX: number;
+  mapY: number;
+  shakeIntensity: number;
+  cracks: Array<{
+    x: number;
+    y: number;
+    angle: number;
+    length: number;
+    width: number;
+    opacity: number;
+  }>;
+  debris: Array<{
+    x: number;
+    y: number;
+    vx: number;
+    vy: number;
+    rotation: number;
+    size: number;
+    life: number;
+  }>;
+  startTime: number;
+  duration: number;
+};
+
+// 56. 火山噴火アニメーション（火山が噴火）
+export type VolcanoAnimation = {
+  x: number;
+  y: number;
+  mapX: number;
+  mapY: number;
+  lava: Array<{
+    offsetX: number;
+    offsetY: number;
+    vx: number;
+    vy: number;
+    size: number;
+    color: string;
+    life: number;
+  }>;
+  smoke: Array<{
+    offsetX: number;
+    offsetY: number;
+    vy: number;
+    size: number;
+    opacity: number;
+    life: number;
+  }>;
+  ash: Array<{
+    x: number;
+    y: number;
+    vx: number;
+    vy: number;
+    size: number;
+    opacity: number;
+    life: number;
+  }>;
+  startTime: number;
+  targetObj: Obj;
+};
+
+// 57. オーシャンアニメーション（海の波）
+export type OceanAnimation = {
+  mapX: number;
+  mapY: number;
+  waves: Array<{
+    x: number;
+    amplitude: number;
+    frequency: number;
+    speed: number;
+    foam: boolean;
+  }>;
+  bubbles: Array<{
+    x: number;
+    y: number;
+    vy: number;
+    size: number;
+    opacity: number;
+    life: number;
+  }>;
+  startTime: number;
+  duration: number;
+};
+
+// 58. 滝アニメーション（滝が流れる）
+export type WaterfallAnimation = {
+  x: number;
+  y: number;
+  mapX: number;
+  mapY: number;
+  water: Array<{
+    offsetX: number;
+    offsetY: number;
+    vy: number;
+    size: number;
+    opacity: number;
+  }>;
+  mist: Array<{
+    offsetX: number;
+    offsetY: number;
+    vy: number;
+    size: number;
+    opacity: number;
+    life: number;
+  }>;
+  splash: {
+    particles: Array<{
+      vx: number;
+      vy: number;
+      size: number;
+      life: number;
+    }>;
+  };
+  startTime: number;
+  life: number;
+  targetObj: Obj;
+};
+
+// 59. 温泉アニメーション（温泉の湯気）
+export type OnsenAnimation = {
+  x: number;
+  y: number;
+  mapX: number;
+  mapY: number;
+  steam: Array<{
+    offsetX: number;
+    offsetY: number;
+    vy: number;
+    size: number;
+    opacity: number;
+    life: number;
+  }>;
+  bubbles: Array<{
+    offsetX: number;
+    offsetY: number;
+    vy: number;
+    size: number;
+    life: number;
+  }>;
+  ripples: Array<{
+    radius: number;
+    opacity: number;
+  }>;
+  startTime: number;
+  life: number;
+  targetObj: Obj;
+};
+
+// 60. キャンプファイヤーアニメーション（キャンプファイヤー）
+export type CampfireAnimation = {
+  x: number;
+  y: number;
+  mapX: number;
+  mapY: number;
+  flames: Array<{
+    offsetX: number;
+    offsetY: number;
+    size: number;
+    height: number;
+    flicker: number;
+    color: string;
+    opacity: number;
+  }>;
+  sparks: Array<{
+    offsetX: number;
+    offsetY: number;
+    vy: number;
+    size: number;
+    life: number;
+  }>;
+  glow: {
+    radius: number;
+    intensity: number;
+  };
+  startTime: number;
+  life: number;
+  targetObj: Obj;
+};
+
+// 61. 宝箱アニメーション（宝箱が開く）
+export type TreasureChestAnimation = {
+  x: number;
+  y: number;
+  mapX: number;
+  mapY: number;
+  lid: {
+    openProgress: number;
+    angle: number;
+  };
+  treasures: Array<{
+    offsetX: number;
+    offsetY: number;
+    vy: number;
+    type: 'coin' | 'gem' | 'crown';
+    rotation: number;
+    size: number;
+    life: number;
+  }>;
+  glow: {
+    intensity: number;
+    color: string;
+  };
+  startTime: number;
+  life: number;
+  targetObj: Obj;
+};
+
+// 62. マジックワンドアニメーション（魔法の杖）
+export type MagicWandAnimation = {
+  x: number;
+  y: number;
+  mapX: number;
+  mapY: number;
+  wand: {
+    angle: number;
+    glow: number;
+  };
+  sparkles: Array<{
+    offsetX: number;
+    offsetY: number;
+    vx: number;
+    vy: number;
+    size: number;
+    color: string;
+    opacity: number;
+    life: number;
+  }>;
+  trail: Array<{
+    x: number;
+    y: number;
+    opacity: number;
+  }>;
+  startTime: number;
+  life: number;
+  targetObj: Obj;
+};
+
+// 63. ポーションアニメーション（薬瓶から泡）
+export type PotionAnimation = {
+  x: number;
+  y: number;
+  mapX: number;
+  mapY: number;
+  bottle: {
+    size: number;
+    liquidColor: string;
+    shake: number;
+  };
+  bubbles: Array<{
+    offsetY: number;
+    size: number;
+    speed: number;
+    opacity: number;
+  }>;
+  vapor: Array<{
+    offsetX: number;
+    offsetY: number;
+    vy: number;
+    size: number;
+    color: string;
+    opacity: number;
+    life: number;
+  }>;
+  startTime: number;
+  life: number;
+  targetObj: Obj;
+};
+
+// 64. 魔法書アニメーション（魔法書が開く）
+export type SpellbookAnimation = {
+  x: number;
+  y: number;
+  mapX: number;
+  mapY: number;
+  book: {
+    openProgress: number;
+    glowIntensity: number;
+  };
+  runes: Array<{
+    offsetX: number;
+    offsetY: number;
+    symbol: string;
+    rotation: number;
+    opacity: number;
+    color: string;
+  }>;
+  particles: Array<{
+    offsetX: number;
+    offsetY: number;
+    vx: number;
+    vy: number;
+    size: number;
+    life: number;
+  }>;
+  startTime: number;
+  life: number;
+  targetObj: Obj;
+};
+
+// 65. パーティクルエクスプロージョン（派手な爆発）
+export type ParticleExplosionAnimation = {
+  x: number;
+  y: number;
+  mapX: number;
+  mapY: number;
+  particles: Array<{
+    angle: number;
+    speed: number;
+    distance: number;
+    size: number;
+    color: string;
+    opacity: number;
+    trail: Array<{ x: number; y: number; alpha: number }>;
+  }>;
+  shockwave: {
+    radius: number;
+    opacity: number;
+  };
+  flash: number;
+  startTime: number;
+  targetObj: Obj;
 };
