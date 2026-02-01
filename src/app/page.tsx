@@ -510,7 +510,20 @@ export default function Home() {
   const [campfireAnimations, setCampfireAnimations] = useState<CampfireAnimation[]>([]);
   const [treasureChestAnimations, setTreasureChestAnimations] = useState<TreasureChestAnimation[]>([]);
 
-  // カメラ：パン(tx,ty)は「画面座標系」での移動量（ピクセル）、scaleは倍率
+  // 音楽管理用
+  const [musicList, setMusicList] = useState<import('./types').MusicData[]>([]);
+  const [showMusicManager, setShowMusicManager] = useState(false);
+  const [editingMusic, setEditingMusic] = useState<import('./types').MusicData | null>(null);
+  const [currentPlayingMusic, setCurrentPlayingMusic] = useState<import('./types').MusicData | null>(null);
+  const [showMusicPlayer, setShowMusicPlayer] = useState(false);
+  const [showMusicPlaylist, setShowMusicPlaylist] = useState(false);
+  const [playlistMusics, setPlaylistMusics] = useState<import('./types').MusicData[]>([]);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  
+  // 同盟音楽モーダル
+  const [showAllianceMusicModal, setShowAllianceMusicModal] = useState(false);
+
+  // カメラ：パン(tx,ty)は「画面座標系」での移動量(ピクセル）、scaleは倍率
   // 初期ズーム: 統一して1.0でスタート（SSRハイドレーションエラー回避）
   const [cam, setCam] = useState({ 
     tx: 0, 
@@ -613,6 +626,22 @@ export default function Home() {
       }
     }
   }, []);
+
+  // 音楽データをGASから読み込み
+  async function loadMusic() {
+    try {
+      const base = process.env.NEXT_PUBLIC_GAS_URL;
+      if (!base) return;
+      
+      const res = await fetch(`${base}?action=getMusic`, { method: "GET" });
+      const json = await res.json();
+      if (json.ok && Array.isArray(json.music)) {
+        setMusicList(json.music);
+      }
+    } catch (e) {
+      console.error("音楽データの取得に失敗:", e);
+    }
+  }
 
   // 背景画像の読み込み
   useEffect(() => {
@@ -1058,13 +1087,150 @@ export default function Home() {
   }
 
   useEffect(() => {
-    // 初回ロード時にマップ設定を取得してから最初のマップを読み込む
+    // 初回ロード時にマップ設定と音楽データを取得してから最初のマップを読み込む
     async function init() {
       await loadMapConfigs();
+      await loadMusic();
       await loadMap();
     }
     init();
   }, []);
+
+  // 音楽関連の関数
+  const saveMusicList = async (list: import('./types').MusicData[]) => {
+    setMusicList(list);
+    
+    // GASに保存
+    try {
+      const base = process.env.NEXT_PUBLIC_GAS_URL;
+      if (!base) return;
+      
+      const res = await fetch(`${base}?action=saveMusic`, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain" },
+        body: JSON.stringify({
+          password: "snow1234",
+          music: list,
+        }),
+      });
+      
+      const json = await res.json();
+      if (!json.ok) {
+        throw new Error(json.error || "音楽データの保存に失敗しました");
+      }
+      
+      setToastMessage("✅ 音楽データ保存完了");
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : String(e);
+      console.error("音楽保存エラー:", e);
+      setToastMessage(`❌ 音楽保存エラー: ${message}`);
+    }
+  };
+
+  const playMusic = (music: import('./types').MusicData) => {
+    setCurrentPlayingMusic(music);
+    setShowMusicPlayer(true);
+  };
+
+  // URLの種類を判定
+  const getMusicPlatform = (url: string): 'youtube' | 'suno' | 'other' => {
+    if (url.includes('youtube.com') || url.includes('youtu.be')) {
+      return 'youtube';
+    }
+    if (url.includes('suno.com') || url.includes('suno.ai')) {
+      return 'suno';
+    }
+    return 'other';
+  };
+
+  // 埋め込み用URLを生成
+  const getEmbedUrl = (url: string): string => {
+    const platform = getMusicPlatform(url);
+    
+    if (platform === 'youtube') {
+      // YouTube URLをembed形式に変換
+      let videoId = '';
+      if (url.includes('youtube.com/watch')) {
+        const urlObj = new URL(url);
+        videoId = urlObj.searchParams.get('v') || '';
+      } else if (url.includes('youtu.be/')) {
+        videoId = url.split('youtu.be/')[1]?.split('?')[0] || '';
+      }
+      return videoId ? `https://www.youtube.com/embed/${videoId}` : url;
+    }
+    
+    if (platform === 'suno') {
+      // Suno URLをembed形式に変換
+      const songId = url.split('/').pop();
+      return songId ? `https://suno.com/embed/${songId}/` : url;
+    }
+    
+    return url;
+  };
+
+  const stopMusic = () => {
+    setCurrentPlayingMusic(null);
+    setShowMusicPlayer(false);
+  };
+
+  const deleteMusic = (musicId: string) => {
+    if (!confirm('この音楽を削除しますか？')) return;
+    
+    const newList = musicList.filter(m => m.id !== musicId);
+    saveMusicList(newList);
+    
+    // 再生中の音楽を削除した場合は停止
+    if (currentPlayingMusic?.id === musicId) {
+      stopMusic();
+    }
+  };
+
+  const saveMusic = async (music: import('./types').MusicData) => {
+    const index = musicList.findIndex(m => m.id === music.id);
+    let newList: import('./types').MusicData[];
+    
+    if (index >= 0) {
+      // 更新
+      newList = [...musicList];
+      newList[index] = music;
+    } else {
+      // 新規追加
+      newList = [...musicList, music];
+    }
+    
+    // orderでソート
+    newList.sort((a, b) => a.order - b.order);
+    await saveMusicList(newList);
+    setEditingMusic(null);
+  };
+
+  const linkMusicToObject = (objectId: string, musicId: string) => {
+    // オブジェクトに音楽IDを関連付け（配列で管理）
+    const newObjects = objects.map(obj => {
+      if (obj.id === objectId) {
+        const musicIds = obj.musicIds || [];
+        if (!musicIds.includes(musicId)) {
+          return { ...obj, musicIds: [...musicIds, musicId] };
+        }
+      }
+      return obj;
+    });
+    setObjects(newObjects);
+    setHasUnsavedChanges(true);
+  };
+
+  const unlinkMusicFromObject = (objectId: string, musicId: string) => {
+    // オブジェクトから特定の音楽IDを削除
+    const newObjects = objects.map(obj => {
+      if (obj.id === objectId && obj.musicIds) {
+        const musicIds = obj.musicIds.filter(id => id !== musicId);
+        return { ...obj, musicIds: musicIds.length > 0 ? musicIds : undefined };
+      }
+      return obj;
+    });
+    setObjects(newObjects);
+    setHasUnsavedChanges(true);
+  };
 
   // キャンバスのホイールイベントでページスクロールを防止 & ズーム機能
   useEffect(() => {
@@ -1581,6 +1747,49 @@ export default function Home() {
         const isKnownType = knownTypes.includes(type);
         ctx.fillStyle = isKnownType ? "#111" : "#fff";
         ctx.fillText(label, 0, 0);
+
+        // 音符マーク表示（音楽が関連付けられている場合）
+        if (o.musicIds && o.musicIds.length > 0) {
+          const musicCount = o.musicIds.length;
+          ctx.save();
+          
+          // 音符マークの位置（ラベルの下）
+          const noteY = 18 / cam.scale;
+          const noteSize = 14 / cam.scale;
+          
+          // 背景円を描画（複数曲の場合は色を変える）
+          ctx.fillStyle = musicCount > 1 ? "rgba(147, 51, 234, 0.8)" : "rgba(59, 130, 246, 0.8)"; // 紫 or 青
+          ctx.beginPath();
+          ctx.arc(0, noteY, noteSize / 2, 0, Math.PI * 2);
+          ctx.fill();
+          
+          // 音符記号を描画
+          ctx.fillStyle = "#ffffff";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.font = `bold ${noteSize}px system-ui`;
+          ctx.fillText("♪", 0, noteY);
+          
+          // 複数曲の場合は右上に数字バッジ
+          if (musicCount > 1) {
+            const badgeSize = 8 / cam.scale;
+            const badgeX = noteSize / 3;
+            const badgeY = noteY - noteSize / 3;
+            
+            // バッジ背景
+            ctx.fillStyle = "#ef4444";
+            ctx.beginPath();
+            ctx.arc(badgeX, badgeY, badgeSize / 2, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 数字
+            ctx.fillStyle = "#ffffff";
+            ctx.font = `bold ${badgeSize}px system-ui`;
+            ctx.fillText(String(musicCount), badgeX, badgeY);
+          }
+          
+          ctx.restore();
+        }
 
         // 溶鉱炉レベル表示（都市ドメインの名前の上に小さく表示）
         if (type === "CITY" && o.Fire) {
@@ -10296,6 +10505,16 @@ export default function Home() {
         clickTimerRef.current = null;
       }
       
+      // 音楽がリンクされている場合、再生リストを表示
+      if (hit.musicIds && hit.musicIds.length > 0) {
+        const musics = musicList.filter(m => hit.musicIds!.includes(m.id));
+        if (musics.length > 0) {
+          setPlaylistMusics(musics);
+          setShowMusicPlaylist(true);
+          return;
+        }
+      }
+      
       const animationType = getActiveAnimation(hit);
       
       // 隕石とコイン以外のアニメーションをクリックした場合のみクリア
@@ -11964,6 +12183,34 @@ export default function Home() {
                 margin: "4px 0",
               }} />
               
+              {/* 音楽管理（編集モード時のみ） */}
+              {isEditMode && (
+                <div
+                  onClick={() => {
+                    setShowMusicManager(true);
+                    setShowHeaderMenu(false);
+                  }}
+                  style={{
+                    padding: "10px 16px 10px 32px",
+                    cursor: "pointer",
+                    borderBottom: isDarkMode ? "1px solid #374151" : "1px solid #e5e7eb",
+                    transition: "background 0.2s",
+                    userSelect: "none",
+                    fontSize: "14px",
+                    background: isDarkMode ? "#1f2937" : "white",
+                    color: isDarkMode ? "#e5e7eb" : "#1f2937",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = isDarkMode ? "#374151" : "#f3f4f6";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = isDarkMode ? "#1f2937" : "white";
+                  }}
+                >
+                  🎵 音楽管理 ({musicList.length})
+                </div>
+              )}
+              
               {/* 背景変更（編集モード時のみ） */}
               {isEditMode && (
                 <div
@@ -12264,6 +12511,38 @@ export default function Home() {
               }}
             >
               {isMobile ? "編集" : "🔓 編集モード"}
+            </button>
+            <button
+              onClick={() => setShowAllianceMusicModal(true)}
+              style={{
+                padding: isMobile ? "6px 8px" : "6px 10px",
+                background: "linear-gradient(135deg, #1a1a2e 0%, #0f0f1e 100%)",
+                color: "white",
+                border: "1px solid rgba(139,92,246,0.5)",
+                borderRadius: 6,
+                cursor: "pointer",
+                fontSize: isMobile ? "12px" : "13px",
+                fontWeight: isMobile ? "bold" : "normal",
+                whiteSpace: "nowrap",
+                minHeight: isMobile ? "36px" : "auto",
+                position: "relative",
+                zIndex: 1,
+                userSelect: "none",
+                boxShadow: "0 2px 8px rgba(139,92,246,0.3), inset 0 1px 0 rgba(255,255,255,0.1)",
+                transition: "all 0.2s",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%)";
+                e.currentTarget.style.borderColor = "rgba(139,92,246,0.8)";
+                e.currentTarget.style.boxShadow = "0 4px 12px rgba(139,92,246,0.5), inset 0 1px 0 rgba(255,255,255,0.2)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "linear-gradient(135deg, #1a1a2e 0%, #0f0f1e 100%)";
+                e.currentTarget.style.borderColor = "rgba(139,92,246,0.5)";
+                e.currentTarget.style.boxShadow = "0 2px 8px rgba(139,92,246,0.3), inset 0 1px 0 rgba(255,255,255,0.1)";
+              }}
+            >
+              {isMobile ? "♪同盟音楽" : "🎵 同盟音楽"}
             </button>
           </>
         ) : (
@@ -14649,6 +14928,126 @@ export default function Home() {
                   e.target.style.boxShadow = "none";
                 }}
               />
+            </div>
+            )}
+
+            {/* 音楽設定 - ベースマップのみ */}
+            {currentMap?.isBase && (
+            <div style={{ 
+              marginBottom: isMobile ? 10 : 16,
+              padding: isMobile ? "10px" : "14px", 
+              background: "#f0f9ff", 
+              borderRadius: 8,
+              border: "2px solid #3b82f6",
+            }}>
+              <label style={{ 
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                marginBottom: 8, 
+                fontSize: 13, 
+                fontWeight: 600, 
+                color: "#1e3a8a",
+                userSelect: "none",
+              }}>
+                <span>🎵 関連付ける音楽</span>
+              </label>
+              
+              {/* 現在関連付けられている音楽リスト */}
+              {editingObject.musicIds && editingObject.musicIds.length > 0 && (
+                <div style={{ marginBottom: "10px" }}>
+                  {editingObject.musicIds.map(musicId => {
+                    const music = musicList.find(m => m.id === musicId);
+                    if (!music) return null;
+                    return (
+                      <div key={musicId} style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        padding: "8px 12px",
+                        background: "#f0f9ff",
+                        border: "1px solid #bae6fd",
+                        borderRadius: "6px",
+                        marginBottom: "6px",
+                      }}>
+                        <span style={{ fontSize: "13px", color: "#0369a1" }}>
+                          🎵 {music.title} ({music.type === 'alliance' ? '同盟' : '都市'})
+                        </span>
+                        <button
+                          onClick={() => {
+                            unlinkMusicFromObject(editingObject.id || '', musicId);
+                            setEditingObject({
+                              ...editingObject,
+                              musicIds: editingObject.musicIds?.filter(id => id !== musicId)
+                            });
+                          }}
+                          style={{
+                            padding: "4px 8px",
+                            background: "#ef4444",
+                            color: "#fff",
+                            border: "none",
+                            borderRadius: "4px",
+                            cursor: "pointer",
+                            fontSize: "11px",
+                          }}
+                        >
+                          削除
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+              
+              {/* 音楽追加用ドロップダウン */}
+              <select
+                value=""
+                onChange={(e) => {
+                  const musicId = e.target.value;
+                  if (musicId) {
+                    linkMusicToObject(editingObject.id || '', musicId);
+                    setEditingObject({
+                      ...editingObject,
+                      musicIds: [...(editingObject.musicIds || []), musicId]
+                    });
+                  }
+                }}
+                style={{
+                  width: "100%",
+                  padding: "10px 12px",
+                  border: "2px solid #bfdbfe",
+                  borderRadius: 8,
+                  fontSize: 14,
+                  boxSizing: "border-box",
+                  backgroundColor: "white",
+                  color: "#1f2937",
+                  cursor: "pointer",
+                  outline: "none",
+                  transition: "all 0.2s",
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = "#3b82f6";
+                  e.target.style.boxShadow = "0 0 0 3px rgba(59, 130, 246, 0.1)";
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = "#bfdbfe";
+                  e.target.style.boxShadow = "none";
+                }}
+              >
+                <option value="">➕ 音楽を追加...</option>
+                {musicList
+                  .filter(music => !editingObject.musicIds?.includes(music.id))
+                  .map(music => (
+                    <option key={music.id} value={music.id}>
+                      {music.title} ({music.type === 'alliance' ? '同盟' : '都市'})
+                    </option>
+                  ))}
+              </select>
+              {editingObject.musicIds && editingObject.musicIds.length > 0 && (
+                <p style={{ margin: "8px 0 0 0", fontSize: 12, color: "#1e40af", lineHeight: 1.5, userSelect: "none" }}>
+                  💡 マップ上で音符マークが表示され、クリックで音楽を再生できます（複数曲は紫色で表示）
+                </p>
+              )}
             </div>
             )}
 
@@ -17128,6 +17527,948 @@ export default function Home() {
             fontWeight: "normal",
           }}>
             （クリックで戻る）
+          </div>
+        </div>
+      )}
+
+      {/* 音楽プレーヤー（オーバーレイ） */}
+      {showMusicPlayer && currentPlayingMusic && (
+        <div style={{
+          position: "fixed",
+          top: "80px",
+          right: "20px",
+          background: "rgba(0, 0, 0, 0.85)",
+          backdropFilter: "blur(10px)",
+          color: "#fff",
+          padding: "20px",
+          borderRadius: "12px",
+          boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
+          zIndex: 100,
+          minWidth: "320px",
+          maxWidth: "450px",
+        }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
+            <div style={{ fontSize: "18px", fontWeight: "bold" }}>🎵 {currentPlayingMusic.title}</div>
+            <button 
+              onClick={stopMusic}
+              style={{
+                background: "rgba(255,255,255,0.2)",
+                border: "none",
+                color: "#fff",
+                cursor: "pointer",
+                fontSize: "20px",
+                width: "30px",
+                height: "30px",
+                borderRadius: "50%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >×</button>
+          </div>
+          <div style={{ fontSize: "12px", opacity: 0.7, marginBottom: "12px" }}>
+            {currentPlayingMusic.type === 'alliance' ? '🏰 同盟向け' : '🏛️ 都市向け'}
+            {' • '}
+            {getMusicPlatform(currentPlayingMusic.url) === 'youtube' && '📺 YouTube'}
+            {getMusicPlatform(currentPlayingMusic.url) === 'suno' && '🎵 Suno'}
+            {getMusicPlatform(currentPlayingMusic.url) === 'other' && '🎧 その他'}
+          </div>
+          {/* 埋め込みプレーヤー */}
+          <iframe
+            style={{
+              width: "100%",
+              height: getMusicPlatform(currentPlayingMusic.url) === 'youtube' ? "315px" : "152px",
+              borderRadius: "8px",
+              border: "none",
+            }}
+            src={getEmbedUrl(currentPlayingMusic.url)}
+            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+            loading="lazy"
+          />
+          <div style={{ marginTop: "10px", fontSize: "12px", opacity: 0.6 }}>
+            <a href={currentPlayingMusic.url} target="_blank" rel="noopener noreferrer" style={{ color: "#60a5fa" }}>
+              {getMusicPlatform(currentPlayingMusic.url) === 'youtube' ? 'YouTubeで開く' : 
+               getMusicPlatform(currentPlayingMusic.url) === 'suno' ? 'Sunoで開く' : '開く'} ↗
+            </a>
+          </div>
+        </div>
+      )}
+
+      {/* 音楽再生リスト（都市クリック時に右上表示） */}
+      {showMusicPlaylist && playlistMusics.length > 0 && (
+        <div style={{
+          position: "fixed",
+          top: "80px",
+          right: "20px",
+          background: "rgba(255, 255, 255, 0.95)",
+          backdropFilter: "blur(10px)",
+          color: "#1f2937",
+          padding: "20px",
+          borderRadius: "12px",
+          boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+          zIndex: 100,
+          minWidth: "320px",
+          maxWidth: "400px",
+        }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+            <div style={{ fontSize: "18px", fontWeight: "bold", color: "#1e40af" }}>🎵 関連音楽</div>
+            <button 
+              onClick={() => setShowMusicPlaylist(false)}
+              style={{
+                background: "rgba(0,0,0,0.1)",
+                border: "none",
+                color: "#1f2937",
+                cursor: "pointer",
+                fontSize: "20px",
+                width: "30px",
+                height: "30px",
+                borderRadius: "50%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >×</button>
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+            {playlistMusics.map((music, index) => (
+              <div 
+                key={music.id}
+                onClick={() => {
+                  playMusic(music);
+                  setShowMusicPlaylist(false);
+                }}
+                style={{
+                  padding: "12px",
+                  background: currentPlayingMusic?.id === music.id ? "#dbeafe" : "#f3f4f6",
+                  border: currentPlayingMusic?.id === music.id ? "2px solid #3b82f6" : "1px solid #e5e7eb",
+                  borderRadius: "8px",
+                  cursor: "pointer",
+                  transition: "all 0.2s",
+                }}
+                onMouseEnter={(e) => {
+                  if (currentPlayingMusic?.id !== music.id) {
+                    e.currentTarget.style.background = "#e0e7ff";
+                    e.currentTarget.style.borderColor = "#c7d2fe";
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (currentPlayingMusic?.id !== music.id) {
+                    e.currentTarget.style.background = "#f3f4f6";
+                    e.currentTarget.style.borderColor = "#e5e7eb";
+                  }
+                }}
+              >
+                <div style={{ fontSize: "14px", fontWeight: "600", marginBottom: "4px", display: "flex", alignItems: "center", gap: "8px" }}>
+                  <span>{currentPlayingMusic?.id === music.id ? '▶' : '♪'}</span>
+                  <span>{music.title || '（タイトルなし）'}</span>
+                </div>
+                <div style={{ fontSize: "12px", color: "#6b7280" }}>
+                  {music.type === 'alliance' ? '🏰 同盟向け' : '🏛️ 都市向け'}
+                </div>
+              </div>
+            ))}
+          </div>
+          <div style={{ marginTop: "12px", fontSize: "11px", color: "#9ca3af", textAlign: "center" }}>
+            クリックして再生
+          </div>
+        </div>
+      )}
+
+      {/* 音楽管理モーダル（編集モード時） */}
+      {isEditMode && showMusicManager && (
+        <div style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: "rgba(0,0,0,0.5)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 100,
+        }}
+        onClick={(e) => {
+          if (e.target === e.currentTarget) {
+            setShowMusicManager(false);
+            setEditingMusic(null);
+          }
+        }}
+        >
+          <div style={{
+            background: "#fff",
+            padding: "30px",
+            borderRadius: "12px",
+            maxWidth: "800px",
+            width: "90%",
+            maxHeight: "80vh",
+            overflow: "auto",
+            boxShadow: "0 8px 32px rgba(0,0,0,0.2)",
+          }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
+              <h2 style={{ margin: 0, fontSize: "24px" }}>🎵 音楽管理</h2>
+              <button 
+                onClick={() => {
+                  setShowMusicManager(false);
+                  setEditingMusic(null);
+                }}
+                style={{
+                  background: "none",
+                  border: "none",
+                  fontSize: "24px",
+                  cursor: "pointer",
+                }}
+              >×</button>
+            </div>
+
+            {/* 音楽リスト */}
+            <div style={{ marginBottom: "20px" }}>
+              <button
+                onClick={() => {
+                  const newMusic: import('./types').MusicData = {
+                    id: `music_${Date.now()}`,
+                    title: "",
+                    url: "",
+                    type: 'alliance',
+                    order: musicList.length + 1,
+                    createdAt: Date.now(),
+                  };
+                  setEditingMusic(newMusic);
+                }}
+                style={{
+                  padding: "10px 20px",
+                  background: "#3b82f6",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: "6px",
+                  cursor: "pointer",
+                  fontSize: "14px",
+                  marginBottom: "15px",
+                }}
+              >
+                ➕ 新規音楽追加
+              </button>
+
+              {/* 新規音楽の編集フォーム */}
+              {editingMusic && !musicList.find(m => m.id === editingMusic.id) && (
+                <div style={{
+                  padding: "15px",
+                  border: "2px solid #3b82f6",
+                  borderRadius: "8px",
+                  marginBottom: "10px",
+                  background: "#f0f9ff",
+                }}>
+                  <div style={{ marginBottom: "10px", fontWeight: "bold", color: "#3b82f6" }}>
+                    ✨ 新規音楽
+                  </div>
+                  <div style={{ marginBottom: "10px" }}>
+                    <label style={{ display: "block", fontSize: "12px", marginBottom: "5px", fontWeight: "bold" }}>曲名</label>
+                    <input
+                      type="text"
+                      value={editingMusic.title}
+                      onChange={(e) => setEditingMusic({ ...editingMusic, title: e.target.value })}
+                      style={{
+                        width: "100%",
+                        padding: "8px",
+                        border: "1px solid #d1d5db",
+                        borderRadius: "4px",
+                        fontSize: "14px",
+                      }}
+                      placeholder="例: セシルの歌"
+                    />
+                  </div>
+                  <div style={{ marginBottom: "10px" }}>
+                    <label style={{ display: "block", fontSize: "12px", marginBottom: "5px", fontWeight: "bold" }}>SunoのURL</label>
+                    <input
+                      type="text"
+                      value={editingMusic.url}
+                      onChange={(e) => setEditingMusic({ ...editingMusic, url: e.target.value })}
+                      style={{
+                        width: "100%",
+                        padding: "8px",
+                        border: "1px solid #d1d5db",
+                        borderRadius: "4px",
+                        fontSize: "14px",
+                      }}
+                      placeholder="https://suno.com/s/..."
+                    />
+                  </div>
+                  <div style={{ marginBottom: "10px" }}>
+                    <label style={{ display: "block", fontSize: "12px", marginBottom: "5px", fontWeight: "bold" }}>種別</label>
+                    <select
+                      value={editingMusic.type}
+                      onChange={(e) => setEditingMusic({ ...editingMusic, type: e.target.value as 'alliance' | 'city' })}
+                      style={{
+                        width: "100%",
+                        padding: "8px",
+                        border: "1px solid #d1d5db",
+                        borderRadius: "4px",
+                        fontSize: "14px",
+                      }}
+                    >
+                      <option value="alliance">同盟全体向け</option>
+                      <option value="city">都市メンバー向け</option>
+                    </select>
+                  </div>
+                  <div style={{ marginBottom: "10px" }}>
+                    <label style={{ display: "block", fontSize: "12px", marginBottom: "5px", fontWeight: "bold" }}>表示順序</label>
+                    <input
+                      type="number"
+                      value={editingMusic.order}
+                      onChange={(e) => setEditingMusic({ ...editingMusic, order: parseInt(e.target.value) || 0 })}
+                      style={{
+                        width: "100%",
+                        padding: "8px",
+                        border: "1px solid #d1d5db",
+                        borderRadius: "4px",
+                        fontSize: "14px",
+                      }}
+                    />
+                  </div>
+                  <div style={{ display: "flex", gap: "10px" }}>
+                    <button
+                      onClick={() => saveMusic(editingMusic)}
+                      style={{
+                        padding: "8px 16px",
+                        background: "#10b981",
+                        color: "#fff",
+                        border: "none",
+                        borderRadius: "4px",
+                        cursor: "pointer",
+                        fontSize: "14px",
+                      }}
+                    >
+                      保存
+                    </button>
+                    <button
+                      onClick={() => setEditingMusic(null)}
+                      style={{
+                        padding: "8px 16px",
+                        background: "#6b7280",
+                        color: "#fff",
+                        border: "none",
+                        borderRadius: "4px",
+                        cursor: "pointer",
+                        fontSize: "14px",
+                      }}
+                    >
+                      キャンセル
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {musicList.length === 0 && !editingMusic && (
+                <div style={{ padding: "20px", textAlign: "center", color: "#999" }}>
+                  音楽が登録されていません
+                </div>
+              )}
+
+              {musicList.map((music, index) => (
+                <div key={music.id} style={{
+                  padding: "15px",
+                  border: "1px solid #e5e7eb",
+                  borderRadius: "8px",
+                  marginBottom: "10px",
+                  background: editingMusic?.id === music.id ? "#f0f9ff" : "#fff",
+                }}>
+                  {editingMusic?.id === music.id ? (
+                    <div>
+                      <div style={{ marginBottom: "10px" }}>
+                        <label style={{ display: "block", fontSize: "12px", marginBottom: "5px", fontWeight: "bold" }}>曲名</label>
+                        <input
+                          type="text"
+                          value={editingMusic.title}
+                          onChange={(e) => setEditingMusic({ ...editingMusic, title: e.target.value })}
+                          style={{
+                            width: "100%",
+                            padding: "8px",
+                            border: "1px solid #d1d5db",
+                            borderRadius: "4px",
+                            fontSize: "14px",
+                          }}
+                          placeholder="例: セシルの歌"
+                        />
+                      </div>
+                      <div style={{ marginBottom: "10px" }}>
+                        <label style={{ display: "block", fontSize: "12px", marginBottom: "5px", fontWeight: "bold" }}>SunoのURL</label>
+                        <input
+                          type="text"
+                          value={editingMusic.url}
+                          onChange={(e) => setEditingMusic({ ...editingMusic, url: e.target.value })}
+                          style={{
+                            width: "100%",
+                            padding: "8px",
+                            border: "1px solid #d1d5db",
+                            borderRadius: "4px",
+                            fontSize: "14px",
+                          }}
+                          placeholder="https://suno.com/s/..."
+                        />
+                      </div>
+                      <div style={{ marginBottom: "10px" }}>
+                        <label style={{ display: "block", fontSize: "12px", marginBottom: "5px", fontWeight: "bold" }}>種別</label>
+                        <select
+                          value={editingMusic.type}
+                          onChange={(e) => setEditingMusic({ ...editingMusic, type: e.target.value as 'alliance' | 'city' })}
+                          style={{
+                            width: "100%",
+                            padding: "8px",
+                            border: "1px solid #d1d5db",
+                            borderRadius: "4px",
+                            fontSize: "14px",
+                          }}
+                        >
+                          <option value="alliance">同盟全体向け</option>
+                          <option value="city">都市メンバー向け</option>
+                        </select>
+                      </div>
+                      <div style={{ marginBottom: "10px" }}>
+                        <label style={{ display: "block", fontSize: "12px", marginBottom: "5px", fontWeight: "bold" }}>表示順序</label>
+                        <input
+                          type="number"
+                          value={editingMusic.order}
+                          onChange={(e) => setEditingMusic({ ...editingMusic, order: parseInt(e.target.value) || 0 })}
+                          style={{
+                            width: "100%",
+                            padding: "8px",
+                            border: "1px solid #d1d5db",
+                            borderRadius: "4px",
+                            fontSize: "14px",
+                          }}
+                        />
+                      </div>
+                      <div style={{ display: "flex", gap: "10px" }}>
+                        <button
+                          onClick={() => saveMusic(editingMusic)}
+                          style={{
+                            padding: "8px 16px",
+                            background: "#10b981",
+                            color: "#fff",
+                            border: "none",
+                            borderRadius: "4px",
+                            cursor: "pointer",
+                            fontSize: "14px",
+                          }}
+                        >
+                          保存
+                        </button>
+                        <button
+                          onClick={() => setEditingMusic(null)}
+                          style={{
+                            padding: "8px 16px",
+                            background: "#6b7280",
+                            color: "#fff",
+                            border: "none",
+                            borderRadius: "4px",
+                            cursor: "pointer",
+                            fontSize: "14px",
+                          }}
+                        >
+                          キャンセル
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start", marginBottom: "8px" }}>
+                        <div>
+                          <div style={{ fontWeight: "bold", fontSize: "16px", marginBottom: "4px" }}>
+                            🎵 {music.title || '（タイトルなし）'}
+                          </div>
+                          <div style={{ fontSize: "12px", color: "#6b7280" }}>
+                            {music.type === 'alliance' ? '🏰 同盟向け' : '🏛️ 都市向け'} | 順序: {music.order}
+                          </div>
+                        </div>
+                        <div style={{ display: "flex", gap: "8px" }}>
+                          <button
+                            onClick={() => playMusic(music)}
+                            style={{
+                              padding: "6px 12px",
+                              background: "#3b82f6",
+                              color: "#fff",
+                              border: "none",
+                              borderRadius: "4px",
+                              cursor: "pointer",
+                              fontSize: "12px",
+                            }}
+                          >
+                            ▶ 再生
+                          </button>
+                          <button
+                            onClick={() => setEditingMusic(music)}
+                            style={{
+                              padding: "6px 12px",
+                              background: "#f59e0b",
+                              color: "#fff",
+                              border: "none",
+                              borderRadius: "4px",
+                              cursor: "pointer",
+                              fontSize: "12px",
+                            }}
+                          >
+                            編集
+                          </button>
+                          <button
+                            onClick={() => deleteMusic(music.id)}
+                            style={{
+                              padding: "6px 12px",
+                              background: "#ef4444",
+                              color: "#fff",
+                              border: "none",
+                              borderRadius: "4px",
+                              cursor: "pointer",
+                              fontSize: "12px",
+                            }}
+                          >
+                            削除
+                          </button>
+                        </div>
+                      </div>
+                      <div style={{ fontSize: "12px", color: "#9ca3af", wordBreak: "break-all" }}>
+                        {music.url}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 同盟音楽モーダル */}
+      {showAllianceMusicModal && (
+        <div style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: "rgba(0,0,0,0.75)",
+          backdropFilter: "blur(4px)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 9999,
+          padding: isMobile ? "10px" : "20px",
+        }}
+        onClick={(e) => {
+          if (e.target === e.currentTarget) {
+            setShowAllianceMusicModal(false);
+          }
+        }}>
+          <div style={{
+            background: "linear-gradient(180deg, #1a1a2e 0%, #0f0f1e 100%)",
+            borderRadius: "24px",
+            padding: isMobile ? "20px" : "30px",
+            width: "90%",
+            maxWidth: "900px",
+            maxHeight: "90vh",
+            overflow: "hidden",
+            boxShadow: "0 25px 50px -12px rgba(0,0,0,0.9), 0 0 0 1px rgba(255,255,255,0.1)",
+            border: "1px solid rgba(255,255,255,0.1)",
+          }}
+          onClick={(e) => e.stopPropagation()}>
+            {/* ヘッダー */}
+            <div style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: "25px",
+              paddingBottom: "20px",
+              borderBottom: "1px solid rgba(255,255,255,0.1)",
+              background: "linear-gradient(90deg, rgba(139,92,246,0.1) 0%, rgba(59,130,246,0.1) 100%)",
+              padding: "15px 20px",
+              borderRadius: "12px",
+              margin: "-5px -5px 20px -5px",
+            }}>
+              <div style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "12px",
+              }}>
+                <div style={{
+                  width: "50px",
+                  height: "50px",
+                  background: "linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%)",
+                  borderRadius: "12px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: "24px",
+                  boxShadow: "0 4px 12px rgba(139,92,246,0.4)",
+                }}>
+                  🎵
+                </div>
+                <div>
+                  <h2 style={{
+                    margin: 0,
+                    fontSize: isMobile ? "20px" : "26px",
+                    fontWeight: "bold",
+                    background: "linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%)",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                    letterSpacing: "0.5px",
+                  }}>
+                    同盟音楽プレーヤー
+                  </h2>
+                  <div style={{
+                    fontSize: "12px",
+                    color: "rgba(255,255,255,0.5)",
+                    marginTop: "2px",
+                  }}>
+                    Alliance Music Player
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  setShowAllianceMusicModal(false);
+                }}
+                style={{
+                  background: "rgba(255,255,255,0.05)",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                  color: "rgba(255,255,255,0.7)",
+                  fontSize: "20px",
+                  width: "44px",
+                  height: "44px",
+                  borderRadius: "12px",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  transition: "all 0.2s",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = "rgba(255,255,255,0.1)";
+                  e.currentTarget.style.color = "#fff";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "rgba(255,255,255,0.05)";
+                  e.currentTarget.style.color = "rgba(255,255,255,0.7)";
+                }}
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* 現在再生中の音楽プレーヤー */}
+            {currentPlayingMusic && (
+              <div style={{
+                background: "linear-gradient(135deg, rgba(139,92,246,0.15) 0%, rgba(59,130,246,0.15) 100%)",
+                borderRadius: "16px",
+                padding: isMobile ? "15px" : "20px",
+                marginBottom: "20px",
+                border: "1px solid rgba(139,92,246,0.3)",
+                boxShadow: "0 8px 24px rgba(139,92,246,0.2), inset 0 1px 0 rgba(255,255,255,0.1)",
+              }}>
+                <div style={{ 
+                  display: "flex", 
+                  justifyContent: "space-between", 
+                  alignItems: "center", 
+                  marginBottom: "15px" 
+                }}>
+                  <div style={{ 
+                    fontSize: "16px", 
+                    fontWeight: "bold", 
+                    color: "#fff",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                  }}>
+                    <span style={{
+                      display: "inline-block",
+                      width: "8px",
+                      height: "8px",
+                      background: "#10b981",
+                      borderRadius: "50%",
+                      boxShadow: "0 0 10px rgba(16,185,129,0.8)",
+                      animation: "pulse 2s infinite",
+                    }} />
+                    <span style={{ background: "linear-gradient(135deg, #8b5cf6, #3b82f6)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+                      NOW PLAYING
+                    </span>
+                  </div>
+                  <button 
+                    onClick={stopMusic}
+                    style={{
+                      background: "linear-gradient(135deg, #ef4444 0%, #dc2626 100%)",
+                      border: "none",
+                      color: "#fff",
+                      cursor: "pointer",
+                      fontSize: "12px",
+                      padding: "8px 16px",
+                      borderRadius: "8px",
+                      fontWeight: "bold",
+                      boxShadow: "0 4px 12px rgba(239,68,68,0.4)",
+                      transition: "all 0.2s",
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.transform = "translateY(-1px)"}
+                    onMouseLeave={(e) => e.currentTarget.style.transform = "translateY(0)"}
+                  >■ 停止</button>
+                </div>
+                <div style={{ 
+                  fontSize: "20px", 
+                  fontWeight: "bold", 
+                  color: "#fff", 
+                  marginBottom: "8px",
+                  textShadow: "0 2px 8px rgba(0,0,0,0.3)",
+                }}>
+                  {currentPlayingMusic.title}
+                </div>
+                <div style={{ fontSize: "13px", color: "rgba(255,255,255,0.6)", marginBottom: "15px" }}>
+                  {currentPlayingMusic.type === 'alliance' ? '🏰 同盟全体' : '🏛️ 都市メンバー'}
+                  {' • '}
+                  {getMusicPlatform(currentPlayingMusic.url) === 'youtube' && '▶️ YouTube'}
+                  {getMusicPlatform(currentPlayingMusic.url) === 'suno' && '🎵 Suno'}
+                  {getMusicPlatform(currentPlayingMusic.url) === 'other' && '🎧 その他'}
+                </div>
+                {/* 埋め込みプレーヤー */}
+                <div style={{
+                  borderRadius: "12px",
+                  overflow: "hidden",
+                  boxShadow: "0 8px 24px rgba(0,0,0,0.4)",
+                }}>
+                  <iframe
+                    style={{
+                      width: "100%",
+                      height: getMusicPlatform(currentPlayingMusic.url) === 'youtube' ? "315px" : "152px",
+                      border: "none",
+                      display: "block",
+                    }}
+                    src={getEmbedUrl(currentPlayingMusic.url)}
+                    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                    loading="lazy"
+                  />
+                </div>
+                <div style={{ marginTop: "12px", textAlign: "right" }}>
+                  <a 
+                    href={currentPlayingMusic.url} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    style={{ 
+                      color: "#60a5fa",
+                      fontSize: "12px",
+                      textDecoration: "none",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "4px",
+                      padding: "6px 12px",
+                      background: "rgba(96,165,250,0.1)",
+                      borderRadius: "6px",
+                      transition: "all 0.2s",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = "rgba(96,165,250,0.2)";
+                      e.currentTarget.style.color = "#93c5fd";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = "rgba(96,165,250,0.1)";
+                      e.currentTarget.style.color = "#60a5fa";
+                    }}
+                  >
+                    {getMusicPlatform(currentPlayingMusic.url) === 'youtube' ? 'YouTubeで開く' : 
+                     getMusicPlatform(currentPlayingMusic.url) === 'suno' ? 'Sunoで開く' : '開く'} ↗
+                  </a>
+                </div>
+              </div>
+            )}
+
+            {/* コンテンツエリア */}
+            <div style={{
+              background: "rgba(255,255,255,0.03)",
+              borderRadius: "16px",
+              padding: isMobile ? "15px" : "20px",
+              maxHeight: currentPlayingMusic ? "280px" : "500px",
+              overflow: "auto",
+              border: "1px solid rgba(255,255,255,0.05)",
+            }}>
+              {/* 音楽リスト */}
+              {/* 音楽リスト */}
+              {musicList.length === 0 ? (
+                <div style={{
+                  padding: "60px 20px",
+                  textAlign: "center",
+                  color: "rgba(255,255,255,0.4)",
+                }}>
+                  <div style={{ fontSize: "64px", marginBottom: "15px", opacity: 0.5 }}>🎵</div>
+                  <div style={{ fontSize: "18px", fontWeight: "500" }}>音楽が登録されていません</div>
+                  <div style={{ fontSize: "14px", marginTop: "8px", opacity: 0.6 }}>編集モードで音楽を追加してください</div>
+                </div>
+              ) : (
+                <div style={{
+                  display: "grid",
+                  gridTemplateColumns: isMobile ? "1fr" : "repeat(auto-fill, minmax(280px, 1fr))",
+                  gap: "12px",
+                }}>
+                  {musicList
+                    .sort((a, b) => a.order - b.order)
+                    .map((music) => {
+                      const platform = getMusicPlatform(music.url);
+                      const isPlaying = currentPlayingMusic?.id === music.id;
+                      const platformInfo = {
+                        youtube: { icon: "▶️", gradient: "linear-gradient(135deg, #ff0000 0%, #cc0000 100%)", name: "YouTube" },
+                        suno: { icon: "🎵", gradient: "linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)", name: "Suno" },
+                        other: { icon: "🎶", gradient: "linear-gradient(135deg, #6b7280 0%, #4b5563 100%)", name: "Other" },
+                      }[platform];
+
+                      return (
+                        <div
+                          key={music.id}
+                          onClick={() => playMusic(music)}
+                          style={{
+                            padding: "16px",
+                            background: isPlaying
+                              ? "linear-gradient(135deg, rgba(139,92,246,0.25) 0%, rgba(59,130,246,0.25) 100%)"
+                              : "rgba(255,255,255,0.05)",
+                            borderRadius: "12px",
+                            cursor: "pointer",
+                            transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                            border: isPlaying
+                              ? "1px solid rgba(139,92,246,0.5)"
+                              : "1px solid rgba(255,255,255,0.08)",
+                            position: "relative",
+                            overflow: "hidden",
+                          }}
+                          onMouseEnter={(e) => {
+                            if (!isPlaying) {
+                              e.currentTarget.style.background = "rgba(255,255,255,0.08)";
+                              e.currentTarget.style.transform = "translateY(-2px)";
+                              e.currentTarget.style.borderColor = "rgba(255,255,255,0.15)";
+                            }
+                          }}
+                          onMouseLeave={(e) => {
+                            if (!isPlaying) {
+                              e.currentTarget.style.background = "rgba(255,255,255,0.05)";
+                              e.currentTarget.style.transform = "translateY(0)";
+                              e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)";
+                            }
+                          }}
+                        >
+                          {/* プラットフォームバッジ */}
+                          <div style={{
+                            position: "absolute",
+                            top: "12px",
+                            right: "12px",
+                            padding: "4px 10px",
+                            background: platformInfo.gradient,
+                            borderRadius: "6px",
+                            fontSize: "11px",
+                            fontWeight: "bold",
+                            color: "#fff",
+                            boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "4px",
+                          }}>
+                            <span>{platformInfo.icon}</span>
+                            <span>{platformInfo.name}</span>
+                          </div>
+
+                          <div style={{
+                            marginTop: "8px",
+                          }}>
+                            <div style={{
+                              fontWeight: "bold",
+                              fontSize: "16px",
+                              color: "#fff",
+                              marginBottom: "8px",
+                              paddingRight: "100px",
+                              lineHeight: "1.4",
+                              minHeight: "44px",
+                              display: "-webkit-box",
+                              WebkitLineClamp: 2,
+                              WebkitBoxOrient: "vertical",
+                              overflow: "hidden",
+                            }}>
+                              {music.title || "（タイトルなし）"}
+                            </div>
+                            <div style={{
+                              fontSize: "12px",
+                              color: "rgba(255,255,255,0.5)",
+                              marginBottom: "12px",
+                            }}>
+                              {music.type === 'alliance' ? '🏰 同盟全体' : '🏛️ 都市メンバー'}
+                            </div>
+                          </div>
+
+                          {isPlaying && (
+                            <div style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "8px",
+                              padding: "8px 12px",
+                              background: "rgba(16,185,129,0.15)",
+                              borderRadius: "8px",
+                              border: "1px solid rgba(16,185,129,0.3)",
+                            }}>
+                              <div style={{
+                                display: "flex",
+                                gap: "2px",
+                                alignItems: "flex-end",
+                              }}>
+                                <div style={{
+                                  width: "3px",
+                                  height: "12px",
+                                  background: "#10b981",
+                                  borderRadius: "2px",
+                                  animation: "wave1 0.6s infinite ease-in-out",
+                                }} />
+                                <div style={{
+                                  width: "3px",
+                                  height: "16px",
+                                  background: "#10b981",
+                                  borderRadius: "2px",
+                                  animation: "wave2 0.6s infinite ease-in-out 0.1s",
+                                }} />
+                                <div style={{
+                                  width: "3px",
+                                  height: "10px",
+                                  background: "#10b981",
+                                  borderRadius: "2px",
+                                  animation: "wave3 0.6s infinite ease-in-out 0.2s",
+                                }} />
+                              </div>
+                              <span style={{
+                                fontSize: "12px",
+                                color: "#10b981",
+                                fontWeight: "600",
+                                textShadow: "0 0 10px rgba(16,185,129,0.5)",
+                              }}>
+                                NOW PLAYING
+                              </span>
+                            </div>
+                          )}
+
+                          {!isPlaying && (
+                            <div style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "6px",
+                              padding: "8px 12px",
+                              background: "rgba(255,255,255,0.05)",
+                              borderRadius: "8px",
+                              marginTop: "8px",
+                            }}>
+                              <span style={{
+                                fontSize: "16px",
+                              }}>▶️</span>
+                              <span style={{
+                                fontSize: "12px",
+                                color: "rgba(255,255,255,0.6)",
+                                fontWeight: "500",
+                              }}>
+                                クリックして再生
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}

@@ -41,6 +41,17 @@ export type Obj = {
   note?: string;
   Animation?: string;
   Fire?: string | number;
+  musicIds?: string[]; // 関連付けられた音楽IDの配列（複数曲対応）
+};
+
+// 音楽データ型
+export type MusicData = {
+  id: string;           // 音楽の一意なID
+  title: string;        // 曲名
+  url: string;          // SunoのURL（再生用）
+  type: 'alliance' | 'city'; // 同盟全体 or 都市メンバー向け
+  order: number;        // 表示順序
+  createdAt: number;    // 作成日時（タイムスタンプ）
 };
 
 export type SoldierAnimation = {

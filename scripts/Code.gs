@@ -44,6 +44,87 @@ function getMapConfigs() {
   return configs.sort((a, b) => a.order - b.order);
 }
 
+// 音楽データを取得
+function getMusic() {
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  let musicSheet = ss.getSheetByName('Music');
+  
+  // Musicシートが存在しない場合は空配列を返す
+  if (!musicSheet) {
+    return { ok: true, music: [] };
+  }
+  
+  const data = musicSheet.getDataRange().getValues();
+  const music = [];
+  
+  // ヘッダー行をスキップ
+  for (let i = 1; i < data.length; i++) {
+    if (data[i][0]) {  // IDがある行のみ
+      music.push({
+        id: data[i][0],
+        title: data[i][1],
+        url: data[i][2],
+        type: data[i][3],
+        order: data[i][4] || 0,
+        createdAt: data[i][5] || Date.now()
+      });
+    }
+  }
+  
+  // 表示順でソート
+  music.sort((a, b) => (a.order || 0) - (b.order || 0));
+  
+  return { ok: true, music: music };
+}
+
+// 音楽データを保存
+function saveMusic(e) {
+  const data = JSON.parse(e.postData.contents);
+  
+  // パスワード認証
+  if (data.password !== EDIT_PASSWORD) {
+    return ContentService.createTextOutput(JSON.stringify({ 
+      ok: false, 
+      error: 'Invalid password' 
+    }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+  
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  let musicSheet = ss.getSheetByName('Music');
+  
+  // Musicシートが存在しない場合は作成
+  if (!musicSheet) {
+    musicSheet = ss.insertSheet('Music');
+    musicSheet.appendRow(['id', 'title', 'url', 'type', 'order', 'createdAt']);
+  }
+  
+  // 既存データをクリア（ヘッダー以外）
+  const lastRow = musicSheet.getLastRow();
+  if (lastRow >= 2) {
+    musicSheet.getRange(2, 1, lastRow - 1, 6).clearContent();
+  }
+  
+  // 新しいデータを書き込み
+  if (data.music && data.music.length > 0) {
+    const rows = data.music.map(music => [
+      music.id,
+      music.title,
+      music.url,
+      music.type,
+      music.order || 0,
+      music.createdAt || Date.now()
+    ]);
+    musicSheet.getRange(2, 1, rows.length, 6).setValues(rows);
+  }
+  
+  return ContentService.createTextOutput(JSON.stringify({ 
+    ok: true,
+    updated: data.music ? data.music.length : 0
+  }))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
 function doGet(e) {
   const action = e.parameter.action;
   
@@ -54,6 +135,12 @@ function doGet(e) {
       ok: true, 
       maps: configs 
     }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+  
+  // 音楽データを取得
+  if (action === 'getMusic') {
+    return ContentService.createTextOutput(JSON.stringify(getMusic()))
       .setMimeType(ContentService.MimeType.JSON);
   }
   
@@ -135,6 +222,8 @@ function doGet(e) {
           obj.isFavorite = objectsData[i][11] || false;
           obj.Animation = objectsData[i][12] || '';
           obj.Fire = objectsData[i][13] || '';
+          const musicIdsStr = objectsData[i][14] || '';  // 音楽ID（カンマ区切り）
+          obj.musicIds = musicIdsStr ? String(musicIdsStr).split(',').map(id => id.trim()).filter(id => id) : [];
         }
         
         output.objects.push(obj);
@@ -189,6 +278,11 @@ function doGet(e) {
 
 function doPost(e) {
   const action = e.parameter.action;
+  
+  // 音楽データを保存
+  if (action === 'saveMusic') {
+    return saveMusic(e);
+  }
   
   // マップ設定を更新
   if (action === 'updateMapConfig') {
@@ -341,7 +435,7 @@ function doPost(e) {
     if (!objectsSheet) {
       objectsSheet = ss.insertSheet(mapConfig.sheetName);
       if (mapConfig.isBase) {
-        objectsSheet.appendRow(['id', 'type', 'label', 'x', 'y', 'w', 'h', 'birthday', 'note', 'updatedAt', 'updatedBy', 'isFavorite', 'Animation', 'Fire']);
+        objectsSheet.appendRow(['id', 'type', 'label', 'x', 'y', 'w', 'h', 'birthday', 'note', 'updatedAt', 'updatedBy', 'isFavorite', 'Animation', 'Fire', 'musicId']);
       } else {
         objectsSheet.appendRow(['id', 'type', 'label', 'x', 'y', 'w', 'h']);
       }
@@ -390,7 +484,7 @@ function doPost(e) {
     
     // 既存データをクリア（2行目以降、ヘッダーは残す）
     const lastRow = objectsSheet.getLastRow();
-    const columnCount = mapConfig.isBase ? 14 : 7;
+    const columnCount = mapConfig.isBase ? 15 : 7;  // musicIdを追加したので15列
     if (lastRow >= 2) {
       objectsSheet.getRange(2, 1, lastRow - 1, columnCount).clearContent();
     }
@@ -416,7 +510,8 @@ function doPost(e) {
           actor,
           obj.isFavorite || false,
           obj.Animation || '',
-          obj.Fire || ''
+          obj.Fire || '',
+          Array.isArray(obj.musicIds) ? obj.musicIds.join(',') : ''  // 音楽ID（カンマ区切り）
         ]);
       } else {
         rows = data.objects.map(obj => [
