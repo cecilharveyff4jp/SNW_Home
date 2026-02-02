@@ -18104,17 +18104,18 @@ export default function Home() {
                 <div>
                   <h2 style={{
                     margin: 0,
-                    fontSize: isMobile ? "20px" : "26px",
+                    fontSize: isMobile ? "16px" : "20px",
                     fontWeight: "bold",
                     background: "linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%)",
                     WebkitBackgroundClip: "text",
                     WebkitTextFillColor: "transparent",
                     letterSpacing: "0.5px",
+                    whiteSpace: "nowrap",
                   }}>
                     同盟音楽プレーヤー
                   </h2>
                   <div style={{
-                    fontSize: "12px",
+                    fontSize: "11px",
                     color: "rgba(255,255,255,0.5)",
                     marginTop: "2px",
                   }}>
@@ -18407,6 +18408,7 @@ export default function Home() {
                                 display: "flex",
                                 gap: "2px",
                                 alignItems: "flex-end",
+                                height: "24px",
                               }}>
                                 <div style={{
                                   width: "3px",
