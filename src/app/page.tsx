@@ -554,6 +554,9 @@ export default function Home() {
   // UI表示用のズーム値のみ別state (scale変化時のみ更新、tx/ty変化では再レンダしない)
   const [displayZoom, setDisplayZoom] = useState(1.0);
 
+  // 常に最新の draw 関数を指す ref (rAFクロージャが古いdrawをキャプチャするバグ回避)
+  const drawRef = useRef<() => void>(() => {});
+
   // setCam互換ヘルパー: ref を更新 + 必要に応じて display 同期 + 再描画要求
   type CamValue = { tx: number; ty: number; scale: number };
   const setCam = (valueOrUpdater: CamValue | ((prev: CamValue) => CamValue)) => {
@@ -567,11 +570,11 @@ export default function Home() {
     if (next.scale !== prev.scale) {
       setDisplayZoom(next.scale);
     }
-    // rafRef経由で間引き再描画
+    // rafRef経由で間引き再描画 (drawRef経由で最新drawを呼ぶ)
     if (rafRef.current == null) {
       rafRef.current = window.requestAnimationFrame(() => {
         rafRef.current = null;
-        draw();
+        drawRef.current();
       });
     }
   };
@@ -1334,12 +1337,12 @@ export default function Home() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isEditMode, undoStack, redoStack, objects]);
 
-  // 描画要求（rafで間引き）
+  // 描画要求（rafで間引き）- drawRef経由で最新drawを呼ぶ
   const requestDraw = () => {
     if (rafRef.current != null) return;
     rafRef.current = window.requestAnimationFrame(() => {
       rafRef.current = null;
-      draw();
+      drawRef.current();
     });
   };
 
@@ -5598,6 +5601,9 @@ export default function Home() {
       ctx.restore();
     }
   };
+
+  // 毎レンダで drawRef を最新 draw に更新 (rAFクロージャの古いdraw問題回避)
+  drawRef.current = draw;
 
   // アニメーション判定関数：どのアニメーションを表示するか決定
   const getActiveAnimation = (obj: Obj): string | null => {
