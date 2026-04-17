@@ -1146,13 +1146,127 @@ export default function Home() {
   }
 
   useEffect(() => {
-    // 初回ロード時にマップ設定と音楽データを取得してから最初のマップを読み込む
+    // 初回ロード: 4つのGAS requestを並列発射して逐次比較で3-4倍高速化
     async function init() {
-      await loadMapConfigs();
-      await loadMusic();
-      await loadMap();
+      const base = process.env.NEXT_PUBLIC_GAS_URL;
+      if (!base) {
+        setErr("Google Apps ScriptのURLが設定されていません。.env.localファイルにNEXT_PUBLIC_GAS_URLを設定してください。");
+        setIsLoading(false);
+        setIsInitialLoading(false);
+        return;
+      }
+
+      setIsLoading(true);
+      setErr(null);
+
+      const targetMapId = currentMapId || 'object';
+
+      try {
+        // 並列に4本のGASリクエストを発射
+        const [mapsRes, musicRes, mapRes, linksRes] = await Promise.all([
+          fetch(`${base}?action=getMaps`, { method: "GET" }),
+          fetch(`${base}?action=getMusic`, { method: "GET" }),
+          fetch(`${base}?action=getMap&mapId=${targetMapId}`, { method: "GET" }),
+          fetch(`${base}?action=getLinks`, { method: "GET" }),
+        ]);
+
+        const [mapsJson, musicJson, mapJson, linksJson] = await Promise.all([
+          mapsRes.json(),
+          musicRes.json(),
+          mapRes.json(),
+          linksRes.json(),
+        ]);
+
+        // マップ設定の反映
+        if (mapsJson.ok && Array.isArray(mapsJson.maps)) {
+          setMapConfigs(mapsJson.maps);
+        }
+
+        // 音楽データの反映
+        if (musicJson.ok && Array.isArray(musicJson.music)) {
+          setMusicList(musicJson.music);
+        }
+
+        // リンクの反映
+        if (linksJson.ok && Array.isArray(linksJson.links)) {
+          setLinks(linksJson.links);
+        }
+
+        // マップデータの反映
+        if (!mapJson.ok) {
+          // ベースマップ以外で失敗した場合はベースマップにフォールバック
+          if (mapJson.error === 'Map not found' && targetMapId !== 'object') {
+            console.warn(`マップ ${targetMapId} が見つかりません。ベースマップにフォールバックします。`);
+            setCurrentMapId('object');
+            localStorage.setItem('currentMapId', 'object');
+            await loadMap('object');
+            return;
+          }
+          throw new Error(mapJson.error || "マップデータの取得に失敗しました");
+        }
+
+        setMeta(mapJson.meta || {});
+        setObjects(Array.isArray(mapJson.objects) ? mapJson.objects : []);
+
+        if (mapJson.meta) {
+          const newBgConfig: BgConfig = {
+            image: mapJson.meta.bgImage || "map-bg.jpg",
+            centerX: mapJson.meta.bgCenterX ?? 50,
+            centerY: mapJson.meta.bgCenterY ?? 50,
+            scale: mapJson.meta.bgScale ?? 1.0,
+            opacity: mapJson.meta.bgOpacity ?? 1.0,
+          };
+          setBgConfig(newBgConfig);
+        }
+
+        // カメラ位置計算
+        let targetGridX = 18;
+        let targetGridY = 19;
+        if (typeof window !== 'undefined') {
+          const savedMyObjectId = localStorage.getItem('snw-my-object-id');
+          if (savedMyObjectId) {
+            const myObj = (Array.isArray(mapJson.objects) ? mapJson.objects : []).find((o: Obj) => o.id === savedMyObjectId);
+            if (myObj && myObj.x !== undefined && myObj.y !== undefined) {
+              targetGridX = num(myObj.x, 18);
+              targetGridY = num(myObj.y, 19);
+            }
+          }
+        }
+
+        const targetScale = window.innerWidth <= 768 ? 0.78 : 1.0;
+        const cols = num(mapJson.meta?.cols, FALLBACK.cols);
+        const rows = num(mapJson.meta?.rows, FALLBACK.rows);
+        const cell = num(mapJson.meta?.cellSize, FALLBACK.cellSize);
+        const cx = (cols * cell) / 2;
+        const cy = (rows * cell) / 2;
+        const targetX = targetGridX * cell;
+        const targetY = targetGridY * cell;
+        const offsetX = targetX - cx;
+        const offsetY = targetY - cy;
+        const angle = -Math.PI / 4;
+        const cosA = Math.cos(angle);
+        const sinA = Math.sin(angle);
+        const rotatedX = offsetX * cosA - offsetY * sinA;
+        const rotatedY = offsetX * sinA + offsetY * cosA;
+        const tx = -rotatedX * targetScale;
+        const ty = -rotatedY * targetScale;
+
+        setCam({ tx, ty, scale: targetScale });
+        setIsCameraMoving(true);
+        if (cameraMovingTimerRef.current) clearTimeout(cameraMovingTimerRef.current);
+        cameraMovingTimerRef.current = setTimeout(() => setIsCameraMoving(false), 200);
+        setTickerKey(prev => prev + 1);
+      } catch (e: unknown) {
+        const message = e instanceof Error ? e.message : String(e);
+        setErr(message);
+        console.error("初期ロードエラー:", e);
+      } finally {
+        setIsLoading(false);
+        setIsInitialLoading(false);
+      }
     }
     init();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // 音楽関連の関数
