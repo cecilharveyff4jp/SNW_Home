@@ -275,7 +275,8 @@ export default function Home() {
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   // 熊罠→兵士アニメーション用
-  const [soldierAnimations, setSoldierAnimations] = useState<SoldierAnimation[]>([]);
+  // soldierAnimations: useRef化で毎フレーム setState による Home() 再レンダを回避
+  const soldierAnimationsRef = useRef<SoldierAnimation[]>([]);
   const soldierAnimationRef = useRef<number | null>(null);
   const isAnimationStartingRef = useRef<boolean>(false); // アニメーション開始中フラグ
 
@@ -2354,7 +2355,7 @@ export default function Home() {
     }
 
     // 兵士アニメーションの描画（最上位レイヤー）
-    if (soldierAnimations.length > 0) {
+    if (soldierAnimationsRef.current.length > 0) {
       ctx.save();
       ctx.translate(viewW / 2, viewH / 2);
       ctx.translate(camRef.current.tx, camRef.current.ty);
@@ -2362,7 +2363,7 @@ export default function Home() {
       ctx.rotate(LOOK.angle);
       ctx.translate(-cx, -cy);
 
-      soldierAnimations.forEach((anim) => {
+      soldierAnimationsRef.current.forEach((anim) => {
         const { from, to, progress, soldiers } = anim;
         
         // オブジェクトの座標（中心）
@@ -7853,7 +7854,7 @@ export default function Home() {
   // 兵士アニメーション開始関数
   const startSoldierAnimation = (bearTrap: Obj) => {
     // アニメーション開始中または実行中の場合は何もしない
-    if (isAnimationStartingRef.current || soldierAnimations.length > 0) {
+    if (isAnimationStartingRef.current || soldierAnimationsRef.current.length > 0) {
       return;
     }
     
@@ -7956,73 +7957,64 @@ export default function Home() {
       };
     });
 
-    setSoldierAnimations(newAnimations);
-    
-    // アニメーション開始完了、ロック解除
-    isAnimationStartingRef.current = false;
-  };
+    // soldierAnimationsRefにセット + アニメーションループ開始 (React再レンダ無しでrAFループ起動)
+    soldierAnimationsRef.current = newAnimations;
+    requestDraw();
 
-  // 兵士アニメーションのループ
-  useEffect(() => {
-    if (soldierAnimations.length === 0) return;
+    // アニメーションループ (ref直接mutation + requestDrawでHome()再レンダ回避)
+    const maxDamageSnapshot = bearTrapMaxDamage; // 開始時点の記録値をクロージャにキャプチャ
+    let dynamicMaxDamage = maxDamageSnapshot;
 
     const animate = () => {
       const now = Date.now();
       let allComplete = true;
 
-      const updated = soldierAnimations.map(anim => {
+      const updated = soldierAnimationsRef.current.map(anim => {
         const elapsed = now - anim.startTime;
-        const duration = 6500; // 6.5秒に延長（ダメ合計が残る時間を確保）
+        const duration = 6500;
         const progress = Math.min(elapsed / duration, 1);
-        
+
         if (progress < 1) allComplete = false;
-        
-        // 攻撃アニメーション中盤（progress >= 0.6）で記録更新判定（一度だけ）
+
         let isNewRecord = anim.isNewRecord;
         let recordSaved = anim.recordSaved;
-        
+
         if (progress >= 0.6 && !recordSaved && anim.totalDamage !== undefined) {
           const finalDamage = anim.totalDamage;
-          const highScoreKey = 'bearTrapMaxDamage';
-          
-          if (finalDamage > bearTrapMaxDamage) {
+          if (finalDamage > dynamicMaxDamage) {
             isNewRecord = true;
             setBearTrapMaxDamage(finalDamage);
-            localStorage.setItem(highScoreKey, finalDamage.toString());
+            localStorage.setItem('bearTrapMaxDamage', finalDamage.toString());
+            dynamicMaxDamage = finalDamage;
           } else {
             isNewRecord = false;
           }
           recordSaved = true;
         }
-        
+
         return { ...anim, progress, isNewRecord, recordSaved };
       });
 
-      setSoldierAnimations(updated);
+      soldierAnimationsRef.current = updated;
+      requestDraw();
 
       if (!allComplete) {
         soldierAnimationRef.current = requestAnimationFrame(animate);
       } else {
-        // アニメーション完了したら即座にクリア（遅延なし）
-        setSoldierAnimations([]);
-        
-        // 携帯端末でテロップを一時的にオフにしていた場合、元に戻す
+        soldierAnimationsRef.current = [];
+        soldierAnimationRef.current = null;
+        requestDraw();
         if (tickerStateBeforeAnimation.current) {
           setTickerHidden(false);
           tickerStateBeforeAnimation.current = false;
         }
       }
     };
-
     soldierAnimationRef.current = requestAnimationFrame(animate);
 
-    return () => {
-      if (soldierAnimationRef.current) {
-        cancelAnimationFrame(soldierAnimationRef.current);
-        soldierAnimationRef.current = null;
-      }
-    };
-  }, [soldierAnimations.length > 0 ? soldierAnimations[0]?.startTime : 0]);
+    // アニメーション開始完了、ロック解除
+    isAnimationStartingRef.current = false;
+  };
 
   // 猫アニメーション開始関数
   const startCatAnimation = (fromObj: Obj, toObj: Obj) => {
@@ -9843,12 +9835,7 @@ export default function Home() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [objects, cfg.cols, cfg.rows, cfg.cell, selectedId, showMoveArrows, myObjectId, isEditMode, pendingPosition]);
 
-  // 兵士アニメーション変更時も再描画
-  useEffect(() => {
-    if (soldierAnimations.length > 0) {
-      requestDraw();
-    }
-  }, [soldierAnimations]);
+  // soldierAnimations は useRef化したため、描画トリガーは animate() ループ内の requestDraw() で担保
 
   // 花火アニメーション変更時も再描画
   useEffect(() => {
@@ -12516,7 +12503,13 @@ export default function Home() {
                       onClick={(e) => {
                         e.stopPropagation();
                         setBearTrapMaxDamage(0);
-                        setSoldierAnimations([]); // アニメーションもクリア
+                        // アニメーションもクリア
+                        soldierAnimationsRef.current = [];
+                        if (soldierAnimationRef.current) {
+                          cancelAnimationFrame(soldierAnimationRef.current);
+                          soldierAnimationRef.current = null;
+                        }
+                        requestDraw();
                         try {
                           localStorage.removeItem('bearTrapMaxDamage');
                         } catch (err) {
