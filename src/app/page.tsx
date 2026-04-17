@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import type { Meta, BgConfig, Obj, MapConfig } from './types';
 import { 
   basePath, 
@@ -14,29 +15,47 @@ import {
   FALLBACK 
 } from './utils';
 
-// クイズデータのインポート
-import { FISH_QUESTIONS, type FishQuestion } from './data/fishQuestions';
-import { YOJIJUKUGO_QUESTIONS, type YojijukugoQuestion } from './data/yojijukugoQuestions';
-import { ENGLISH_QUESTIONS, type EnglishQuestion } from './data/englishQuestions';
-import { MUSCLE_QUESTIONS, type MuscleQuestion } from './data/muscleQuestions';
-import { MOVIE_QUESTIONS, type MovieQuestion } from './data/movieQuestions';
-import { RAMEN_QUESTIONS, type RamenQuestion } from './data/ramenQuestions';
-import { HERITAGE_QUESTIONS, type HeritageQuestion } from './data/heritageQuestions';
-import { SWEETS_QUESTIONS, type SweetsQuestion } from './data/sweetsQuestions';
-import { drawOmikuji, FORTUNES } from './data/omikujiData';
+// クイズデータ: 型のみ同期import (ランタイムは遅延ロード)
+import type { FishQuestion } from './data/fishQuestions';
+import type { YojijukugoQuestion } from './data/yojijukugoQuestions';
+import type { EnglishQuestion } from './data/englishQuestions';
+import type { MuscleQuestion } from './data/muscleQuestions';
+import type { MovieQuestion } from './data/movieQuestions';
+import type { RamenQuestion } from './data/ramenQuestions';
+import type { HeritageQuestion } from './data/heritageQuestions';
+import type { SweetsQuestion } from './data/sweetsQuestions';
 
-// クイズUIコンポーネントのインポート
-import FishQuizUI from './components/quizzes/FishQuizUI';
-import YojijukugoQuizUI from './components/quizzes/YojijukugoQuizUI';
-import EnglishQuizUI from './components/quizzes/EnglishQuizUI';
-import MuscleQuizUI from './components/quizzes/MuscleQuizUI';
-import MovieQuizUI from './components/quizzes/MovieQuizUI';
-import RamenQuizUI from './components/quizzes/RamenQuizUI';
-import HeritageQuizUI from './components/quizzes/HeritageQuizUI';
-import SweetsQuizUI from './components/quizzes/SweetsQuizUI';
+// クイズ問題データの遅延ロード (初回使用時のみフェッチ、以降はwebpack/turbopackがキャッシュ)
+const loadFishQuestions = () => import('./data/fishQuestions').then(m => m.FISH_QUESTIONS);
+const loadYojijukugoQuestions = () => import('./data/yojijukugoQuestions').then(m => m.YOJIJUKUGO_QUESTIONS);
+const loadEnglishQuestions = () => import('./data/englishQuestions').then(m => m.ENGLISH_QUESTIONS);
+const loadMuscleQuestions = () => import('./data/muscleQuestions').then(m => m.MUSCLE_QUESTIONS);
+const loadMovieQuestions = () => import('./data/movieQuestions').then(m => m.MOVIE_QUESTIONS);
+const loadRamenQuestions = () => import('./data/ramenQuestions').then(m => m.RAMEN_QUESTIONS);
+const loadHeritageQuestions = () => import('./data/heritageQuestions').then(m => m.HERITAGE_QUESTIONS);
+const loadSweetsQuestions = () => import('./data/sweetsQuestions').then(m => m.SWEETS_QUESTIONS);
 
-// 掲示板
-import ThreadBoard from './components/ThreadBoard';
+// おみくじデータ: Canvas描画ループからも参照するためモジュール変数にキャッシュ
+let FORTUNES_CACHE: typeof import('./data/omikujiData').FORTUNES | null = null;
+let DRAW_OMIKUJI_CACHE: typeof import('./data/omikujiData').drawOmikuji | null = null;
+const loadOmikujiData = async () => {
+  if (FORTUNES_CACHE && DRAW_OMIKUJI_CACHE) return { FORTUNES: FORTUNES_CACHE, drawOmikuji: DRAW_OMIKUJI_CACHE };
+  const mod = await import('./data/omikujiData');
+  FORTUNES_CACHE = mod.FORTUNES;
+  DRAW_OMIKUJI_CACHE = mod.drawOmikuji;
+  return { FORTUNES: mod.FORTUNES, drawOmikuji: mod.drawOmikuji };
+};
+
+// クイズUIコンポーネント（遅延ロード: 使うまで初期バンドルに含めない）
+const FishQuizUI = dynamic(() => import('./components/quizzes/FishQuizUI'), { ssr: false });
+const EnglishQuizUI = dynamic(() => import('./components/quizzes/EnglishQuizUI'), { ssr: false });
+const MovieQuizUI = dynamic(() => import('./components/quizzes/MovieQuizUI'), { ssr: false });
+const RamenQuizUI = dynamic(() => import('./components/quizzes/RamenQuizUI'), { ssr: false });
+const HeritageQuizUI = dynamic(() => import('./components/quizzes/HeritageQuizUI'), { ssr: false });
+const SweetsQuizUI = dynamic(() => import('./components/quizzes/SweetsQuizUI'), { ssr: false });
+
+// 掲示板（遅延ロード）
+const ThreadBoard = dynamic(() => import('./components/ThreadBoard'), { ssr: false });
 
 // アニメーション型定義のインポート
 import type {
@@ -3606,8 +3625,10 @@ export default function Home() {
         // フェーズ別の描画
         if (omikuji.phase === 'roulette') {
           // ルーレット演出：運勢名が高速で変わる（回転演出なし）
-          const displayIndex = Math.floor(omikuji.rouletteIndex) % FORTUNES.length;
-          const rouletteText = FORTUNES[displayIndex].fortune;
+          const fortunesData = FORTUNES_CACHE;
+          if (!fortunesData) return;
+          const displayIndex = Math.floor(omikuji.rouletteIndex) % fortunesData.length;
+          const rouletteText = fortunesData[displayIndex].fortune;
           
           // 運勢タイトル（中立色、回転なし）
           ctx.fillStyle = isDark ? '#FFFFFF' : '#333333';
@@ -5909,7 +5930,7 @@ export default function Home() {
   };
 
   // おみくじアニメーション開始（確認ウィンドウから呼ばれる）
-  const startOmikujiAnimation = () => {
+  const startOmikujiAnimation = async () => {
     // コインが100枚未満なら実行しない
     if (totalCoins < 100) {
       alert('おみくじを引くには100コインが必要です！');
@@ -5917,16 +5938,19 @@ export default function Home() {
       return;
     }
 
+    // 遅延ロード: おみくじデータ (FORTUNES/drawOmikuji)
+    const { drawOmikuji } = await loadOmikujiData();
+
     const canvas = canvasRef.current;
     if (!canvas) return;
-    
+
     const rect = canvas.getBoundingClientRect();
     const viewW = rect.width;
     const viewH = rect.height;
-    
+
     const startX = viewW / 2;
     const startY = viewH / 2;
-    
+
     // おみくじを引く（100コイン消費）
     setTotalCoins(prev => {
       const newTotal = prev - 100;
@@ -5937,10 +5961,10 @@ export default function Home() {
       }
       return newTotal;
     });
-    
+
     // 確認ウィンドウを閉じる
     setOmikujiConfirms([]);
-    
+
     // おみくじ結果を取得
     const { result, message, luckyItem } = drawOmikuji();
     
@@ -6107,7 +6131,8 @@ export default function Home() {
   };
 
   // 魚クイズアニメーション開始
-  const startFishQuizAnimation = (objOrX: Obj | number, y?: number) => {
+  const startFishQuizAnimation = async (objOrX: Obj | number, y?: number) => {
+    const FISH_QUESTIONS = await loadFishQuestions();
     // コインチェック（10コイン必要）
     if (totalCoins < 10) {
       // コイン不足の場合は専用の状態を表示
@@ -6214,7 +6239,8 @@ export default function Home() {
   };
 
   // 四字熟語クイズアニメーション開始
-  const startYojijukugoAnimation = (objOrX: Obj | number, y?: number) => {
+  const startYojijukugoAnimation = async (objOrX: Obj | number, y?: number) => {
+    const YOJIJUKUGO_QUESTIONS = await loadYojijukugoQuestions();
     // コインチェック(10コイン必要)
     if (totalCoins < 10) {
       // コイン不足の場合は専用の状態を表示
@@ -6321,7 +6347,8 @@ export default function Home() {
   };
 
   // 英単語クイズアニメーション開始
-  const startEnglishQuizAnimation = (objOrX: Obj | number, y?: number) => {
+  const startEnglishQuizAnimation = async (objOrX: Obj | number, y?: number) => {
+    const ENGLISH_QUESTIONS = await loadEnglishQuestions();
     // コインチェック(10コイン必要)
     if (totalCoins < 10) {
       // コイン不足の場合は専用の状態を表示
@@ -6428,7 +6455,8 @@ export default function Home() {
   };
 
   // 筋肉クイズアニメーション開始
-  const startMuscleQuizAnimation = (objOrX: Obj | number, y?: number) => {
+  const startMuscleQuizAnimation = async (objOrX: Obj | number, y?: number) => {
+    const MUSCLE_QUESTIONS = await loadMuscleQuestions();
     // コインチェック(10コイン必要)
     if (totalCoins < 10) {
       // コイン不足の場合は専用の状態を表示
@@ -6535,7 +6563,8 @@ export default function Home() {
   };
 
   // 映画クイズアニメーション開始
-  const startMovieQuizAnimation = (objOrX: Obj | number, y?: number) => {
+  const startMovieQuizAnimation = async (objOrX: Obj | number, y?: number) => {
+    const MOVIE_QUESTIONS = await loadMovieQuestions();
     if (totalCoins < 100) {
       const canvas = canvasRef.current;
       if (!canvas) return;
@@ -6584,7 +6613,8 @@ export default function Home() {
   };
 
   // ラーメンクイズアニメーション開始
-  const startRamenQuizAnimation = (objOrX: Obj | number, y?: number) => {
+  const startRamenQuizAnimation = async (objOrX: Obj | number, y?: number) => {
+    const RAMEN_QUESTIONS = await loadRamenQuestions();
     if (totalCoins < 100) {
       const canvas = canvasRef.current;
       if (!canvas) return;
@@ -6633,7 +6663,8 @@ export default function Home() {
   };
 
   // 世界遺産クイズアニメーション開始
-  const startHeritageQuizAnimation = (objOrX: Obj | number, y?: number) => {
+  const startHeritageQuizAnimation = async (objOrX: Obj | number, y?: number) => {
+    const HERITAGE_QUESTIONS = await loadHeritageQuestions();
     if (totalCoins < 100) {
       const canvas = canvasRef.current;
       if (!canvas) return;
@@ -6684,7 +6715,8 @@ export default function Home() {
 
 
   // スイーツクイズアニメーション開始
-  const startSweetsQuizAnimation = (objOrX: Obj | number, y?: number) => {
+  const startSweetsQuizAnimation = async (objOrX: Obj | number, y?: number) => {
+    const SWEETS_QUESTIONS = await loadSweetsQuestions();
     if (totalCoins < 100) {
       const canvas = canvasRef.current;
       if (!canvas) return;
