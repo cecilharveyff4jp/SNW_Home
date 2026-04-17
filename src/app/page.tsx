@@ -549,11 +549,32 @@ export default function Home() {
 
   // カメラ：パン(tx,ty)は「画面座標系」での移動量(ピクセル）、scaleは倍率
   // 初期ズーム: 統一して1.0でスタート（SSRハイドレーションエラー回避）
-  const [cam, setCam] = useState({ 
-    tx: 0, 
-    ty: 0, 
-    scale: 1.0 
-  });
+  // パフォーマンス最適化: useState → useRef で毎state更新によるHome()再レンダを回避
+  const camRef = useRef({ tx: 0, ty: 0, scale: 1.0 });
+  // UI表示用のズーム値のみ別state (scale変化時のみ更新、tx/ty変化では再レンダしない)
+  const [displayZoom, setDisplayZoom] = useState(1.0);
+
+  // setCam互換ヘルパー: ref を更新 + 必要に応じて display 同期 + 再描画要求
+  type CamValue = { tx: number; ty: number; scale: number };
+  const setCam = (valueOrUpdater: CamValue | ((prev: CamValue) => CamValue)) => {
+    const prev = camRef.current;
+    const next =
+      typeof valueOrUpdater === 'function'
+        ? (valueOrUpdater as (p: CamValue) => CamValue)(prev)
+        : valueOrUpdater;
+    camRef.current = next;
+    // scale変化時のみUI再レンダ
+    if (next.scale !== prev.scale) {
+      setDisplayZoom(next.scale);
+    }
+    // rafRef経由で間引き再描画
+    if (rafRef.current == null) {
+      rafRef.current = window.requestAnimationFrame(() => {
+        rafRef.current = null;
+        draw();
+      });
+    }
+  };
 
   // 最高ダメージ記録をlocalStorageから読み込み
   useEffect(() => {
@@ -757,7 +778,7 @@ export default function Home() {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cam, objects, selectedId, isEditMode, showMoveArrows]);
+  }, [objects, selectedId, isEditMode, showMoveArrows]);
 
   // LocalStorageからテロップ表示状態を読み込む
   useEffect(() => {
@@ -1334,12 +1355,12 @@ export default function Home() {
     let y = sy - viewH / 2;
 
     // パンを戻す
-    x -= cam.tx;
-    y -= cam.ty;
+    x -= camRef.current.tx;
+    y -= camRef.current.ty;
 
     // スケールを戻す
-    x /= cam.scale;
-    y /= cam.scale;
+    x /= camRef.current.scale;
+    y /= camRef.current.scale;
 
     // 回転を戻す（逆回転）
     const p = rot(x, y, -LOOK.angle);
@@ -1358,8 +1379,8 @@ export default function Home() {
 
     // 描画時の変換順序と同じ:
     // ctx.translate(viewW / 2, viewH / 2);
-    // ctx.translate(cam.tx, cam.ty);
-    // ctx.scale(cam.scale, cam.scale);
+    // ctx.translate(camRef.current.tx, camRef.current.ty);
+    // ctx.scale(camRef.current.scale, camRef.current.scale);
     // ctx.rotate(LOOK.angle);
     // ctx.translate(-cx, -cy);
     // この後、座標(mx, my)を描画
@@ -1374,13 +1395,13 @@ export default function Home() {
     const rx = x * cosA - y * sinA;
     const ry = x * sinA + y * cosA;
 
-    // 3. scale(cam.scale, cam.scale)
-    x = rx * cam.scale;
-    y = ry * cam.scale;
+    // 3. scale(camRef.current.scale, camRef.current.scale)
+    x = rx * camRef.current.scale;
+    y = ry * camRef.current.scale;
 
-    // 4. translate(cam.tx, cam.ty)
-    x += cam.tx;
-    y += cam.ty;
+    // 4. translate(camRef.current.tx, camRef.current.ty)
+    x += camRef.current.tx;
+    y += camRef.current.ty;
 
     // 5. translate(viewW / 2, viewH / 2)
     return { sx: x + viewW / 2, sy: y + viewH / 2 };
@@ -1460,14 +1481,14 @@ export default function Home() {
     // ===== カメラ変換（中心→パン→ズーム→回転→マップ中心へ）=====
     ctx.save();
     ctx.translate(viewW / 2, viewH / 2);
-    ctx.translate(cam.tx, cam.ty);
-    ctx.scale(cam.scale, cam.scale);
+    ctx.translate(camRef.current.tx, camRef.current.ty);
+    ctx.scale(camRef.current.scale, camRef.current.scale);
     ctx.rotate(LOOK.angle);
     ctx.translate(-cx, -cy);
 
     // グリッド（余白含めて拡張表示）
     // 回転とズームを考慮して、画面全体をカバーする広い範囲を確保
-    const gridMargin = Math.max(viewW, viewH) / cam.scale;
+    const gridMargin = Math.max(viewW, viewH) / camRef.current.scale;
     const gridStartX = Math.floor(-gridMargin / cell);
     const gridEndX = Math.ceil((mapW + gridMargin) / cell);
     const gridStartY = Math.floor(-gridMargin / cell);
@@ -1789,8 +1810,8 @@ export default function Home() {
           ctx.save();
           
           // 音符マークの位置（ラベルの下）
-          const noteY = 18 / cam.scale;
-          const noteSize = 14 / cam.scale;
+          const noteY = 18 / camRef.current.scale;
+          const noteSize = 14 / camRef.current.scale;
           
           // 背景円を描画（複数曲の場合は色を変える）
           ctx.fillStyle = musicCount > 1 ? "rgba(147, 51, 234, 0.8)" : "rgba(59, 130, 246, 0.8)"; // 紫 or 青
@@ -1807,7 +1828,7 @@ export default function Home() {
           
           // 複数曲の場合は右上に数字バッジ
           if (musicCount > 1) {
-            const badgeSize = 8 / cam.scale;
+            const badgeSize = 8 / camRef.current.scale;
             const badgeX = noteSize / 3;
             const badgeY = noteY - noteSize / 3;
             
@@ -1836,9 +1857,9 @@ export default function Home() {
             const img = fireLevelImagesRef.current[imageName];
             
             if (img && img.complete) {
-              const imgWidth = 22 / cam.scale; // 小さく表示
-              const imgHeight = 22 / cam.scale;
-              const imgY = -28 / cam.scale; // ラベルの上
+              const imgWidth = 22 / camRef.current.scale; // 小さく表示
+              const imgHeight = 22 / camRef.current.scale;
+              const imgY = -28 / camRef.current.scale; // ラベルの上
               
               ctx.save();
               ctx.globalAlpha = 0.9;
@@ -1852,13 +1873,13 @@ export default function Home() {
             ctx.save();
             
             // FCアイコンより少し小さいサイズの円を描画
-            const circleSize = 18 / cam.scale;
-            const circleY = -28 / cam.scale; // ラベルの上（FCと同じ位置）
+            const circleSize = 18 / camRef.current.scale;
+            const circleY = -28 / camRef.current.scale; // ラベルの上（FCと同じ位置）
             
             // 白い縁取りの円を描画
             ctx.fillStyle = "#ffffff";
             ctx.beginPath();
-            ctx.arc(0, circleY + circleSize / 2, circleSize / 2 + 1.5 / cam.scale, 0, Math.PI * 2);
+            ctx.arc(0, circleY + circleSize / 2, circleSize / 2 + 1.5 / camRef.current.scale, 0, Math.PI * 2);
             ctx.fill();
             
             // ロイヤルブルーの円を描画
@@ -1873,7 +1894,7 @@ export default function Home() {
             ctx.textBaseline = "middle";
             
             // 数字の桁数に応じてフォントサイズを調整
-            const fontSize = level >= 10 ? 9 / cam.scale : 11 / cam.scale;
+            const fontSize = level >= 10 ? 9 / camRef.current.scale : 11 / camRef.current.scale;
             ctx.font = `bold ${fontSize}px system-ui`;
             ctx.fillText(String(level), 0, circleY + circleSize / 2);
             
@@ -1898,8 +1919,8 @@ export default function Home() {
       if ((hasBirthday || hasNote) && !isBearTrap) {
         ctx.save();
         ctx.translate(viewW / 2, viewH / 2);
-        ctx.translate(cam.tx, cam.ty);
-        ctx.scale(cam.scale, cam.scale);
+        ctx.translate(camRef.current.tx, camRef.current.ty);
+        ctx.scale(camRef.current.scale, camRef.current.scale);
         ctx.rotate(LOOK.angle);
         ctx.translate(-cx, -cy);
 
@@ -1960,7 +1981,7 @@ export default function Home() {
         const bubbleWidth = Math.min(maxWidth, Math.max(...lines.map(l => ctx.measureText(l).width))) + padding * 2;
         const bubbleHeight = lines.length * lineHeight + padding * 2;
         const labelBoxH = 18;
-        const bubbleY = -labelBoxH / 2 - bubbleHeight - 10 / cam.scale;  // 吹き出し全体を名前に近づける
+        const bubbleY = -labelBoxH / 2 - bubbleHeight - 10 / camRef.current.scale;  // 吹き出し全体を名前に近づける
 
         const gradient = ctx.createLinearGradient(
           -bubbleWidth / 2, bubbleY,
@@ -1975,7 +1996,7 @@ export default function Home() {
 
         ctx.fillStyle = gradient;
         ctx.strokeStyle = '#fbbf24';
-        ctx.lineWidth = 1 / cam.scale;  // 線を細く
+        ctx.lineWidth = 1 / camRef.current.scale;  // 線を細く
 
         ctx.beginPath();
         ctx.moveTo(x0 + r, y0);
@@ -1987,8 +2008,8 @@ export default function Home() {
         ctx.fill();
         ctx.stroke();
 
-        const arrowSize = 8 / cam.scale;
-        const arrowOffset = 1 / cam.scale;  // 三角形を吹き出しに詰める
+        const arrowSize = 8 / camRef.current.scale;
+        const arrowOffset = 1 / camRef.current.scale;  // 三角形を吹き出しに詰める
         ctx.fillStyle = '#fbbf24';
         ctx.beginPath();
         ctx.moveTo(-arrowSize, y0 + bubbleHeight + arrowOffset);
@@ -1999,9 +2020,9 @@ export default function Home() {
 
         ctx.fillStyle = '#fde68a';
         ctx.beginPath();
-        ctx.moveTo(-arrowSize + 1 / cam.scale, y0 + bubbleHeight + arrowOffset);
-        ctx.lineTo(0, y0 + bubbleHeight + arrowSize - 1 / cam.scale + arrowOffset);
-        ctx.lineTo(arrowSize - 1 / cam.scale, y0 + bubbleHeight + arrowOffset);
+        ctx.moveTo(-arrowSize + 1 / camRef.current.scale, y0 + bubbleHeight + arrowOffset);
+        ctx.lineTo(0, y0 + bubbleHeight + arrowSize - 1 / camRef.current.scale + arrowOffset);
+        ctx.lineTo(arrowSize - 1 / camRef.current.scale, y0 + bubbleHeight + arrowOffset);
         ctx.closePath();
         ctx.fill();
 
@@ -2026,8 +2047,8 @@ export default function Home() {
       if (arrowObj) {
         ctx.save();
         ctx.translate(viewW / 2, viewH / 2);
-        ctx.translate(cam.tx, cam.ty);
-        ctx.scale(cam.scale, cam.scale);
+        ctx.translate(camRef.current.tx, camRef.current.ty);
+        ctx.scale(camRef.current.scale, camRef.current.scale);
         ctx.rotate(LOOK.angle);
         ctx.translate(-cx, -cy);
 
@@ -2219,8 +2240,8 @@ export default function Home() {
     if (soldierAnimations.length > 0) {
       ctx.save();
       ctx.translate(viewW / 2, viewH / 2);
-      ctx.translate(cam.tx, cam.ty);
-      ctx.scale(cam.scale, cam.scale);
+      ctx.translate(camRef.current.tx, camRef.current.ty);
+      ctx.scale(camRef.current.scale, camRef.current.scale);
       ctx.rotate(LOOK.angle);
       ctx.translate(-cx, -cy);
 
@@ -5532,8 +5553,8 @@ export default function Home() {
       const rotatedY = Math.sin(LOOK.angle) * (worldX - cx) + Math.cos(LOOK.angle) * (worldY - cy);
       
       // スケールとパンを適用
-      const screenX = (viewW / 2) + (rotatedX * cam.scale) + cam.tx;
-      const screenY = (viewH / 2) + (rotatedY * cam.scale) + cam.ty;
+      const screenX = (viewW / 2) + (rotatedX * camRef.current.scale) + camRef.current.tx;
+      const screenY = (viewH / 2) + (rotatedY * camRef.current.scale) + camRef.current.ty;
       
       // +マークの描画（スクリーン座標で）
       const markSize = 20;
@@ -6147,8 +6168,8 @@ export default function Home() {
         const rect = canvas.getBoundingClientRect();
         const gridX = (objOrX.x || 0) + Math.floor((objOrX.w || 1) / 2);
         const gridY = (objOrX.y || 0) + Math.floor((objOrX.h || 1) / 2);
-        startX = (gridX - cam.tx) * cam.scale + rect.width / 2;
-        startY = (gridY - cam.ty) * cam.scale + rect.height / 2;
+        startX = (gridX - camRef.current.tx) * camRef.current.scale + rect.width / 2;
+        startY = (gridY - camRef.current.ty) * camRef.current.scale + rect.height / 2;
       } else {
         return;
       }
@@ -6183,8 +6204,8 @@ export default function Home() {
       const rect = canvas.getBoundingClientRect();
       const gridX = (objOrX.x || 0) + Math.floor((objOrX.w || 1) / 2);
       const gridY = (objOrX.y || 0) + Math.floor((objOrX.h || 1) / 2);
-      startX = (gridX - cam.tx) * cam.scale + rect.width / 2;
-      startY = (gridY - cam.ty) * cam.scale + rect.height / 2;
+      startX = (gridX - camRef.current.tx) * camRef.current.scale + rect.width / 2;
+      startY = (gridY - camRef.current.ty) * camRef.current.scale + rect.height / 2;
     } else {
       return;
     }
@@ -6255,8 +6276,8 @@ export default function Home() {
         const rect = canvas.getBoundingClientRect();
         const gridX = (objOrX.x || 0) + Math.floor((objOrX.w || 1) / 2);
         const gridY = (objOrX.y || 0) + Math.floor((objOrX.h || 1) / 2);
-        startX = (gridX - cam.tx) * cam.scale + rect.width / 2;
-        startY = (gridY - cam.ty) * cam.scale + rect.height / 2;
+        startX = (gridX - camRef.current.tx) * camRef.current.scale + rect.width / 2;
+        startY = (gridY - camRef.current.ty) * camRef.current.scale + rect.height / 2;
       } else {
         return;
       }
@@ -6291,8 +6312,8 @@ export default function Home() {
       const rect = canvas.getBoundingClientRect();
       const gridX = (objOrX.x || 0) + Math.floor((objOrX.w || 1) / 2);
       const gridY = (objOrX.y || 0) + Math.floor((objOrX.h || 1) / 2);
-      startX = (gridX - cam.tx) * cam.scale + rect.width / 2;
-      startY = (gridY - cam.ty) * cam.scale + rect.height / 2;
+      startX = (gridX - camRef.current.tx) * camRef.current.scale + rect.width / 2;
+      startY = (gridY - camRef.current.ty) * camRef.current.scale + rect.height / 2;
     } else {
       return;
     }
@@ -6363,8 +6384,8 @@ export default function Home() {
         const rect = canvas.getBoundingClientRect();
         const gridX = (objOrX.x || 0) + Math.floor((objOrX.w || 1) / 2);
         const gridY = (objOrX.y || 0) + Math.floor((objOrX.h || 1) / 2);
-        startX = (gridX - cam.tx) * cam.scale + rect.width / 2;
-        startY = (gridY - cam.ty) * cam.scale + rect.height / 2;
+        startX = (gridX - camRef.current.tx) * camRef.current.scale + rect.width / 2;
+        startY = (gridY - camRef.current.ty) * camRef.current.scale + rect.height / 2;
       } else {
         return;
       }
@@ -6399,8 +6420,8 @@ export default function Home() {
       const rect = canvas.getBoundingClientRect();
       const gridX = (objOrX.x || 0) + Math.floor((objOrX.w || 1) / 2);
       const gridY = (objOrX.y || 0) + Math.floor((objOrX.h || 1) / 2);
-      startX = (gridX - cam.tx) * cam.scale + rect.width / 2;
-      startY = (gridY - cam.ty) * cam.scale + rect.height / 2;
+      startX = (gridX - camRef.current.tx) * camRef.current.scale + rect.width / 2;
+      startY = (gridY - camRef.current.ty) * camRef.current.scale + rect.height / 2;
     } else {
       return;
     }
@@ -6471,8 +6492,8 @@ export default function Home() {
         const rect = canvas.getBoundingClientRect();
         const gridX = (objOrX.x || 0) + Math.floor((objOrX.w || 1) / 2);
         const gridY = (objOrX.y || 0) + Math.floor((objOrX.h || 1) / 2);
-        startX = (gridX - cam.tx) * cam.scale + rect.width / 2;
-        startY = (gridY - cam.ty) * cam.scale + rect.height / 2;
+        startX = (gridX - camRef.current.tx) * camRef.current.scale + rect.width / 2;
+        startY = (gridY - camRef.current.ty) * camRef.current.scale + rect.height / 2;
       } else {
         return;
       }
@@ -6507,8 +6528,8 @@ export default function Home() {
       const rect = canvas.getBoundingClientRect();
       const gridX = (objOrX.x || 0) + Math.floor((objOrX.w || 1) / 2);
       const gridY = (objOrX.y || 0) + Math.floor((objOrX.h || 1) / 2);
-      startX = (gridX - cam.tx) * cam.scale + rect.width / 2;
-      startY = (gridY - cam.ty) * cam.scale + rect.height / 2;
+      startX = (gridX - camRef.current.tx) * camRef.current.scale + rect.width / 2;
+      startY = (gridY - camRef.current.ty) * camRef.current.scale + rect.height / 2;
     } else {
       return;
     }
@@ -6576,8 +6597,8 @@ export default function Home() {
         const rect = canvas.getBoundingClientRect();
         const gridX = (objOrX.x || 0) + Math.floor((objOrX.w || 1) / 2);
         const gridY = (objOrX.y || 0) + Math.floor((objOrX.h || 1) / 2);
-        startX = (gridX - cam.tx) * cam.scale + rect.width / 2;
-        startY = (gridY - cam.ty) * cam.scale + rect.height / 2;
+        startX = (gridX - camRef.current.tx) * camRef.current.scale + rect.width / 2;
+        startY = (gridY - camRef.current.ty) * camRef.current.scale + rect.height / 2;
       } else { return; }
       setMovieQuiz({ x: startX, y: startY, question: MOVIE_QUESTIONS[0], choices: [], state: 'insufficient_coins', selectedAnswer: null, startTime: Date.now(), reward: 0, consecutiveCount: movieQuizConsecutiveCorrect });
       return;
@@ -6595,8 +6616,8 @@ export default function Home() {
       const rect = canvas.getBoundingClientRect();
       const gridX = (objOrX.x || 0) + Math.floor((objOrX.w || 1) / 2);
       const gridY = (objOrX.y || 0) + Math.floor((objOrX.h || 1) / 2);
-      startX = (gridX - cam.tx) * cam.scale + rect.width / 2;
-      startY = (gridY - cam.ty) * cam.scale + rect.height / 2;
+      startX = (gridX - camRef.current.tx) * camRef.current.scale + rect.width / 2;
+      startY = (gridY - camRef.current.ty) * camRef.current.scale + rect.height / 2;
     } else { return; }
     const asked = new Set(JSON.parse(localStorage.getItem("movieQuizAsked") || "[]"));
     const wrong = new Set(JSON.parse(localStorage.getItem("movieQuizWrong") || "[]"));
@@ -6626,8 +6647,8 @@ export default function Home() {
         const rect = canvas.getBoundingClientRect();
         const gridX = (objOrX.x || 0) + Math.floor((objOrX.w || 1) / 2);
         const gridY = (objOrX.y || 0) + Math.floor((objOrX.h || 1) / 2);
-        startX = (gridX - cam.tx) * cam.scale + rect.width / 2;
-        startY = (gridY - cam.ty) * cam.scale + rect.height / 2;
+        startX = (gridX - camRef.current.tx) * camRef.current.scale + rect.width / 2;
+        startY = (gridY - camRef.current.ty) * camRef.current.scale + rect.height / 2;
       } else { return; }
       setRamenQuiz({ x: startX, y: startY, question: RAMEN_QUESTIONS[0], choices: [], state: 'insufficient_coins', selectedAnswer: null, startTime: Date.now(), reward: 0, consecutiveCount: ramenQuizConsecutiveCorrect });
       return;
@@ -6645,8 +6666,8 @@ export default function Home() {
       const rect = canvas.getBoundingClientRect();
       const gridX = (objOrX.x || 0) + Math.floor((objOrX.w || 1) / 2);
       const gridY = (objOrX.y || 0) + Math.floor((objOrX.h || 1) / 2);
-      startX = (gridX - cam.tx) * cam.scale + rect.width / 2;
-      startY = (gridY - cam.ty) * cam.scale + rect.height / 2;
+      startX = (gridX - camRef.current.tx) * camRef.current.scale + rect.width / 2;
+      startY = (gridY - camRef.current.ty) * camRef.current.scale + rect.height / 2;
     } else { return; }
     const asked = new Set(JSON.parse(localStorage.getItem("ramenQuizAsked") || "[]"));
     const wrong = new Set(JSON.parse(localStorage.getItem("ramenQuizWrong") || "[]"));
@@ -6676,8 +6697,8 @@ export default function Home() {
         const rect = canvas.getBoundingClientRect();
         const gridX = (objOrX.x || 0) + Math.floor((objOrX.w || 1) / 2);
         const gridY = (objOrX.y || 0) + Math.floor((objOrX.h || 1) / 2);
-        startX = (gridX - cam.tx) * cam.scale + rect.width / 2;
-        startY = (gridY - cam.ty) * cam.scale + rect.height / 2;
+        startX = (gridX - camRef.current.tx) * camRef.current.scale + rect.width / 2;
+        startY = (gridY - camRef.current.ty) * camRef.current.scale + rect.height / 2;
       } else { return; }
       setHeritageQuiz({ x: startX, y: startY, question: HERITAGE_QUESTIONS[0], choices: [], state: 'insufficient_coins', selectedAnswer: null, startTime: Date.now(), reward: 0, consecutiveCount: heritageQuizConsecutiveCorrect });
       return;
@@ -6695,8 +6716,8 @@ export default function Home() {
       const rect = canvas.getBoundingClientRect();
       const gridX = (objOrX.x || 0) + Math.floor((objOrX.w || 1) / 2);
       const gridY = (objOrX.y || 0) + Math.floor((objOrX.h || 1) / 2);
-      startX = (gridX - cam.tx) * cam.scale + rect.width / 2;
-      startY = (gridY - cam.ty) * cam.scale + rect.height / 2;
+      startX = (gridX - camRef.current.tx) * camRef.current.scale + rect.width / 2;
+      startY = (gridY - camRef.current.ty) * camRef.current.scale + rect.height / 2;
     } else { return; }
     const asked = new Set(JSON.parse(localStorage.getItem("heritageQuizAsked") || "[]"));
     const wrong = new Set(JSON.parse(localStorage.getItem("heritageQuizWrong") || "[]"));
@@ -6728,8 +6749,8 @@ export default function Home() {
         const rect = canvas.getBoundingClientRect();
         const gridX = (objOrX.x || 0) + Math.floor((objOrX.w || 1) / 2);
         const gridY = (objOrX.y || 0) + Math.floor((objOrX.h || 1) / 2);
-        startX = (gridX - cam.tx) * cam.scale + rect.width / 2;
-        startY = (gridY - cam.ty) * cam.scale + rect.height / 2;
+        startX = (gridX - camRef.current.tx) * camRef.current.scale + rect.width / 2;
+        startY = (gridY - camRef.current.ty) * camRef.current.scale + rect.height / 2;
       } else { return; }
       setSweetsQuiz({ x: startX, y: startY, question: SWEETS_QUESTIONS[0], choices: [], state: 'insufficient_coins', selectedAnswer: null, startTime: Date.now(), reward: 0, consecutiveCount: sweetsQuizConsecutiveCorrect });
       return;
@@ -6747,8 +6768,8 @@ export default function Home() {
       const rect = canvas.getBoundingClientRect();
       const gridX = (objOrX.x || 0) + Math.floor((objOrX.w || 1) / 2);
       const gridY = (objOrX.y || 0) + Math.floor((objOrX.h || 1) / 2);
-      startX = (gridX - cam.tx) * cam.scale + rect.width / 2;
-      startY = (gridY - cam.ty) * cam.scale + rect.height / 2;
+      startX = (gridX - camRef.current.tx) * camRef.current.scale + rect.width / 2;
+      startY = (gridY - camRef.current.ty) * camRef.current.scale + rect.height / 2;
     } else { return; }
     const asked = new Set(JSON.parse(localStorage.getItem("sweetsQuizAsked") || "[]"));
     const wrong = new Set(JSON.parse(localStorage.getItem("sweetsQuizWrong") || "[]"));
@@ -9700,7 +9721,7 @@ export default function Home() {
   useEffect(() => {
     requestDraw();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [objects, cfg.cols, cfg.rows, cfg.cell, cam, selectedId, showMoveArrows, myObjectId, isEditMode, pendingPosition]);
+  }, [objects, cfg.cols, cfg.rows, cfg.cell, selectedId, showMoveArrows, myObjectId, isEditMode, pendingPosition]);
 
   // 兵士アニメーション変更時も再描画
   useEffect(() => {
@@ -9912,9 +9933,9 @@ export default function Home() {
       const mid = { x: (pts[0].x + pts[1].x) / 2, y: (pts[0].y + pts[1].y) / 2 };
       const dist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
       pinchRef.current = {
-        startScale: cam.scale,
-        startTx: cam.tx,
-        startTy: cam.ty,
+        startScale: camRef.current.scale,
+        startTx: camRef.current.tx,
+        startTy: camRef.current.ty,
         startMid: mid,
         startDist: dist,
       };
@@ -13559,7 +13580,7 @@ export default function Home() {
               userSelect: "none",
             }}
           >
-            ×{cam.scale.toFixed(2)}
+            ×{displayZoom.toFixed(2)}
           </div>
         </div>
       </div>
@@ -14386,8 +14407,8 @@ export default function Home() {
                           // 既存のアニメーション開始処理
                           const tempObj: Obj = {
                             ...editingObject,
-                            x: editingObject.x !== undefined ? editingObject.x : Math.floor((centerX - rect.width / 2) / cam.scale + cam.tx),
-                            y: editingObject.y !== undefined ? editingObject.y : Math.floor((centerY - rect.height / 2) / cam.scale + cam.ty),
+                            x: editingObject.x !== undefined ? editingObject.x : Math.floor((centerX - rect.width / 2) / camRef.current.scale + camRef.current.tx),
+                            y: editingObject.y !== undefined ? editingObject.y : Math.floor((centerY - rect.height / 2) / camRef.current.scale + camRef.current.ty),
                             w: editingObject.w !== undefined ? editingObject.w : 1,
                             h: editingObject.h !== undefined ? editingObject.h : 1,
                           };
