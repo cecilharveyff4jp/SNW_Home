@@ -208,6 +208,8 @@ export default function Home() {
   const [undoStack, setUndoStack] = useState<Obj[][]>([]);
   const [redoStack, setRedoStack] = useState<Obj[][]>([]);
   const dragStartRef = useRef<{ objId: string; mx: number; my: number; objX: number; objY: number } | null>(null);
+  // ドラッグ中のスナップ座標キャッシュ: 同じマスの間はsetObjectsをスキップして再レンダ削減
+  const dragLastSnappedRef = useRef<{ x: number; y: number; notified: boolean } | null>(null);
   const initialObjectsRef = useRef<Obj[]>([]);
   const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
   const pointerStartRef = useRef<{ x: number; y: number; time: number } | null>(null);
@@ -10035,7 +10037,8 @@ export default function Home() {
       pointerStartRef.current = null;
       setIsDragging(false);
       dragStartRef.current = null;
-      
+      dragLastSnappedRef.current = null;
+
       const pts = [...pointersRef.current.values()];
       const mid = { x: (pts[0].x + pts[1].x) / 2, y: (pts[0].y + pts[1].y) / 2 };
       const dist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
@@ -10116,6 +10119,17 @@ export default function Home() {
       const snappedX = Math.round(newX);
       const snappedY = Math.round(newY);
 
+      // 最適化: 直前のスナップ座標と同じならsetObjectsスキップ(マス境界を跨ぐまで再レンダなし)
+      const last = dragLastSnappedRef.current;
+      if (last && last.x === snappedX && last.y === snappedY) {
+        return;
+      }
+      dragLastSnappedRef.current = {
+        x: snappedX,
+        y: snappedY,
+        notified: last?.notified ?? false,
+      };
+
       // オブジェクトの位置を更新
       setObjects((prev) =>
         prev.map((o) =>
@@ -10124,7 +10138,11 @@ export default function Home() {
             : o
         )
       );
-      setHasUnsavedChanges(true);
+      // hasUnsavedChangesはドラッグ中に1回だけset
+      if (!dragLastSnappedRef.current.notified) {
+        setHasUnsavedChanges(true);
+        dragLastSnappedRef.current.notified = true;
+      }
       return;
     }
 
@@ -10384,6 +10402,7 @@ export default function Home() {
               pinchRef.current = null;
               setIsDragging(false);
               dragStartRef.current = null;
+              dragLastSnappedRef.current = null;
               return; // ダブルタップ検出したら早期リターン
             }
           }
@@ -10435,6 +10454,7 @@ export default function Home() {
     pinchRef.current = null;
     setIsDragging(false);
     dragStartRef.current = null;
+    dragLastSnappedRef.current = null;
     // 矢印はOKボタンでのみ消すので、ここでは消さない
   };
 
@@ -10450,6 +10470,7 @@ export default function Home() {
     pinchRef.current = null;
     setIsDragging(false);
     dragStartRef.current = null;
+    dragLastSnappedRef.current = null;
   };
 
   // タップ選択（短いクリック/タップ）
@@ -11396,25 +11417,28 @@ export default function Home() {
     return false;
   }, [objects, isEditMode]);
 
-  // GASへ保存
+  // GASへ保存 (楽観的UI: UI更新を先に、POSTは裏で実行)
   const saveToGAS = async () => {
     if (hasAnyOverlap) {
       setToastMessage("⚠️ 重なりを解消してください");
       return;
     }
 
-    setIsLoading(true);
+    const base = process.env.NEXT_PUBLIC_GAS_URL;
+    if (!base) {
+      setToastMessage("❌ URL未設定");
+      return;
+    }
 
+    // 楽観的UI: 保存成功したとみなして先にUI更新
+    const snapshotForRollback = initialObjectsRef.current;
+    setToastMessage("✅ 保存完了");
+    initialObjectsRef.current = JSON.parse(JSON.stringify(objects));
+    setHasUnsavedChanges(false);
+
+    // POSTは裏で実行 (失敗時のみロールバック)
+    const actorName = "anonymous";
     try {
-      const base = process.env.NEXT_PUBLIC_GAS_URL;
-      if (!base) {
-        setToastMessage("❌ URL未設定");
-        setIsLoading(false);
-        return;
-      }
-
-      const actorName = "anonymous"; // 常にanonymousで保存
-
       const res = await fetch(`${base}?action=saveMap`, {
         method: "POST",
         headers: { "Content-Type": "text/plain" },
@@ -11435,7 +11459,6 @@ export default function Home() {
       });
 
       const text = await res.text();
-
       let json;
       try {
         json = JSON.parse(text);
@@ -11446,18 +11469,14 @@ export default function Home() {
       if (!json.ok) {
         throw new Error(json.error || "保存に失敗しました");
       }
-
-      setToastMessage("✅ 保存完了");
-      // 初期状態を更新（カメラ位置は維持）
-      initialObjectsRef.current = JSON.parse(JSON.stringify(objects));
-      setHasUnsavedChanges(false);
-      // 再読込はしない（カメラ位置を維持）
+      // 成功時は何もしない (既にUI更新済み)
     } catch (e: unknown) {
+      // 失敗時のみロールバック
       const message = e instanceof Error ? e.message : String(e);
       console.error("保存エラー詳細:", e);
-      setToastMessage(`❌ 保存エラー: ${message}`);
-    } finally {
-      setIsLoading(false);
+      initialObjectsRef.current = snapshotForRollback;
+      setHasUnsavedChanges(true);
+      setToastMessage(`❌ 保存エラー(未保存状態に戻しました): ${message}`);
     }
   };
 
