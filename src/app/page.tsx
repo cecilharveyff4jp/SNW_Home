@@ -35,6 +35,9 @@ import RamenQuizUI from './components/quizzes/RamenQuizUI';
 import HeritageQuizUI from './components/quizzes/HeritageQuizUI';
 import SweetsQuizUI from './components/quizzes/SweetsQuizUI';
 
+// 掲示板
+import ThreadBoard from './components/ThreadBoard';
+
 // アニメーション型定義のインポート
 import type {
   Firework,
@@ -198,6 +201,8 @@ export default function Home() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const nameInputRef = useRef<HTMLInputElement>(null);
   const [showHeaderMenu, setShowHeaderMenu] = useState(false);
+  const [showThreadBoard, setShowThreadBoard] = useState(false);
+  const [threadBoardInitialId, setThreadBoardInitialId] = useState<string | null>(null);
   const [isTestingAnimation, setIsTestingAnimation] = useState(false);
   const [hoveredLinkIndex, setHoveredLinkIndex] = useState<number | null>(null);
   const [highlightedLinkIndex, setHighlightedLinkIndex] = useState<number | null>(null);
@@ -755,6 +760,17 @@ export default function Home() {
       return () => clearTimeout(timer);
     }
   }, [toastMessage]);
+
+  // 掲示板: 旧URL ?thread=xxx を /thread?id=xxx にリダイレクト
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    const threadId = params.get('thread');
+    if (threadId) {
+      const basePath = process.env.NODE_ENV === 'production' ? '/SNW_Home' : '';
+      window.location.replace(`${basePath}/thread?id=${encodeURIComponent(threadId)}`);
+    }
+  }, []);
 
   // テロップはCSS keyframesで実装（state更新なし）
   // useEffect削除
@@ -11908,7 +11924,32 @@ export default function Home() {
                   })}
                 </>
               )}
-              
+
+              {/* 掲示板 */}
+              <div
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setThreadBoardInitialId(null);
+                  setShowThreadBoard(true);
+                  setShowHeaderMenu(false);
+                }}
+                style={{
+                  padding: "12px 16px",
+                  borderBottom: isDarkMode ? "1px solid #374151" : "1px solid #e5e7eb",
+                  cursor: "pointer",
+                  userSelect: "none",
+                  fontWeight: 600,
+                  color: isDarkMode ? "#e5e7eb" : "#1f2937",
+                  fontSize: "14px",
+                  background: isDarkMode ? "#1f2937" : "white",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                }}
+              >
+                📋 掲示板
+              </div>
+
               {/* リンク集（見出し） */}
               <div 
                 style={{
@@ -17529,6 +17570,20 @@ export default function Home() {
             （クリックで戻る）
           </div>
         </div>
+      )}
+
+      {/* 掲示板モーダル */}
+      {showThreadBoard && (
+        <ThreadBoard
+          isEditMode={isEditMode}
+          isDarkMode={isDarkMode}
+          initialThreadId={threadBoardInitialId}
+          onClose={() => {
+            setShowThreadBoard(false);
+            setThreadBoardInitialId(null);
+          }}
+          onToast={(msg) => setToastMessage(msg)}
+        />
       )}
 
       {/* 音楽プレーヤー（オーバーレイ） */}

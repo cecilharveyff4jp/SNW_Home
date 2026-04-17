@@ -1,6 +1,11 @@
 const EDIT_PASSWORD = "snow1234";
 const SPREADSHEET_ID = "1E3snSo7vzpdcTLkRqJFDlgDK3GZ3IuJYehspN95AgvQ";
 
+// 掲示板用 Google Drive フォルダID
+const THREAD_ROOT_FOLDER_ID = "18gvDl0Jm9D7S15YVWdJJM7PuA_QG6ttv";
+const THREADS_INDEX_FILENAME = "threads.json";
+const THREAD_META_FILENAME = "thread.json";
+
 // マップ設定のデフォルト
 const DEFAULT_MAPS = [
   { id: 'object', name: 'メインマップ', sheetName: 'objects', isVisible: true, isBase: true, order: 1 },
@@ -272,8 +277,268 @@ function doGet(e) {
       .setMimeType(ContentService.MimeType.JSON);
   }
   
+  // 掲示板: スレッド一覧
+  if (action === 'getThreads') {
+    try {
+      return jsonOutput(getThreadsIndex());
+    } catch (err) {
+      return jsonOutput({ ok: false, error: 'getThreads failed: ' + (err && err.message ? err.message : String(err)) });
+    }
+  }
+
+  // 掲示板: スレッド詳細
+  if (action === 'getThread') {
+    try {
+      const threadId = e.parameter.threadId;
+      if (!threadId) {
+        return jsonOutput({ ok: false, error: 'threadId required' });
+      }
+      return jsonOutput(getThreadDetail(threadId));
+    } catch (err) {
+      return jsonOutput({ ok: false, error: 'getThread failed: ' + (err && err.message ? err.message : String(err)) });
+    }
+  }
+
   return ContentService.createTextOutput(JSON.stringify({ error: 'Invalid action' }))
     .setMimeType(ContentService.MimeType.JSON);
+}
+
+// ===== 掲示板ヘルパー =====
+
+function jsonOutput(obj) {
+  return ContentService.createTextOutput(JSON.stringify(obj))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function getRootFolder_() {
+  return DriveApp.getFolderById(THREAD_ROOT_FOLDER_ID);
+}
+
+function findChildFile_(folder, name) {
+  const iter = folder.getFilesByName(name);
+  return iter.hasNext() ? iter.next() : null;
+}
+
+function findChildFolder_(folder, name) {
+  const iter = folder.getFoldersByName(name);
+  return iter.hasNext() ? iter.next() : null;
+}
+
+function readJsonFile_(file, fallback) {
+  if (!file) return fallback;
+  try {
+    return JSON.parse(file.getBlob().getDataAsString());
+  } catch (err) {
+    return fallback;
+  }
+}
+
+function writeJsonFile_(folder, name, data) {
+  const content = JSON.stringify(data);
+  const existing = findChildFile_(folder, name);
+  if (existing) {
+    existing.setContent(content);
+    return existing;
+  }
+  return folder.createFile(name, content, 'application/json');
+}
+
+function uuid_() {
+  return Utilities.getUuid();
+}
+
+function getThreadsIndex() {
+  const root = getRootFolder_();
+  const indexFile = findChildFile_(root, THREADS_INDEX_FILENAME);
+  const data = readJsonFile_(indexFile, { threads: [] });
+  const visible = (data.threads || []).filter(function (t) { return !t.isDeleted; });
+  // 新しい順（作成日時降順）
+  visible.sort(function (a, b) { return (b.createdAt || 0) - (a.createdAt || 0); });
+  return { ok: true, threads: visible };
+}
+
+function getThreadDetail(threadId) {
+  const root = getRootFolder_();
+  const threadFolder = findChildFolder_(root, threadId);
+  if (!threadFolder) return { ok: false, error: 'Thread not found' };
+  const metaFile = findChildFile_(threadFolder, THREAD_META_FILENAME);
+  const detail = readJsonFile_(metaFile, null);
+  if (!detail) return { ok: false, error: 'Thread meta missing' };
+  // 論理削除チェック
+  const idx = readJsonFile_(findChildFile_(root, THREADS_INDEX_FILENAME), { threads: [] });
+  const entry = (idx.threads || []).find(function (t) { return t.id === threadId; });
+  if (entry && entry.isDeleted) return { ok: false, error: 'Thread deleted' };
+  return { ok: true, thread: detail };
+}
+
+function createThread_(data) {
+  const lock = LockService.getScriptLock();
+  lock.waitLock(20000);
+  try {
+    const root = getRootFolder_();
+    const threadId = uuid_();
+    const now = Date.now();
+    const title = String(data.title || '').substring(0, 120);
+    const createdBy = String(data.createdBy || 'anonymous').substring(0, 40);
+
+    const threadFolder = root.createFolder(threadId);
+
+    const detail = {
+      id: threadId,
+      title: title,
+      createdBy: createdBy,
+      createdAt: now,
+      posts: [],
+      likes: 0
+    };
+    writeJsonFile_(threadFolder, THREAD_META_FILENAME, detail);
+
+    // インデックス更新
+    const indexFile = findChildFile_(root, THREADS_INDEX_FILENAME);
+    const idx = readJsonFile_(indexFile, { threads: [] });
+    idx.threads = idx.threads || [];
+    idx.threads.push({
+      id: threadId,
+      title: title,
+      createdBy: createdBy,
+      createdAt: now,
+      lastPostAt: now,
+      postCount: 0,
+      likes: 0,
+      thumbnailUrl: '',
+      isDeleted: false,
+      folderId: threadFolder.getId()
+    });
+    writeJsonFile_(root, THREADS_INDEX_FILENAME, idx);
+
+    return { ok: true, threadId: threadId };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function addPost_(data) {
+  const lock = LockService.getScriptLock();
+  lock.waitLock(30000);
+  try {
+    const threadId = data.threadId;
+    if (!threadId) return { ok: false, error: 'threadId required' };
+    const root = getRootFolder_();
+    const threadFolder = findChildFolder_(root, threadId);
+    if (!threadFolder) return { ok: false, error: 'Thread not found' };
+
+    const metaFile = findChildFile_(threadFolder, THREAD_META_FILENAME);
+    const detail = readJsonFile_(metaFile, null);
+    if (!detail) return { ok: false, error: 'Thread meta missing' };
+
+    const postId = uuid_();
+    const now = Date.now();
+    const createdBy = String(data.createdBy || 'anonymous').substring(0, 40);
+    const comment = String(data.comment || '').substring(0, 2000);
+
+    // 画像アップロード（base64配列）
+    const imageUrls = [];
+    const images = Array.isArray(data.images) ? data.images : [];
+    let firstImageUrl = '';
+    for (let i = 0; i < images.length; i++) {
+      const img = images[i];
+      if (!img || !img.data) continue;
+      const mime = img.mime || 'image/webp';
+      const ext = (mime.split('/')[1] || 'webp').split('+')[0];
+      const filename = postId + '_' + i + '.' + ext;
+      const blob = Utilities.newBlob(Utilities.base64Decode(img.data), mime, filename);
+      const file = threadFolder.createFile(blob);
+      file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+      // <img> で直接埋め込み可能な lh3 形式で保存
+      const url = 'https://lh3.googleusercontent.com/d/' + file.getId();
+      imageUrls.push({ fileId: file.getId(), url: url });
+      if (!firstImageUrl) firstImageUrl = url;
+    }
+
+    detail.posts = detail.posts || [];
+    detail.posts.push({
+      id: postId,
+      createdBy: createdBy,
+      createdAt: now,
+      comment: comment,
+      imageUrls: imageUrls
+    });
+    writeJsonFile_(threadFolder, THREAD_META_FILENAME, detail);
+
+    // インデックスのlastPostAt/postCount/thumbnailUrl更新
+    const indexFile = findChildFile_(root, THREADS_INDEX_FILENAME);
+    const idx = readJsonFile_(indexFile, { threads: [] });
+    idx.threads = idx.threads || [];
+    for (let j = 0; j < idx.threads.length; j++) {
+      if (idx.threads[j].id === threadId) {
+        idx.threads[j].lastPostAt = now;
+        idx.threads[j].postCount = detail.posts.length;
+        if (firstImageUrl && !idx.threads[j].thumbnailUrl) {
+          idx.threads[j].thumbnailUrl = firstImageUrl;
+        }
+        break;
+      }
+    }
+    writeJsonFile_(root, THREADS_INDEX_FILENAME, idx);
+
+    return { ok: true, postId: postId, imageUrls: imageUrls };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function deleteThread_(threadId) {
+  const lock = LockService.getScriptLock();
+  lock.waitLock(15000);
+  try {
+    const root = getRootFolder_();
+    const indexFile = findChildFile_(root, THREADS_INDEX_FILENAME);
+    const idx = readJsonFile_(indexFile, { threads: [] });
+    idx.threads = idx.threads || [];
+    let hit = false;
+    for (let i = 0; i < idx.threads.length; i++) {
+      if (idx.threads[i].id === threadId) {
+        idx.threads[i].isDeleted = true;
+        hit = true;
+        break;
+      }
+    }
+    if (!hit) return { ok: false, error: 'Thread not found' };
+    writeJsonFile_(root, THREADS_INDEX_FILENAME, idx);
+    return { ok: true };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function likeThread_(threadId) {
+  const lock = LockService.getScriptLock();
+  lock.waitLock(15000);
+  try {
+    const root = getRootFolder_();
+    const threadFolder = findChildFolder_(root, threadId);
+    if (!threadFolder) return { ok: false, error: 'Thread not found' };
+    const metaFile = findChildFile_(threadFolder, THREAD_META_FILENAME);
+    const detail = readJsonFile_(metaFile, null);
+    if (!detail) return { ok: false, error: 'Thread meta missing' };
+    detail.likes = (detail.likes || 0) + 1;
+    writeJsonFile_(threadFolder, THREAD_META_FILENAME, detail);
+
+    // インデックスも同期
+    const indexFile = findChildFile_(root, THREADS_INDEX_FILENAME);
+    const idx = readJsonFile_(indexFile, { threads: [] });
+    idx.threads = idx.threads || [];
+    for (let i = 0; i < idx.threads.length; i++) {
+      if (idx.threads[i].id === threadId) {
+        idx.threads[i].likes = detail.likes;
+        break;
+      }
+    }
+    writeJsonFile_(root, THREADS_INDEX_FILENAME, idx);
+    return { ok: true, likes: detail.likes };
+  } finally {
+    lock.releaseLock();
+  }
 }
 
 function doPost(e) {
@@ -579,7 +844,56 @@ function doPost(e) {
     }))
       .setMimeType(ContentService.MimeType.JSON);
   }
-  
+
+  // 掲示板: スレッド作成
+  if (action === 'createThread') {
+    try {
+      const data = JSON.parse(e.postData.contents);
+      if (data.password !== EDIT_PASSWORD) {
+        return jsonOutput({ ok: false, error: 'Invalid password' });
+      }
+      return jsonOutput(createThread_(data));
+    } catch (err) {
+      return jsonOutput({ ok: false, error: 'createThread failed: ' + (err && err.message ? err.message : String(err)) });
+    }
+  }
+
+  // 掲示板: 投稿追加
+  if (action === 'addPost') {
+    try {
+      const data = JSON.parse(e.postData.contents);
+      if (data.password !== EDIT_PASSWORD) {
+        return jsonOutput({ ok: false, error: 'Invalid password' });
+      }
+      return jsonOutput(addPost_(data));
+    } catch (err) {
+      return jsonOutput({ ok: false, error: 'addPost failed: ' + (err && err.message ? err.message : String(err)) });
+    }
+  }
+
+  // 掲示板: スレッド論理削除
+  if (action === 'deleteThread') {
+    try {
+      const data = JSON.parse(e.postData.contents);
+      if (data.password !== EDIT_PASSWORD) {
+        return jsonOutput({ ok: false, error: 'Invalid password' });
+      }
+      return jsonOutput(deleteThread_(data.threadId));
+    } catch (err) {
+      return jsonOutput({ ok: false, error: 'deleteThread failed: ' + (err && err.message ? err.message : String(err)) });
+    }
+  }
+
+  // 掲示板: いいね（認証不要）
+  if (action === 'likeThread') {
+    try {
+      const data = JSON.parse(e.postData.contents);
+      return jsonOutput(likeThread_(data.threadId));
+    } catch (err) {
+      return jsonOutput({ ok: false, error: 'likeThread failed: ' + (err && err.message ? err.message : String(err)) });
+    }
+  }
+
   return ContentService.createTextOutput(JSON.stringify({ error: 'Invalid action' }))
     .setMimeType(ContentService.MimeType.JSON);
 }
